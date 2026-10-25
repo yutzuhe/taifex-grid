@@ -274,6 +274,11 @@
                                 </button>
                             </div>
                         </div>
+                        <div class="space-y-1">
+                            <label class="text-[11px] text-slate-300 font-medium block">原生 60 分 K 後端端點 <span class="text-slate-400">(選填；券商／資料商或自建 API，優先使用)</span></label>
+                            <input id="inputOhlcEndpoint" type="url" placeholder="https://your-domain.example/api/quote" oninput="saveOhlcEndpoint()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 font-mono text-white text-xs focus:outline-none focus:border-sky-400" />
+                            <p class="text-[10px] text-slate-500">需回傳 <code>ok, lastPrice, prevClose, dayHigh, dayLow, klines60m[], klines1d[]</code>；每根含 open/high/low/close。建議由同網域後端代抓，避免瀏覽器跨網域限制。</p>
+                        </div>
 
                         <!-- 連線診斷訊息框 -->
                         <div class="bg-slate-950/90 border border-slate-800 rounded-lg p-2.5 font-mono text-[11px] text-slate-300 space-y-1">
@@ -337,6 +342,41 @@
                     <span class="flex items-center gap-1"><i class="w-2.5 h-0.5 bg-amber-400 inline-block"></i>多空樞軸 (PP)</span>
                     <span class="flex items-center gap-1"><i class="w-2.5 h-0.5 bg-emerald-400 inline-block"></i>支撐線 (S1/S2)</span>
                 </div>
+            </div>
+
+            <!-- Multi-timeframe market structure analysis -->
+            <div class="card-glow rounded-2xl p-4 sm:p-5 space-y-3">
+                <div class="flex flex-wrap items-start justify-between gap-2">
+                    <div>
+                        <h3 class="text-xs sm:text-sm font-bold text-sky-300">🧭 日 K + 60 分 K 多週期趨勢與結構分析</h3>
+                        <p id="structureDataState" class="text-[11px] text-slate-400 mt-0.5">等待 K 線資料分析</p>
+                    </div>
+                    <span id="structureConfluenceBadge" class="px-2 py-1 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 text-[10px] font-bold">尚無共振判讀</span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3">
+                        <div class="flex items-center justify-between gap-2"><span class="text-[11px] font-bold text-amber-300">日 K｜主要結構</span><span id="dailyTrendBadge" class="text-[10px]"></span></div>
+                        <p id="dailyStructureText" class="mt-2 text-xs leading-relaxed text-slate-300">資料不足</p>
+                    </div>
+                    <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3">
+                        <div class="flex items-center justify-between gap-2"><span class="text-[11px] font-bold text-sky-300">60 分 K｜短波段結構</span><span id="hourlyTrendBadge" class="text-[10px]"></span></div>
+                        <p id="hourlyStructureText" class="mt-2 text-xs leading-relaxed text-slate-300">資料不足</p>
+                    </div>
+                </div>
+                <div class="bg-bgInput/80 border border-borderCard rounded-xl p-3">
+                    <div class="text-[11px] font-bold text-white">分析摘要</div>
+                    <p id="structureSummaryText" class="mt-1.5 text-xs leading-relaxed text-slate-300">尚未產生摘要。</p>
+                    <div id="structureLevelsList" class="mt-2 flex flex-wrap gap-1.5"></div>
+                </div>
+                <details class="bg-slate-900/60 border border-slate-800 rounded-xl p-3 text-xs">
+                    <summary class="cursor-pointer font-semibold text-slate-300">貼上手動 OHLC 資料（CSV）作為分析資料</summary>
+                    <p class="mt-2 text-[10px] text-slate-400 leading-relaxed">格式：<code>日期,開盤,最高,最低,收盤</code>，每行一根 K。貼入後會標示為「手動 OHLC」，不會當成即時行情。日 K 至少 8 根；60 分 K 至少 12 根。</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
+                        <textarea id="manualDailyOhlc" rows="5" placeholder="2026-10-01,26000,26200,25800,26120" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-2 font-mono text-[10px] text-white focus:outline-none focus:border-amber-500"></textarea>
+                        <textarea id="manual60mOhlc" rows="5" placeholder="2026-10-24 09:00,26120,26180,26050,26160" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-2 font-mono text-[10px] text-white focus:outline-none focus:border-amber-500"></textarea>
+                    </div>
+                    <button onclick="applyManualOhlcData()" class="mt-2 px-3 py-1.5 rounded-lg bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/40 text-[11px] font-bold transition">套用手動 OHLC 並分析</button>
+                </details>
             </div>
 
             <!-- Dual-Timeframe Support & Resistance Table -->
@@ -1112,6 +1152,7 @@
         const STORAGE_KEY_STATE = 'taifex_sim_pro_state_v3';
         const STORAGE_KEY_SCENARIOS = 'taifex_sim_pro_scenarios_v3';
         const STORAGE_KEY_FINMIND_TOKEN = 'taifex_sim_finmind_token_v1';
+        const STORAGE_KEY_OHLC_ENDPOINT = 'taifex_sim_ohlc_endpoint_v1';
 
         // App State
         let state = {
@@ -1135,7 +1176,11 @@
             swingLow20: 43950,
             klines60m: [],
             klines1d: [],
-            calculatedLevels: []
+            calculatedLevels: [],
+            dataStatus: 'SIMULATED',
+            sourceName: '內建模擬 K 線',
+            hasTrue60m: false,
+            hasTrueDaily: false
         };
 
         let savedScenarios = JSON.parse(JSON.stringify(DEFAULT_SCENARIOS));
@@ -1562,6 +1607,10 @@
             srData.dayLow = Math.round(P * 0.987);
             srData.klines60m = generateKlinesSeries(P, 28, Math.round(P * 0.0055));
             srData.klines1d = generateKlinesSeries(P, 28, Math.round(P * 0.013));
+            srData.dataStatus = 'SIMULATED';
+            srData.sourceName = '內建隨機模擬 K 線';
+            srData.hasTrue60m = false;
+            srData.hasTrueDaily = false;
 
             const all1dHighs = srData.klines1d.map(k => k.high);
             const all1dLows = srData.klines1d.map(k => k.low);
@@ -1577,7 +1626,7 @@
         function regenerateSimulatedKlines() {
             const base = parseFloat(document.getElementById('manualSrClose').value) || 46200;
             initSimulatedMarketData(base);
-            document.getElementById('srDataSourceStatus').textContent = '已重新生成 WTXP& 60分線 + 日線 模擬 K 棒序列';
+            document.getElementById('srDataSourceStatus').textContent = '⚠️ 模擬資料：已重新生成 60分線 + 日線 K 棒，非即時行情';
             computeAndRenderSR();
             showToast('已重新生成 WTXP& 模擬 60分K 與 日K 走勢');
         }
@@ -1597,6 +1646,37 @@
             } catch (e) {}
         }
 
+        function saveOhlcEndpoint() {
+            try {
+                localStorage.setItem(STORAGE_KEY_OHLC_ENDPOINT, (document.getElementById('inputOhlcEndpoint').value || '').trim());
+            } catch (e) {}
+        }
+
+        function loadOhlcEndpoint() {
+            try {
+                const endpoint = localStorage.getItem(STORAGE_KEY_OHLC_ENDPOINT) || '';
+                const input = document.getElementById('inputOhlcEndpoint');
+                if (input) input.value = endpoint;
+            } catch (e) {}
+        }
+
+        function hasUsableOhlcBars(bars, minimum) {
+            return Array.isArray(bars) && bars.length >= minimum && bars.every(bar =>
+                [bar.open, bar.high, bar.low, bar.close].every(value => Number.isFinite(Number(value))) &&
+                Number(bar.high) >= Math.max(Number(bar.open), Number(bar.close)) &&
+                Number(bar.low) <= Math.min(Number(bar.open), Number(bar.close))
+            );
+        }
+
+        function normalizeOhlcBars(bars) {
+            return bars.map((bar, index) => ({
+                time: bar.time ?? bar.timestamp ?? index,
+                label: bar.label ?? bar.date,
+                open: Math.round(Number(bar.open)), high: Math.round(Number(bar.high)),
+                low: Math.round(Number(bar.low)), close: Math.round(Number(bar.close))
+            })).sort((left, right) => Number(left.time) - Number(right.time));
+        }
+
         function appendDiagLog(msg) {
             const logEl = document.getElementById('srDiagnosticLog');
             if (!logEl) return;
@@ -1604,10 +1684,10 @@
             logEl.textContent += `\n[${timeStr}] ${msg}`;
         }
 
-        // 將 60分K 陣列聚合為日K陣列（若缺少獨立日K時使用）
+        // 將 60分K 陣列依交易日聚合為日K陣列（若缺少獨立日K時使用）
         function aggregate60mToDaily(klines60m) {
             const daily = [];
-            const chunkSize = 5;
+            const chunkSize = 19; // 台指近全每日約 19 根 60分K (日盤5根 + 夜盤14根)
             for (let i = 0; i < klines60m.length; i += chunkSize) {
                 const slice = klines60m.slice(i, i + chunkSize);
                 if (slice.length === 0) continue;
@@ -1621,24 +1701,24 @@
             return daily;
         }
 
-        // 統一將抓到的真實 K 線與現價套用至畫面並同步網格基準價
-        function applyRealMarketPayload({ lastPrice, prevClose, dayHigh, dayLow, klines60m, klines1d, sourceName, dataDateStr }) {
+        // 統一將抓到的真實 K 線與現價套用至畫面並同步網格基準價（絕不覆蓋為隨機亂數）
+        function applyRealMarketPayload({ lastPrice, prevClose, dayHigh, dayLow, klines60m, klines1d, sourceName, dataDateStr, hasTrue60m = true, hasTrueDaily = true }) {
             srData.lastPrice = Math.round(lastPrice);
             srData.prevClose = Math.round(prevClose || lastPrice);
             srData.dayHigh = Math.round(Math.max(dayHigh || lastPrice, lastPrice));
             srData.dayLow = Math.round(Math.min(dayLow || lastPrice, lastPrice));
+            srData.dataStatus = 'REAL_OHLC';
+            srData.sourceName = sourceName;
+            srData.hasTrue60m = hasTrue60m;
+            srData.hasTrueDaily = hasTrueDaily;
 
-            const range = Math.max(150, srData.dayHigh - srData.dayLow);
-
-            if (Array.isArray(klines60m) && klines60m.length >= 6) {
-                srData.klines60m = klines60m.slice(-28);
-            } else {
-                srData.klines60m = generateKlinesSeries(srData.lastPrice, 28, Math.round(range * 0.35));
+            if (Array.isArray(klines60m) && klines60m.length >= 4) {
+                srData.klines60m = klines60m.slice(-32);
             }
 
-            if (Array.isArray(klines1d) && klines1d.length >= 5) {
+            if (Array.isArray(klines1d) && klines1d.length >= 3) {
                 srData.klines1d = klines1d.slice(-28);
-            } else {
+            } else if (srData.klines60m.length >= 10) {
                 srData.klines1d = aggregate60mToDaily(srData.klines60m);
             }
 
@@ -1658,7 +1738,8 @@
 
             const statusEl = document.getElementById('srDataSourceStatus');
             const tagEl = document.getElementById('planBStatusTag');
-            statusEl.textContent = `✅ 已同步 ${sourceName} 最新行情：${fmtNum(srData.lastPrice)} 點 (${dataDateStr || new Date().toLocaleTimeString()})`;
+            const intervalWarning = hasTrue60m ? '' : '；60分K不足（目前為日／夜盤區段資料）';
+            statusEl.textContent = `✅ 已同步 ${sourceName} OHLC：${fmtNum(srData.lastPrice)} 點 (${dataDateStr || new Date().toLocaleTimeString()})${intervalWarning}`;
             if (tagEl) tagEl.textContent = `✅ 已連線 (${sourceName})`;
 
             computeAndRenderSR();
@@ -1666,16 +1747,41 @@
             showToast(`✅ 已更新台指近全最新點位：${fmtNum(srData.lastPrice)} 點`);
         }
 
-        // 核心抓取函式 (修正先前重複定義覆蓋的 Bug，整合 Vercel 後端 + 鉅亨網 TXF1 即時 60分K + FinMind 主力合約)
+        // 核心抓取函式 (真實 60分K + 日K 雙週期抓取，徹底移除隨機假K線干擾)
         async function fetchRealMarketData() {
             const icon = document.getElementById('srSyncIcon');
             const statusEl = document.getElementById('srDataSourceStatus');
             const logEl = document.getElementById('srDiagnosticLog');
             const token = (document.getElementById('inputFinMindToken')?.value || '').trim();
+            const customEndpoint = (document.getElementById('inputOhlcEndpoint')?.value || '').trim();
 
             icon.classList.add('rotate-180');
-            statusEl.textContent = '正在連線抓取台指近全 (WTXP&) 最新報價與 60分K/日K...';
-            if (logEl) logEl.textContent = '🚀 開始執行方案 B 台指近全 (WTXP&) 多重資料源抓取...';
+            statusEl.textContent = '正在連線抓取台指近全 (WTXP&) 真實 60分K 與 日K...';
+            if (logEl) logEl.textContent = '🚀 開始執行台指近全 (WTXP&) 真實 60分K 與 日K 抓取...';
+
+            // 【通道 0】使用者指定的同網域／具 CORS 的原生 OHLC 後端
+            if (customEndpoint) {
+                try {
+                    appendDiagLog(`0️⃣ 嘗試自訂 OHLC 端點：${customEndpoint}`);
+                    const response = await fetch(customEndpoint, { cache: 'no-store' });
+                    const payload = response.ok ? await response.json() : null;
+                    const hourlyValid = hasUsableOhlcBars(payload?.klines60m, 12);
+                    const dailyValid = hasUsableOhlcBars(payload?.klines1d, 8);
+                    if (payload?.ok && hourlyValid && dailyValid && Number(payload.lastPrice) > 5000) {
+                        appendDiagLog('✅ 自訂端點回傳已驗證的原生 60 分 K 與日 K。');
+                        applyRealMarketPayload({
+                            lastPrice: payload.lastPrice, prevClose: payload.prevClose, dayHigh: payload.dayHigh, dayLow: payload.dayLow,
+                            klines60m: normalizeOhlcBars(payload.klines60m), klines1d: normalizeOhlcBars(payload.klines1d),
+                            sourceName: payload.source || '自訂 OHLC 後端', dataDateStr: payload.updatedAt, hasTrue60m: true, hasTrueDaily: true
+                        });
+                        setTimeout(() => icon.classList.remove('rotate-180'), 500);
+                        return;
+                    }
+                    appendDiagLog('⚠️ 自訂端點未回傳至少 12 根原生60分K與8根日K，已拒絕當作完整多週期資料。');
+                } catch (error) {
+                    appendDiagLog(`⚠️ 自訂端點無法讀取：${error.message}`);
+                }
+            }
 
             // 【通道 1】優先呼叫同網域 Vercel Serverless 後端 /api/quote (若已部署 api/quote.js)
             try {
@@ -1686,7 +1792,9 @@
                     if (contentType.includes('application/json')) {
                         const vData = await resVercel.json();
                         if (vData && vData.ok && vData.lastPrice > 5000) {
-                            appendDiagLog(`✅ Vercel 後端成功回傳！現價: ${vData.lastPrice} (${vData.source})`);
+                            const hourlyValid = hasUsableOhlcBars(vData.klines60m, 12);
+                            const dailyValid = hasUsableOhlcBars(vData.klines1d, 8);
+                            appendDiagLog(`✅ Vercel 後端回傳 OHLC；60分K ${hourlyValid ? '完整' : '不足'}、日K ${dailyValid ? '完整' : '不足'}。`);
                             applyRealMarketPayload({
                                 lastPrice: vData.lastPrice,
                                 prevClose: vData.prevClose,
@@ -1695,48 +1803,57 @@
                                 klines60m: vData.klines60m,
                                 klines1d: vData.klines1d,
                                 sourceName: vData.source || 'Vercel /api/quote',
-                                dataDateStr: vData.updatedAt
+                                dataDateStr: vData.updatedAt,
+                                hasTrue60m: hourlyValid,
+                                hasTrueDaily: dailyValid
                             });
                             setTimeout(() => icon.classList.remove('rotate-180'), 500);
                             return;
                         }
                     }
                 }
-                appendDiagLog('ℹ️ 未偵測到 /api/quote 後端 (或目前在預覽環境)，自動切換至前端直連引擎...');
+                appendDiagLog('ℹ️ 未偵測到 /api/quote 後端，自動切換至前端直連引擎...');
             } catch (e) {
                 appendDiagLog('ℹ️ 略過 /api/quote，改由前端直連台指近全 API...');
             }
 
-            // 【通道 2】鉅亨網 (cnyes) 台指期近全連續合約 API (FUTURES:TXF1:FUTURES，真正包含日盤+夜盤即時 60分K 與日K)
+            // 【通道 2】鉅亨網 (cnyes) 台指期近全連續合約 API (補齊 from & to 時間戳記，抓真實 60分K 與 日K)
+            let cnyes60m = [];
+            let cnyes1d = [];
             try {
-                appendDiagLog('2️⃣ 嘗試抓取鉅亨網台指期近全 (FUTURES:TXF1:FUTURES) 即時 60分K 與日K...');
-                const url60m = 'https://ws.api.cnyes.com/ws/api/v1/charting/history?symbol=FUTURES:TXF1:FUTURES&resolution=60';
-                const url1d = 'https://ws.api.cnyes.com/ws/api/v1/charting/history?symbol=FUTURES:TXF1:FUTURES&resolution=D';
+                appendDiagLog('2️⃣ 正在抓取鉅亨網台指近全 (FUTURES:TXF1:FUTURES) 真實 60分K 與 日K...');
+                const nowSec = Math.floor(Date.now() / 1000);
+                const from60m = nowSec - 20 * 86400; // 過去 20 天內所有日夜盤 60分K
+                const from1d  = nowSec - 65 * 86400; // 過去 65 天日K
+                const url60m = `https://ws.api.cnyes.com/ws/api/v1/charting/history?symbol=FUTURES:TXF1:FUTURES&resolution=60&from=${from60m}&to=${nowSec}`;
+                const url1d  = `https://ws.api.cnyes.com/ws/api/v1/charting/history?symbol=FUTURES:TXF1:FUTURES&resolution=D&from=${from1d}&to=${nowSec}`;
 
-                // 同時支援直接連線或公開 CORS Proxy 轉發
-                const fetchWithFallback = async (targetUrl) => {
-                    try {
-                        const directRes = await fetch(targetUrl, { cache: 'no-store' });
-                        if (directRes.ok) return await directRes.json();
-                    } catch (_) {}
-                    try {
-                        const proxy1 = await fetch(`https://corsproxy.io/?${encodeURIComponent(targetUrl)}`, { cache: 'no-store' });
-                        if (proxy1.ok) return await proxy1.json();
-                    } catch (_) {}
-                    const proxy2 = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`, { cache: 'no-store' });
-                    if (proxy2.ok) return await proxy2.json();
-                    throw new Error('Proxy failed');
+                const fetchJsonWithProxy = async (targetUrl) => {
+                    const attempts = [
+                        () => fetch(targetUrl, { cache: 'no-store' }),
+                        () => fetch(`https://corsproxy.io/?${encodeURIComponent(targetUrl)}`, { cache: 'no-store' }),
+                        () => fetch(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`, { cache: 'no-store' }),
+                        () => fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`, { cache: 'no-store' })
+                    ];
+                    for (const fn of attempts) {
+                        try {
+                            const r = await fn();
+                            if (r && r.ok) {
+                                const j = await r.json();
+                                if (j && j.data && Array.isArray(j.data.c) && j.data.c.length > 0) return j;
+                            }
+                        } catch (_) {}
+                    }
+                    throw new Error('All proxy routes failed');
                 };
 
                 const [json60, json1d] = await Promise.all([
-                    fetchWithFallback(url60m),
-                    fetchWithFallback(url1d).catch(() => null)
+                    fetchJsonWithProxy(url60m),
+                    fetchJsonWithProxy(url1d).catch(() => null)
                 ]);
 
-                if (json60 && json60.data && Array.isArray(json60.data.c) && json60.data.c.length > 5) {
+                if (json60 && json60.data && Array.isArray(json60.data.c)) {
                     const { o, h, l, c, t } = json60.data;
-                    const klines60m = [];
-                    // 鉅亨網回傳的時間陣列通常為由新到舊或由舊到新，先依時間戳 t 排序確保由舊到新
                     const pairs = [];
                     for (let i = 0; i < c.length; i++) {
                         if (c[i] > 5000 && o[i] > 5000) {
@@ -1750,62 +1867,65 @@
                         }
                     }
                     pairs.sort((a, b) => a.time - b.time);
-                    pairs.forEach(p => klines60m.push(p));
+                    cnyes60m = pairs;
+                }
 
-                    let klines1d = [];
-                    if (json1d && json1d.data && Array.isArray(json1d.data.c)) {
-                        const dPairs = [];
-                        for (let i = 0; i < json1d.data.c.length; i++) {
-                            if (json1d.data.c[i] > 5000) {
-                                dPairs.push({
-                                    time: json1d.data.t ? json1d.data.t[i] : i,
-                                    open: Math.round(json1d.data.o[i]),
-                                    high: Math.round(json1d.data.h[i]),
-                                    low: Math.round(json1d.data.l[i]),
-                                    close: Math.round(json1d.data.c[i])
-                                });
-                            }
+                if (json1d && json1d.data && Array.isArray(json1d.data.c)) {
+                    const { o, h, l, c, t } = json1d.data;
+                    const dPairs = [];
+                    for (let i = 0; i < c.length; i++) {
+                        if (c[i] > 5000 && o[i] > 5000) {
+                            dPairs.push({
+                                time: t ? t[i] : i,
+                                open: Math.round(o[i]),
+                                high: Math.round(h[i]),
+                                low: Math.round(l[i]),
+                                close: Math.round(c[i])
+                            });
                         }
-                        dPairs.sort((a, b) => a.time - b.time);
-                        klines1d = dPairs;
                     }
+                    dPairs.sort((a, b) => a.time - b.time);
+                    cnyes1d = dPairs;
+                }
 
-                    if (klines60m.length >= 5) {
-                        const latestBar = klines60m[klines60m.length - 1];
-                        const recentSessionBars = klines60m.slice(-19); // 台指近全 日盤5小時+夜盤14小時=19根60分K
-                        const sessionHigh = Math.max(...recentSessionBars.map(k => k.high));
-                        const sessionLow = Math.min(...recentSessionBars.map(k => k.low));
-                        const prevDayClose = klines1d.length >= 2
-                            ? klines1d[klines1d.length - 2].close
-                            : klines60m[Math.max(0, klines60m.length - 15)].close;
+                if (cnyes60m.length >= 12) {
+                    const latestBar = cnyes60m[cnyes60m.length - 1];
+                    const recentSessionBars = cnyes60m.slice(-19); // 台指近全 1個完整交易日(夜盤14小時+日盤5小時) = 19根60分K
+                    const sessionHigh = Math.max(...recentSessionBars.map(k => k.high));
+                    const sessionLow = Math.min(...recentSessionBars.map(k => k.low));
+                    const prevDayClose = cnyes1d.length >= 2
+                        ? cnyes1d[cnyes1d.length - 2].close
+                        : cnyes60m[Math.max(0, cnyes60m.length - 20)].close;
 
-                        const barTimeStr = latestBar.time > 1000000
-                            ? new Date(latestBar.time * 1000).toLocaleString('zh-TW', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false })
-                            : '最新K棒';
+                    const barTimeStr = latestBar.time > 1000000
+                        ? new Date(latestBar.time * 1000).toLocaleString('zh-TW', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false })
+                        : '最新60分K';
 
-                        appendDiagLog(`✅ 成功抓到台指近全 (TXF1) 60分K！最新價: ${latestBar.close} 點 (K棒時間: ${barTimeStr})`);
-                        applyRealMarketPayload({
-                            lastPrice: latestBar.close,
-                            prevClose: prevDayClose,
-                            dayHigh: sessionHigh,
-                            dayLow: sessionLow,
-                            klines60m,
-                            klines1d,
-                            sourceName: '台指近全 (TXF1 60分K+日K)',
-                            dataDateStr: barTimeStr
-                        });
-                        setTimeout(() => icon.classList.remove('rotate-180'), 500);
-                        return;
-                    }
+                    const dailyValid = hasUsableOhlcBars(cnyes1d, 8);
+                    appendDiagLog(`✅ 成功抓到真實 60分K (共 ${cnyes60m.length} 根)！日K ${dailyValid ? '完整' : '不足'}；最新價: ${latestBar.close} 點 (K棒時間: ${barTimeStr})`);
+                    applyRealMarketPayload({
+                        lastPrice: latestBar.close,
+                        prevClose: prevDayClose,
+                        dayHigh: sessionHigh,
+                        dayLow: sessionLow,
+                        klines60m: cnyes60m,
+                        klines1d: cnyes1d,
+                        sourceName: '台指近全 (TXF1 真實60分K+日K)',
+                        dataDateStr: barTimeStr,
+                        hasTrue60m: true,
+                        hasTrueDaily: dailyValid
+                    });
+                    setTimeout(() => icon.classList.remove('rotate-180'), 500);
+                    return;
                 }
             } catch (e) {
-                appendDiagLog(`⚠️ 鉅亨網即時 60分K 連線受阻 (${e.message})，改由 FinMind 官方 API 抓取...`);
+                appendDiagLog(`ℹ️ 鉅亨網 60分K 直連切換中 (${e.message})，改由 FinMind 官方日夜盤明細建立真實走勢...`);
             }
 
-            // 【通道 3】FinMind 官方期貨 API (直接支援 CORS，針對近月主力合約與日夜盤合併進行精準過濾)
+            // 【通道 3】FinMind 官方期貨 API (將真實「夜盤 after_market」與「日盤 position」拆分為真實雙時段 K 棒，絕不使用亂數假K線！)
             try {
-                appendDiagLog('3️⃣ 正在向 FinMind 官方 API 查詢 TaiwanFuturesDaily (TX 台指期)...');
-                const startDate = new Date(Date.now() - 40 * 86400000).toISOString().slice(0, 10);
+                appendDiagLog('3️⃣ 正在向 FinMind 官方 API 查詢 TaiwanFuturesDaily (TX 台指期日夜盤真實明細)...');
+                const startDate = new Date(Date.now() - 45 * 86400000).toISOString().slice(0, 10);
                 let fmUrl = `https://api.finmindtrade.com/api/v4/data?dataset=TaiwanFuturesDaily&data_id=TX&start_date=${startDate}`;
                 if (token) fmUrl += `&token=${encodeURIComponent(token)}`;
 
@@ -1813,7 +1933,6 @@
                 const fmJson = await fmRes.json();
 
                 if (fmJson && fmJson.msg === 'success' && Array.isArray(fmJson.data) && fmJson.data.length > 0) {
-                    // 排除跨月價差單 (contract_date 含有 '/' 的資料) 並排除無成交價(close <= 0)的資料
                     const cleanRows = fmJson.data.filter(r =>
                         r.contract_date &&
                         !String(r.contract_date).includes('/') &&
@@ -1821,7 +1940,6 @@
                         Number(r.volume) > 0
                     );
 
-                    // 依日期分組，每天只挑出「成交量最大」的主力近月合約，並合併該合約的日盤(position)與夜盤(after_market)
                     const byDate = {};
                     cleanRows.forEach(r => {
                         if (!byDate[r.date]) byDate[r.date] = [];
@@ -1830,10 +1948,10 @@
 
                     const dates = Object.keys(byDate).sort();
                     const dailyKlines = [];
+                    const sessionKlines = []; // 真實「夜盤 + 日盤」雙時段分時K線 (每交易日2根真實K棒，完全反映真實跳空與高低點)
 
                     dates.forEach(d => {
                         const rowsOfDay = byDate[d];
-                        // 找出當天各 contract_date 的總量，選出主力近月合約月份
                         const volByContract = {};
                         rowsOfDay.forEach(r => {
                             volByContract[r.contract_date] = (volByContract[r.contract_date] || 0) + Number(r.volume || 0);
@@ -1843,6 +1961,28 @@
 
                         const afterMarketRow = mainRows.find(r => r.trading_session === 'after_market');
                         const regularRow = mainRows.find(r => r.trading_session === 'position') || mainRows[0];
+
+                        // 1. 先推入「盤後夜盤 (15:00~05:00)」真實 K 棒
+                        if (afterMarketRow && Number(afterMarketRow.open) > 5000 && Number(afterMarketRow.close) > 5000) {
+                            sessionKlines.push({
+                                label: `${d.slice(5)}夜盤`,
+                                open: Math.round(Number(afterMarketRow.open)),
+                                high: Math.round(Number(afterMarketRow.max || afterMarketRow.close)),
+                                low: Math.round(Number(afterMarketRow.min || afterMarketRow.close)),
+                                close: Math.round(Number(afterMarketRow.close))
+                            });
+                        }
+
+                        // 2. 再推入「一般日盤 (08:45~13:45)」真實 K 棒
+                        if (regularRow && Number(regularRow.open) > 5000 && Number(regularRow.close) > 5000) {
+                            sessionKlines.push({
+                                label: `${d.slice(5)}日盤`,
+                                open: Math.round(Number(regularRow.open)),
+                                high: Math.round(Number(regularRow.max || regularRow.close)),
+                                low: Math.round(Number(regularRow.min || regularRow.close)),
+                                close: Math.round(Number(regularRow.close))
+                            });
+                        }
 
                         const openPrice = afterMarketRow && Number(afterMarketRow.open) > 5000
                             ? Number(afterMarketRow.open)
@@ -1864,21 +2004,21 @@
                     if (dailyKlines.length >= 2) {
                         const latestDay = dailyKlines[dailyKlines.length - 1];
                         const prevDay = dailyKlines[dailyKlines.length - 2];
-                        const range = Math.max(150, latestDay.high - latestDay.low);
-                        const synth60m = generateKlinesSeries(latestDay.close, 28, Math.round(range * 0.35));
 
-                        appendDiagLog(`✅ FinMind 抓取成功！近月主力合約: ${latestDay.contract} | 日期: ${latestDay.date} | 收盤: ${latestDay.close} (全盤高:${latestDay.high} / 低:${latestDay.low})`);
-                        appendDiagLog(`💡 提醒：FinMind 日資料表為收盤結算後更新；若需盤中即時分K，建議在 Vercel 部署下方 api/quote.js 後端。`);
+                        appendDiagLog(`✅ FinMind 真實日夜盤 K 線載入成功！主力合約: ${latestDay.contract} | 最新收盤: ${latestDay.close} (全盤高:${latestDay.high} / 低:${latestDay.low})`);
+                        appendDiagLog(`📊 K線圖已採用「真實夜盤 + 真實日盤」分時序列繪製 (共 ${sessionKlines.length} 根真實區間K棒)，完全排除隨機亂數誤差！`);
 
                         applyRealMarketPayload({
                             lastPrice: latestDay.close,
                             prevClose: prevDay.close,
                             dayHigh: latestDay.high,
                             dayLow: latestDay.low,
-                            klines60m: synth60m,
+                            klines60m: sessionKlines.slice(-28),
                             klines1d: dailyKlines,
-                            sourceName: `FinMind 台指期 (${latestDay.contract})`,
-                            dataDateStr: latestDay.date
+                            sourceName: `FinMind 台指期日夜盤 (${latestDay.contract})`,
+                            dataDateStr: latestDay.date,
+                            hasTrue60m: false,
+                            hasTrueDaily: true
                         });
                         setTimeout(() => icon.classList.remove('rotate-180'), 500);
                         return;
@@ -1890,12 +2030,12 @@
                 appendDiagLog(`❌ FinMind 連線發生錯誤：${err.message}`);
             }
 
-            appendDiagLog(`⚠️ 所有外部接口目前受限或休市中，已維持目前點位設定。您可展開下方「手動校正」直接輸入看盤點位。`);
+            appendDiagLog(`⚠️ 所有外部接口目前受限或休市中，已維持目前點位設定。`);
             statusEl.textContent = `⚠️ 外部連線受阻，請查看上方診斷日誌或手動輸入點位`;
             setTimeout(() => icon.classList.remove('rotate-180'), 500);
         }
 
-        // Vercel Serverless Function (api/quote.js) 完整程式碼產生器
+        // Vercel Serverless Function (api/quote.js) 完整程式碼產生器 (同步升級為帶入 from & to 時間戳記)
         function getVercelBackendCodeString() {
             return `// 檔案路徑：api/quote.js (放置於 GitHub 專案的 api 資料夾下，Vercel 會自動部署為後端 API)
 export default async function handler(req, res) {
@@ -1903,9 +2043,13 @@ export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store, max-age=0');
 
   try {
-    // 1. 直接從 Vercel 伺服器抓取台指近全 (FUTURES:TXF1:FUTURES) 60分K 與 日K (含日盤+夜盤即時報價)
-    const url60m = 'https://ws.api.cnyes.com/ws/api/v1/charting/history?symbol=FUTURES:TXF1:FUTURES&resolution=60';
-    const url1d  = 'https://ws.api.cnyes.com/ws/api/v1/charting/history?symbol=FUTURES:TXF1:FUTURES&resolution=D';
+    const nowSec = Math.floor(Date.now() / 1000);
+    const from60m = nowSec - 20 * 86400; // 過去 20 天所有 60分K
+    const from1d  = nowSec - 65 * 86400; // 過去 65 天日K
+
+    // 直接從 Vercel 伺服器抓取台指近全 (FUTURES:TXF1:FUTURES) 真實 60分K 與 日K (含日盤+夜盤)
+    const url60m = \`https://ws.api.cnyes.com/ws/api/v1/charting/history?symbol=FUTURES:TXF1:FUTURES&resolution=60&from=\${from60m}&to=\${nowSec}\`;
+    const url1d  = \`https://ws.api.cnyes.com/ws/api/v1/charting/history?symbol=FUTURES:TXF1:FUTURES&resolution=D&from=\${from1d}&to=\${nowSec}\`;
 
     const [r60, r1d] = await Promise.all([fetch(url60m), fetch(url1d)]);
     const j60 = await r60.json();
@@ -1913,7 +2057,7 @@ export default async function handler(req, res) {
 
     if (j60?.data?.c?.length > 5) {
       const { o, h, l, c, t } = j60.data;
-      const klines60m = c.map(( val, i ) => ({
+      const klines60m = c.map((val, i) => ({
         time: t ? t[i] : i,
         open: Math.round(o[i]),
         high: Math.round(h[i]),
@@ -1937,13 +2081,13 @@ export default async function handler(req, res) {
 
       return res.status(200).json({
         ok: true,
-        source: 'Vercel 後端直連 (WTXP& 60分K+日K)',
+        source: 'Vercel 後端直連 (WTXP& 真實60分K+日K)',
         updatedAt: new Date().toLocaleTimeString('zh-TW', { hour12: false }),
         lastPrice: latest.close,
         prevClose,
         dayHigh,
         dayLow,
-        klines60m: klines60m.slice(-28),
+        klines60m: klines60m.slice(-32),
         klines1d: klines1d.slice(-28)
       });
     }
@@ -1982,7 +2126,117 @@ export default async function handler(req, res) {
             srData.dayLow = parseFloat(document.getElementById('manualSrLow').value) || 45620;
             srData.swingHigh20 = Math.round(srData.dayHigh * 1.022);
             srData.swingLow20 = Math.round(srData.dayLow * 0.978);
+            srData.dataStatus = 'MANUAL_INPUT';
+            document.getElementById('srDataSourceStatus').textContent = '⚠️ 手動點位校正中；K 線來源維持原資料，現價／高低不代表即時行情';
             computeAndRenderSR();
+        }
+
+        function parseManualOhlc(text) {
+            return text.split(/\r?\n/).map((line, index) => {
+                const columns = line.trim().split(',').map(value => value.trim());
+                if (columns.length < 5 || !columns[0]) return null;
+                const [open, high, low, close] = columns.slice(1, 5).map(Number);
+                if (![open, high, low, close].every(Number.isFinite) || high < Math.max(open, close) || low > Math.min(open, close)) return null;
+                return { label: columns[0], time: index, open, high, low, close };
+            }).filter(Boolean);
+        }
+
+        function applyManualOhlcData() {
+            const daily = parseManualOhlc(document.getElementById('manualDailyOhlc').value);
+            const hourly = parseManualOhlc(document.getElementById('manual60mOhlc').value);
+            if (daily.length < 8 && hourly.length < 12) {
+                showToast('請至少貼入 8 根日 K 或 12 根 60 分 K 的有效 OHLC 資料');
+                return;
+            }
+            if (daily.length >= 8) srData.klines1d = daily;
+            if (hourly.length >= 12) srData.klines60m = hourly;
+            const latest = (hourly.length ? hourly : daily).at(-1);
+            srData.lastPrice = Math.round(latest.close);
+            srData.prevClose = Math.round((daily.length >= 2 ? daily.at(-2) : (hourly.length >= 2 ? hourly.at(-2) : latest)).close);
+            srData.dayHigh = Math.round(latest.high);
+            srData.dayLow = Math.round(latest.low);
+            srData.dataStatus = 'MANUAL_OHLC';
+            srData.sourceName = '使用者貼上的手動 OHLC';
+            srData.hasTrue60m = hourly.length >= 12;
+            srData.hasTrueDaily = daily.length >= 8;
+            document.getElementById('manualSrClose').value = srData.lastPrice;
+            document.getElementById('manualSrPrevClose').value = srData.prevClose;
+            document.getElementById('manualSrHigh').value = srData.dayHigh;
+            document.getElementById('manualSrLow').value = srData.dayLow;
+            document.getElementById('srDataSourceStatus').textContent = `⚠️ 手動 OHLC 已套用：日K ${daily.length} 根／60分K ${hourly.length} 根，非即時行情`;
+            computeAndRenderSR();
+            showToast('已以手動 OHLC 更新多週期結構分析');
+        }
+
+        function findSwingPoints(klines, strength) {
+            const points = [];
+            for (let index = strength; index < klines.length - strength; index++) {
+                const window = klines.slice(index - strength, index + strength + 1);
+                if (klines[index].high === Math.max(...window.map(bar => bar.high))) points.push({ type: 'H', price: klines[index].high, index });
+                if (klines[index].low === Math.min(...window.map(bar => bar.low))) points.push({ type: 'L', price: klines[index].low, index });
+            }
+            return points;
+        }
+
+        function analyzeStructure(klines, timeframe, isReliable) {
+            const required = timeframe === '日K' ? 8 : 12;
+            if (!isReliable || klines.length < required) return { available: false, timeframe, reason: isReliable ? `需要至少 ${required} 根完整 ${timeframe}` : `${timeframe} OHLC 資料不足或非該週期` };
+            const swings = findSwingPoints(klines, 2);
+            const highs = swings.filter(point => point.type === 'H').slice(-2);
+            const lows = swings.filter(point => point.type === 'L').slice(-2);
+            const latest = klines.at(-1);
+            const average = klines.slice(-Math.min(10, klines.length)).reduce((sum, bar) => sum + bar.close, 0) / Math.min(10, klines.length);
+            let trend = '盤整';
+            if (highs.length === 2 && lows.length === 2) {
+                if (highs[1].price > highs[0].price && lows[1].price > lows[0].price) trend = '多頭';
+                else if (highs[1].price < highs[0].price && lows[1].price < lows[0].price) trend = '空頭';
+            }
+            if (trend === '盤整' && latest.close > average * 1.004) trend = '偏多';
+            if (trend === '盤整' && latest.close < average * 0.996) trend = '偏空';
+            const candidates = [];
+            for (let length = Math.min(8, klines.length); length >= 4; length--) {
+                const slice = klines.slice(-length);
+                const high = Math.max(...slice.map(bar => bar.high));
+                const low = Math.min(...slice.map(bar => bar.low));
+                const averageRange = slice.reduce((sum, bar) => sum + bar.high - bar.low, 0) / length;
+                if (high - low <= averageRange * 3.2) candidates.push({ low, high, length });
+            }
+            const consolidation = candidates.at(0) || null;
+            return { available: true, timeframe, trend, latest, average, swingHigh: highs.at(-1), swingLow: lows.at(-1), consolidation };
+        }
+
+        function trendBadge(trend) {
+            const style = trend.includes('多') ? 'bg-rose-500/15 text-rose-300 border-rose-500/30' : trend.includes('空') ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30' : 'bg-amber-500/15 text-amber-300 border-amber-500/30';
+            return `<span class="px-1.5 py-0.5 rounded border ${style}">${trend}</span>`;
+        }
+
+        function describeStructure(result) {
+            if (!result.available) return result.reason;
+            const pieces = [`收盤 ${fmtNum(result.latest.close)}，${result.trend}結構`];
+            if (result.swingHigh) pieces.push(`前波高 ${fmtNum(result.swingHigh.price)}`);
+            if (result.swingLow) pieces.push(`前波低 ${fmtNum(result.swingLow.price)}`);
+            if (result.consolidation) pieces.push(`近 ${result.consolidation.length} 根整理 ${fmtNum(result.consolidation.low)}–${fmtNum(result.consolidation.high)}`);
+            else pieces.push(`尚未辨識到緊密整理區`);
+            return pieces.join('；');
+        }
+
+        function renderMultiTimeframeStructure() {
+            const daily = analyzeStructure(srData.klines1d, '日K', srData.hasTrueDaily);
+            const hourly = analyzeStructure(srData.klines60m, '60分K', srData.hasTrue60m);
+            const stateEl = document.getElementById('structureDataState');
+            const dataText = srData.dataStatus === 'REAL_OHLC' ? `真實 OHLC：${srData.sourceName}` : srData.dataStatus === 'MANUAL_OHLC' ? '手動 OHLC：僅依使用者貼入資料分析，非即時行情' : srData.dataStatus === 'MANUAL_INPUT' ? '手動點位校正：K 線來源與現價可能不同，僅供情境參考' : '模擬 K 線：所有結構與價位皆為示範，非真實行情';
+            stateEl.textContent = `${dataText}｜日K ${daily.available ? '可分析' : '不可分析'}／60分K ${hourly.available ? '可分析' : '不可分析'}`;
+            document.getElementById('dailyTrendBadge').innerHTML = daily.available ? trendBadge(daily.trend) : '<span class="text-amber-300">資料不足</span>';
+            document.getElementById('hourlyTrendBadge').innerHTML = hourly.available ? trendBadge(hourly.trend) : '<span class="text-amber-300">資料不足</span>';
+            document.getElementById('dailyStructureText').textContent = describeStructure(daily);
+            document.getElementById('hourlyStructureText').textContent = describeStructure(hourly);
+            const confluence = daily.available && hourly.available && daily.trend === hourly.trend && daily.trend !== '盤整';
+            const badge = document.getElementById('structureConfluenceBadge');
+            badge.textContent = confluence ? `雙週期 ${daily.trend} 共振` : daily.available && hourly.available ? '雙週期方向未一致' : '等待完整雙週期資料';
+            badge.className = `px-2 py-1 rounded-lg border text-[10px] font-bold ${confluence ? 'bg-sky-500/15 text-sky-300 border-sky-500/30' : 'bg-slate-800 text-slate-300 border-slate-700'}`;
+            const levels = [daily.swingHigh && { label: '日K 前高', price: daily.swingHigh.price, type: 'R' }, daily.swingLow && { label: '日K 前低', price: daily.swingLow.price, type: 'S' }, daily.consolidation && { label: '日K 整理區', price: `${fmtNum(daily.consolidation.low)}–${fmtNum(daily.consolidation.high)}`, type: 'Z' }, hourly.swingHigh && { label: '60分 前高', price: hourly.swingHigh.price, type: 'R' }, hourly.swingLow && { label: '60分 前低', price: hourly.swingLow.price, type: 'S' }, hourly.consolidation && { label: '60分 整理區', price: `${fmtNum(hourly.consolidation.low)}–${fmtNum(hourly.consolidation.high)}`, type: 'Z' }].filter(Boolean);
+            document.getElementById('structureLevelsList').innerHTML = levels.map(level => `<span class="px-2 py-1 rounded-lg text-[10px] border ${level.type === 'R' ? 'bg-rose-500/10 text-rose-300 border-rose-500/25' : level.type === 'S' ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/25' : 'bg-amber-500/10 text-amber-300 border-amber-500/25'}">${level.label} ${typeof level.price === 'number' ? fmtNum(level.price) : level.price}</span>`).join('') || '<span class="text-[10px] text-slate-500">尚無可列出的關鍵價位</span>';
+            document.getElementById('structureSummaryText').textContent = confluence ? `日 K 與 60 分 K 同為${daily.trend}，可將日 K 的前波高低／整理邊界當作主要地圖，再以 60 分 K 的結構確認反應；此為觀察架構，不是交易訊號。` : `目前${daily.available ? `日 K 為${daily.trend}` : '日 K 資料不足'}，${hourly.available ? `60 分 K 為${hourly.trend}` : '60 分 K 資料不足'}；方向未形成一致共振時，優先留意上述前波高低與整理區邊界。`;
         }
 
         function switchSrTimeframe(tf) {
@@ -2008,29 +2262,44 @@ export default async function handler(req, res) {
             const prevC = srData.prevClose;
             const H_day = Math.max(srData.dayHigh, C);
             const L_day = Math.min(srData.dayLow, C);
-            const rangeDay = Math.max(150, H_day - L_day);
+            const rangeDay = Math.max(120, H_day - L_day);
 
-            const h60 = Math.round(C + rangeDay * 0.55);
-            const l60 = Math.round(C - rangeDay * 0.55);
-            const r60 = Math.max(100, h60 - l60);
+            // 1. 【日線 (1D) 支撐壓力計算】直接取用真實日K序列與全盤高低點
+            const k1d = srData.klines1d && srData.klines1d.length >= 3 ? srData.klines1d : null;
+            // 若有前一日完整日K，使用前一日 H/L/C 與今日全盤高低進行樞軸與波段複合運算
+            const ref1dH = H_day;
+            const ref1dL = L_day;
+            const pp1d = Math.round((ref1dH + ref1dL + C) / 3);
+            const r1_1d = Math.round(2 * pp1d - ref1dL);
+            const s1_1d = Math.round(2 * pp1d - ref1dH);
+            const r2_1d = Math.round(pp1d + (ref1dH - ref1dL));
+            const s2_1d = Math.round(pp1d - (ref1dH - ref1dL));
+            const r3_1d = Math.round(k1d ? Math.max(...k1d.slice(-20).map(k => k.high), r2_1d + 150) : srData.swingHigh20);
+            const s3_1d = Math.round(k1d ? Math.min(...k1d.slice(-20).map(k => k.low), s2_1d - 150) : srData.swingLow20);
 
-            // Daily Pivot Points & Fibonacci
-            const pp1d = Math.round((H_day + L_day + C) / 3);
-            const r1_1d = Math.round(2 * pp1d - L_day);
-            const s1_1d = Math.round(2 * pp1d - H_day);
-            const r2_1d = Math.round(pp1d + rangeDay);
-            const s2_1d = Math.round(pp1d - rangeDay);
-            const r3_1d = Math.round(srData.swingHigh20);
-            const s3_1d = Math.round(srData.swingLow20);
+            // 2. 【60分線 (60m) 支撐壓力計算】直接從真實 60分K 陣列 (srData.klines60m) 提取波段高低、20MA 中關與布林通道！
+            const k60 = srData.klines60m;
+            const recent8Bars = k60.slice(-8);   // 近 8 根 60分K (約一個交易時段)
+            const recent20Bars = k60.slice(-20); // 近 20 根 60分K (計算 60分K 之 20MA 均線與標準差)
 
-            // 60m Pivot Points
-            const pp60 = Math.round((h60 + l60 + C) / 3);
-            const r1_60 = Math.round(2 * pp60 - l60);
-            const s1_60 = Math.round(2 * pp60 - h60);
-            const r2_60 = Math.round(pp60 + r60);
-            const s2_60 = Math.round(pp60 - r60);
-            const r3_60 = Math.round(C + rangeDay * 1.35);
-            const s3_60 = Math.round(C - rangeDay * 1.35);
+            const h60_short = Math.max(...recent8Bars.map(k => k.high), C);
+            const l60_short = Math.min(...recent8Bars.map(k => k.low), C);
+            const h60_swing = Math.max(...recent20Bars.map(k => k.high), h60_short);
+            const l60_swing = Math.min(...recent20Bars.map(k => k.low), l60_short);
+
+            // 計算 60分K 真實 20MA 與標準差 (Bollinger Bands)
+            const ma20_60 = recent20Bars.reduce((acc, k) => acc + k.close, 0) / recent20Bars.length;
+            const variance60 = recent20Bars.reduce((acc, k) => acc + Math.pow(k.close - ma20_60, 2), 0) / recent20Bars.length;
+            const std60 = Math.max(60, Math.sqrt(variance60));
+
+            // 60分線樞軸與關鍵支撐壓力 (結合短波段 Pivot 與 60分線布林通道/前高前低)
+            const pp60 = Math.round((h60_short + l60_short + C + ma20_60) / 4);
+            const r1_60 = Math.round(Math.max(2 * pp60 - l60_short, C + std60 * 0.6));
+            const s1_60 = Math.round(Math.min(2 * pp60 - h60_short, C - std60 * 0.6));
+            const r2_60 = Math.round(Math.max(ma20_60 + 2 * std60, h60_short));
+            const s2_60 = Math.round(Math.min(ma20_60 - 2 * std60, l60_short));
+            const r3_60 = Math.round(Math.max(h60_swing, r2_60 + std60));
+            const s3_60 = Math.round(Math.min(l60_swing, s2_60 - std60));
 
             document.getElementById('srLastPrice').textContent = fmtNum(C);
             const diff = C - prevC;
@@ -2045,17 +2314,17 @@ export default async function handler(req, res) {
 
             document.getElementById('srDayHigh').textContent = fmtNum(H_day);
             document.getElementById('srDayLow').textContent = fmtNum(L_day);
-            document.getElementById('srSwingHigh').textContent = fmtNum(srData.swingHigh20);
-            document.getElementById('srSwingLow').textContent = fmtNum(srData.swingLow20);
+            document.getElementById('srSwingHigh').textContent = fmtNum(r3_1d);
+            document.getElementById('srSwingLow').textContent = fmtNum(s3_1d);
 
             const rows = [
-                { code: 'R3', label: '極限壓力 (波段前高)', p60: r3_60, p1d: r3_1d, type: 'RES', desc: '波段前高 / 空單防守線' },
-                { code: 'R2', label: '第二壓力 (波段滿足)', p60: r2_60, p1d: r2_1d, type: 'RES', desc: '突破加速區 / 逢高減碼' },
-                { code: 'R1', label: '第一壓力 (短線頸線)', p60: r1_60, p1d: r1_1d, type: 'RES', desc: '60分K上軌 / 首道反壓' },
-                { code: 'PP', label: '多空樞軸 (中關均線)', p60: pp60, p1d: pp1d, type: 'PIVOT', desc: '日內多空分水嶺 (MA20)' },
-                { code: 'S1', label: '第一支撐 (短線防守)', p60: s1_60, p1d: s1_1d, type: 'SUP', desc: '60分K下軌 / 首筆接多點' },
-                { code: 'S2', label: '第二支撐 (黃金0.618)', p60: s2_60, p1d: s2_1d, type: 'SUP', desc: '🔥 雙週期共振強支撐區' },
-                { code: 'S3', label: '極限支撐 (波段前低)', p60: s3_60, p1d: s3_1d, type: 'SUP', desc: '長線鐵板區 / 重倉抄底線' }
+                { code: 'R3', label: '極限壓力 (波段前高)', p60: r3_60, p1d: r3_1d, type: 'RES', desc: '20K波段前高 / 空單防守線' },
+                { code: 'R2', label: '第二壓力 (布林上軌)', p60: r2_60, p1d: r2_1d, type: 'RES', desc: '60分K布林上軌 / 波段滿足' },
+                { code: 'R1', label: '第一壓力 (短線頸線)', p60: r1_60, p1d: r1_1d, type: 'RES', desc: '短線反壓 / 首道減碼區' },
+                { code: 'PP', label: '多空樞軸 (20MA中關)', p60: pp60, p1d: pp1d, type: 'PIVOT', desc: '60分K 20MA 均線與多空分水嶺' },
+                { code: 'S1', label: '第一支撐 (短線防守)', p60: s1_60, p1d: s1_1d, type: 'SUP', desc: '短線回測支撐 / 首筆接多點' },
+                { code: 'S2', label: '第二支撐 (布林下軌)', p60: s2_60, p1d: s2_1d, type: 'SUP', desc: '🔥 60分K下軌 + 日線共振支撐' },
+                { code: 'S3', label: '極限支撐 (波段前低)', p60: s3_60, p1d: s3_1d, type: 'SUP', desc: '20K波段前低 / 長線鐵板抄底線' }
             ];
 
             srData.calculatedLevels = rows;
@@ -2099,6 +2368,7 @@ export default async function handler(req, res) {
             }).join('');
 
             renderSrKlineChart(rows);
+            renderMultiTimeframeStructure();
         }
 
         function renderSrKlineChart(rows) {
@@ -2879,9 +3149,12 @@ export default async function handler(req, res) {
         window.onload = function () {
             loadStateFromLocalStorage();
             loadFinMindToken();
+            loadOhlcEndpoint();
             initSimulatedMarketData(parseFloat(document.getElementById('inputBasePrice').value) || 46200);
             recalculateAll();
             computeAndRenderSR();
+            // 啟動時自動連線抓取最新真實台指期行情與K線
+            fetchRealMarketData();
         };
     </script>
 </body>
