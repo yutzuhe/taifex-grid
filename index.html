@@ -256,32 +256,32 @@
                     </div>
                 </div>
 
-                <!-- Plan B: Vercel Serverless + FinMind API Configuration Center -->
-                <details class="bg-amber-500/10 border border-amber-500/40 rounded-xl p-3 text-xs">
+                <!-- 方案 B：FinMind API & Vercel Serverless 後端設定與即時診斷中心 -->
+                <details open class="bg-amber-500/10 border border-amber-500/40 rounded-xl p-3 text-xs space-y-2.5">
                     <summary class="cursor-pointer font-bold text-amber-300 flex items-center justify-between">
-                        <span class="flex items-center gap-1.5">🚀 方案 B：FinMind 台指期 API / Vercel 後端設定 (100% 破除阻擋)</span>
-                        <span class="text-[10px] bg-amber-500/20 px-2 py-0.5 rounded border border-amber-500/40">點此設定 ▾</span>
+                        <span class="flex items-center gap-1.5">🚀 方案 B：台指近全 (WTXP&) 連線設定與即時診斷</span>
+                        <span id="planBStatusTag" class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-mono text-[10px]">點擊展開/收合 ▾</span>
                     </summary>
-                    <div class="mt-3 pt-3 border-t border-amber-500/20 space-y-3 text-slate-300">
-                        <p class="text-[11px] leading-relaxed text-slate-300">
-                            本系統已內建支援 <strong class="text-white">Vercel 後端路由 (<code class="text-amber-300">/api/quote</code>)</strong> 與 <strong class="text-white">FinMind 台灣期貨日夜盤資料庫 (<code class="text-amber-300">TaiwanFuturesDaily</code>)</strong>：
-                        </p>
-                        <div class="space-y-1.5">
-                            <label class="text-[11px] font-bold text-amber-400 block">
-                                🔑 填入 FinMind API Token (選填，免費註冊可大幅提升抓取額度)：
+                    <div class="pt-2 border-t border-amber-500/20 space-y-2.5">
+                        <div class="space-y-1">
+                            <label class="text-[11px] text-slate-300 font-medium block">
+                                FinMind API Token <span class="text-slate-400">(選填，填入可提高額度並抓取期交所日夜盤明細)</span>
                             </label>
-                            <div class="flex gap-2">
-                                <input id="inputFinMindToken" type="password" placeholder="貼上您的 FinMind Token (不填亦可走公開額度)" oninput="saveFinMindToken()" class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 font-mono text-xs text-white focus:outline-none focus:border-amber-400" />
+                            <div class="flex gap-1.5">
+                                <input id="inputFinMindToken" type="password" placeholder="貼上 FinMind Token (留空亦可直接抓鉅亨網台指近全 60分K)" oninput="saveFinMindToken()" class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 font-mono text-white text-xs focus:outline-none focus:border-amber-400" />
                                 <button onclick="fetchRealMarketData()" class="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition shrink-0">
                                     立即測試連線
                                 </button>
                             </div>
-                            <div class="text-[10px] text-slate-400 flex items-center justify-between pt-0.5">
-                                <span>免費申請網址：<a href="https://finmindtrade.com/analysis/#/account/login" target="_blank" class="text-sky-400 underline">finmindtrade.com</a></span>
-                                <button onclick="openVercelBackendModal()" class="text-amber-300 hover:text-amber-200 underline font-bold">
-                                    📄 查看/複製 Vercel 後端 api/quote.js 程式碼
-                                </button>
+                        </div>
+
+                        <!-- 連線診斷訊息框 -->
+                        <div class="bg-slate-950/90 border border-slate-800 rounded-lg p-2.5 font-mono text-[11px] text-slate-300 space-y-1">
+                            <div class="text-amber-400 font-bold flex items-center justify-between">
+                                <span>📡 即時抓取診斷日誌 (Debug Log)：</span>
+                                <button onclick="openVercelCodeModal()" class="text-sky-400 hover:underline text-[10px]">📄 複製 Vercel api/quote.js 後端代碼</button>
                             </div>
+                            <div id="srDiagnosticLog" class="text-slate-400 leading-relaxed whitespace-pre-wrap">等待點擊「抓取 WTXP& 行情」或「立即測試連線」...</div>
                         </div>
                     </div>
                 </details>
@@ -899,32 +899,20 @@
             </div>
         </div>
 
-        <!-- VERCEL BACKEND CODE MODAL (方案 B 後端腳本一鍵複製彈窗) -->
+        <!-- VERCEL API/QUOTE.JS CODE MODAL (方案 B 後端腳本彈窗) -->
         <div id="vercelCodeModal" class="fixed inset-0 z-50 hidden bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
-            <div class="card-glow rounded-2xl max-w-lg w-full p-5 space-y-4 border border-amber-500/40 shadow-2xl">
+            <div class="card-glow rounded-2xl max-w-lg w-full p-5 space-y-4 border border-sky-500/40 shadow-2xl">
                 <div class="flex items-center justify-between border-b border-borderCard pb-3">
-                    <div class="flex items-center gap-2">
-                        <span class="text-lg">🚀</span>
-                        <div>
-                            <h3 class="text-base font-bold text-white">Vercel 免費 Serverless 後端 (<code class="text-amber-400">api/quote.js</code>)</h3>
-                            <p class="text-[11px] text-slate-400">放在 GitHub 專案的 <code class="text-sky-300">api/quote.js</code>，徹底解除瀏覽器 CORS 限制</p>
-                        </div>
+                    <div>
+                        <h3 class="text-base font-bold text-white">📄 Vercel Serverless 後端程式碼 (<code class="text-amber-400">api/quote.js</code>)</h3>
+                        <p class="text-[11px] text-slate-400 mt-0.5">在 GitHub 專案新增 <code class="text-sky-300">api/quote.js</code> 並貼上此代碼，即可由雲端後端直連抓取台指近全 60分K 與日K</p>
                     </div>
-                    <button onclick="closeVercelBackendModal()" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center font-bold">
-                        ✕
-                    </button>
+                    <button onclick="closeVercelCodeModal()" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center font-bold">✕</button>
                 </div>
-
-                <textarea id="vercelCodeTextarea" readonly rows="13" class="w-full bg-bgInput border border-borderCard rounded-xl p-3.5 text-[11px] font-mono text-emerald-300 leading-relaxed focus:outline-none"></textarea>
-
+                <textarea id="vercelCodeTextarea" readonly rows="13" class="w-full bg-bgInput border border-borderCard rounded-xl p-3 text-[11px] font-mono text-sky-200 leading-relaxed focus:outline-none"></textarea>
                 <div class="flex items-center justify-end gap-2">
-                    <button onclick="closeVercelBackendModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition">
-                        關閉視窗
-                    </button>
-                    <button onclick="copyVercelBackendCode()" class="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-lg shadow-amber-500/25 transition active:scale-95 flex items-center gap-1.5">
-                        <span>📑</span>
-                        <span>複製 api/quote.js 程式碼</span>
-                    </button>
+                    <button onclick="closeVercelCodeModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition">關閉</button>
+                    <button onclick="copyVercelCodeText()" class="px-5 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs transition">📑 複製 api/quote.js 程式碼</button>
                 </div>
             </div>
         </div>
@@ -1123,6 +1111,7 @@
 
         const STORAGE_KEY_STATE = 'taifex_sim_pro_state_v3';
         const STORAGE_KEY_SCENARIOS = 'taifex_sim_pro_scenarios_v3';
+        const STORAGE_KEY_FINMIND_TOKEN = 'taifex_sim_finmind_token_v1';
 
         // App State
         let state = {
@@ -1222,73 +1211,10 @@
                     document.getElementById('inputMargin').value = s.depositedMargin || 1000000;
                     document.getElementById('inputCurrentPrice').value = s.currentPrice || 44200;
                 }
-                const savedToken = localStorage.getItem('taifex_finmind_token');
-                if (savedToken && document.getElementById('inputFinMindToken')) {
-                    document.getElementById('inputFinMindToken').value = savedToken;
-                }
             } catch (e) {
                 // Fallback to defaults
             }
             syncUIFromState();
-        }
-
-        function saveFinMindToken() {
-            try {
-                const token = (document.getElementById('inputFinMindToken')?.value || '').trim();
-                localStorage.setItem('taifex_finmind_token', token);
-            } catch (e) {}
-        }
-
-        function openVercelBackendModal() {
-            const backendCode = `// 檔案路徑：api/quote.js (部署於 Vercel 免費 Serverless Function)
-export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  if (req.method === 'OPTIONS') return res.status(200).end();
-
-  const token = req.query.token || process.env.FINMIND_TOKEN || '';
-
-  try {
-    // 1. 先抓取鉅亨網台指期近全 (含夜盤 WTXP&) 60分K連續資料
-    const cnyesRes = await fetch(
-      'https://ws.api.cnyes.com/ws/api/v1/charting/history?symbol=FUTURES:TXF1:FUTURES&resolution=60'
-    );
-    const cnyesJson = await cnyesRes.json();
-
-    // 2. 同時抓取 FinMind 台灣期交所台指期 (TX) 日夜盤歷史日K資料
-    const startDate = new Date(Date.now() - 45 * 86400000).toISOString().slice(0, 10);
-    const fmUrl = \`https://api.finmindtrade.com/api/v4/data?dataset=TaiwanFuturesDaily&data_id=TX&start_date=\${startDate}\${token ? \`&token=\${token}\` : ''}\`;
-    const fmRes = await fetch(fmUrl);
-    const fmJson = await fmRes.json();
-
-    return res.status(200).json({
-      ok: true,
-      source: 'Vercel Serverless (WTXP& 60m + FinMind TX 1D)',
-      cnyes60m: cnyesJson?.data || null,
-      finmindDaily: fmJson?.data || null
-    });
-  } catch (err) {
-    return res.status(500).json({ ok: false, error: err.message });
-  }
-}`;
-            document.getElementById('vercelCodeTextarea').value = backendCode;
-            document.getElementById('vercelCodeModal').classList.remove('hidden');
-        }
-
-        function closeVercelBackendModal() {
-            document.getElementById('vercelCodeModal').classList.add('hidden');
-        }
-
-        function copyVercelBackendCode() {
-            const textarea = document.getElementById('vercelCodeTextarea');
-            textarea.select();
-            textarea.setSelectionRange(0, 99999);
-            try {
-                document.execCommand('copy');
-                showToast('✅ 已複製 api/quote.js 後端程式碼！');
-            } catch (e) {
-                showToast('請手動全選複製');
-            }
         }
 
         function syncUIFromState() {
@@ -1656,168 +1582,397 @@ export default async function handler(req, res) {
             showToast('已重新生成 WTXP& 模擬 60分K 與 日K 走勢');
         }
 
+        function saveFinMindToken() {
+            try {
+                const token = (document.getElementById('inputFinMindToken').value || '').trim();
+                localStorage.setItem(STORAGE_KEY_FINMIND_TOKEN, token);
+            } catch (e) {}
+        }
+
+        function loadFinMindToken() {
+            try {
+                const token = localStorage.getItem(STORAGE_KEY_FINMIND_TOKEN) || '';
+                const el = document.getElementById('inputFinMindToken');
+                if (el) el.value = token;
+            } catch (e) {}
+        }
+
+        function appendDiagLog(msg) {
+            const logEl = document.getElementById('srDiagnosticLog');
+            if (!logEl) return;
+            const timeStr = new Date().toLocaleTimeString('zh-TW', { hour12: false });
+            logEl.textContent += `\n[${timeStr}] ${msg}`;
+        }
+
+        // 將 60分K 陣列聚合為日K陣列（若缺少獨立日K時使用）
+        function aggregate60mToDaily(klines60m) {
+            const daily = [];
+            const chunkSize = 5;
+            for (let i = 0; i < klines60m.length; i += chunkSize) {
+                const slice = klines60m.slice(i, i + chunkSize);
+                if (slice.length === 0) continue;
+                daily.push({
+                    open: slice[0].open,
+                    high: Math.max(...slice.map(k => k.high)),
+                    low: Math.min(...slice.map(k => k.low)),
+                    close: slice[slice.length - 1].close
+                });
+            }
+            return daily;
+        }
+
+        // 統一將抓到的真實 K 線與現價套用至畫面並同步網格基準價
+        function applyRealMarketPayload({ lastPrice, prevClose, dayHigh, dayLow, klines60m, klines1d, sourceName, dataDateStr }) {
+            srData.lastPrice = Math.round(lastPrice);
+            srData.prevClose = Math.round(prevClose || lastPrice);
+            srData.dayHigh = Math.round(Math.max(dayHigh || lastPrice, lastPrice));
+            srData.dayLow = Math.round(Math.min(dayLow || lastPrice, lastPrice));
+
+            const range = Math.max(150, srData.dayHigh - srData.dayLow);
+
+            if (Array.isArray(klines60m) && klines60m.length >= 6) {
+                srData.klines60m = klines60m.slice(-28);
+            } else {
+                srData.klines60m = generateKlinesSeries(srData.lastPrice, 28, Math.round(range * 0.35));
+            }
+
+            if (Array.isArray(klines1d) && klines1d.length >= 5) {
+                srData.klines1d = klines1d.slice(-28);
+            } else {
+                srData.klines1d = aggregate60mToDaily(srData.klines60m);
+            }
+
+            const highs1d = srData.klines1d.map(k => k.high);
+            const lows1d = srData.klines1d.map(k => k.low);
+            srData.swingHigh20 = Math.max(...highs1d, srData.dayHigh);
+            srData.swingLow20 = Math.min(...lows1d, srData.dayLow);
+
+            document.getElementById('manualSrClose').value = srData.lastPrice;
+            document.getElementById('manualSrPrevClose').value = srData.prevClose;
+            document.getElementById('manualSrHigh').value = srData.dayHigh;
+            document.getElementById('manualSrLow').value = srData.dayLow;
+
+            // 同步更新網格首頁的基準價與實盤現價
+            document.getElementById('inputBasePrice').value = srData.lastPrice;
+            document.getElementById('inputCurrentPrice').value = srData.lastPrice;
+
+            const statusEl = document.getElementById('srDataSourceStatus');
+            const tagEl = document.getElementById('planBStatusTag');
+            statusEl.textContent = `✅ 已同步 ${sourceName} 最新行情：${fmtNum(srData.lastPrice)} 點 (${dataDateStr || new Date().toLocaleTimeString()})`;
+            if (tagEl) tagEl.textContent = `✅ 已連線 (${sourceName})`;
+
+            computeAndRenderSR();
+            recalculateAll();
+            showToast(`✅ 已更新台指近全最新點位：${fmtNum(srData.lastPrice)} 點`);
+        }
+
+        // 核心抓取函式 (修正先前重複定義覆蓋的 Bug，整合 Vercel 後端 + 鉅亨網 TXF1 即時 60分K + FinMind 主力合約)
         async function fetchRealMarketData() {
             const icon = document.getElementById('srSyncIcon');
             const statusEl = document.getElementById('srDataSourceStatus');
+            const logEl = document.getElementById('srDiagnosticLog');
             const token = (document.getElementById('inputFinMindToken')?.value || '').trim();
+
             icon.classList.add('rotate-180');
-            statusEl.textContent = '正在透過方案 B (Vercel /api/quote 與 FinMind API) 抓取台指近全 WTXP&...';
+            statusEl.textContent = '正在連線抓取台指近全 (WTXP&) 最新報價與 60分K/日K...';
+            if (logEl) logEl.textContent = '🚀 開始執行方案 B 台指近全 (WTXP&) 多重資料源抓取...';
 
-            const applyFullMarketData = (lastPrice, prevClose, dayHigh, dayLow, k60, k1d, sourceName) => {
-                srData.lastPrice = Math.round(lastPrice);
-                srData.prevClose = Math.round(prevClose || lastPrice * 0.996);
-                srData.dayHigh = Math.round(Math.max(dayHigh || lastPrice, lastPrice));
-                srData.dayLow = Math.round(Math.min(dayLow || lastPrice, lastPrice));
-
-                const range = Math.max(180, srData.dayHigh - srData.dayLow);
-                srData.klines60m = (k60 && k60.length >= 8)
-                    ? k60.slice(-28)
-                    : generateKlinesSeries(srData.lastPrice, 28, Math.round(range * 0.38));
-                srData.klines1d = (k1d && k1d.length >= 8)
-                    ? k1d.slice(-28)
-                    : generateKlinesSeries(srData.lastPrice, 28, Math.round(range * 0.85));
-
-                const all1dHighs = srData.klines1d.map(k => k.high);
-                const all1dLows = srData.klines1d.map(k => k.low);
-                srData.swingHigh20 = Math.max(...all1dHighs, srData.dayHigh);
-                srData.swingLow20 = Math.min(...all1dLows, srData.dayLow);
-
-                document.getElementById('manualSrClose').value = srData.lastPrice;
-                document.getElementById('manualSrPrevClose').value = srData.prevClose;
-                document.getElementById('manualSrHigh').value = srData.dayHigh;
-                document.getElementById('manualSrLow').value = srData.dayLow;
-                // 同步更新首頁基準價預設顯示參考
-                statusEl.textContent = `✅ 已同步 ${sourceName} (${new Date().toLocaleTimeString()})`;
-                computeAndRenderSR();
-                showToast(`已成功抓取 WTXP&：${fmtNum(srData.lastPrice)} 點 (${sourceName})`);
-                setTimeout(() => icon.classList.remove('rotate-180'), 500);
-            };
-
-            // 輔助：將 FinMind TaiwanFuturesDaily 原始資料整理成近月含夜盤日K序列
-            const parseFinMindRows = (rows) => {
-                if (!Array.isArray(rows) || rows.length === 0) return null;
-                // 篩選一般與盤後交易且成交量大的近月合約
-                const validRows = rows.filter(r => r.close > 10000 && r.high > 10000 && r.low > 10000 && (!r.spread));
-                if (validRows.length === 0) return null;
-
-                // 依日期分組，合併同一天日盤+夜盤(after_market)的全盤高低收
-                const byDate = {};
-                validRows.forEach(r => {
-                    const d = r.date;
-                    if (!byDate[d]) {
-                        byDate[d] = [];
-                    }
-                    byDate[d].push(r);
-                });
-
-                const dates = Object.keys(byDate).sort();
-                const dailyKlines = [];
-                dates.forEach(d => {
-                    const dayItems = byDate[d];
-                    // 找出當日成交量最大的主力近月合約月份
-                    dayItems.sort((a, b) => (b.volume || 0) - (a.volume || 0));
-                    const mainContractMonth = dayItems[0].contract_date;
-                    const mainSessions = dayItems.filter(x => x.contract_date === mainContractMonth);
-
-                    const regular = mainSessions.find(x => x.trading_session === 'position') || mainSessions[0];
-                    const afterHr = mainSessions.find(x => x.trading_session === 'after_market');
-
-                    const high = Math.max(...mainSessions.map(x => Number(x.max || x.high || x.close)));
-                    const low = Math.min(...mainSessions.map(x => Number(x.min || x.low || x.close)));
-                    const open = Number((afterHr ? afterHr.open : regular.open) || regular.close);
-                    const close = Number(regular.close);
-
-                    dailyKlines.push({ date: d, open: Math.round(open), high: Math.round(high), low: Math.round(low), close: Math.round(close) });
-                });
-                return dailyKlines;
-            };
-
-            // 引擎 1：優先呼叫您部署在 Vercel 上的無伺服器後端 `/api/quote`
+            // 【通道 1】優先呼叫同網域 Vercel Serverless 後端 /api/quote (若已部署 api/quote.js)
             try {
+                appendDiagLog('1️⃣ 嘗試連線 Vercel 後端 /api/quote ...');
                 const resVercel = await fetch(`/api/quote${token ? `?token=${encodeURIComponent(token)}` : ''}`, { cache: 'no-store' });
                 if (resVercel.ok) {
-                    const vData = await resVercel.json();
-                    if (vData && vData.ok) {
-                        let k60 = [];
-                        if (vData.cnyes60m && Array.isArray(vData.cnyes60m.c)) {
-                            const { o, h, l, c } = vData.cnyes60m;
-                            for (let i = 0; i < c.length; i++) {
-                                if (c[i] > 10000) {
-                                    k60.push({ open: Math.round(o[i]), high: Math.round(h[i]), low: Math.round(l[i]), close: Math.round(c[i]) });
-                                }
-                            }
-                        }
-                        const k1d = parseFinMindRows(vData.finmindDaily) || [];
-                        if (k60.length > 0 || k1d.length > 0) {
-                            const latestK = k60.length > 0 ? k60[k60.length - 1] : k1d[k1d.length - 1];
-                            const prevK = k1d.length > 1 ? k1d[k1d.length - 2] : latestK;
-                            const recent60 = k60.slice(-14);
-                            const high = recent60.length > 0 ? Math.max(...recent60.map(x => x.high)) : latestK.high;
-                            const low = recent60.length > 0 ? Math.min(...recent60.map(x => x.low)) : latestK.low;
-                            applyFullMarketData(latestK.close, prevK.close, high, low, k60, k1d, 'Vercel 後端 WTXP&');
+                    const contentType = resVercel.headers.get('content-type') || '';
+                    if (contentType.includes('application/json')) {
+                        const vData = await resVercel.json();
+                        if (vData && vData.ok && vData.lastPrice > 5000) {
+                            appendDiagLog(`✅ Vercel 後端成功回傳！現價: ${vData.lastPrice} (${vData.source})`);
+                            applyRealMarketPayload({
+                                lastPrice: vData.lastPrice,
+                                prevClose: vData.prevClose,
+                                dayHigh: vData.dayHigh,
+                                dayLow: vData.dayLow,
+                                klines60m: vData.klines60m,
+                                klines1d: vData.klines1d,
+                                sourceName: vData.source || 'Vercel /api/quote',
+                                dataDateStr: vData.updatedAt
+                            });
+                            setTimeout(() => icon.classList.remove('rotate-180'), 500);
                             return;
                         }
                     }
                 }
+                appendDiagLog('ℹ️ 未偵測到 /api/quote 後端 (或目前在預覽環境)，自動切換至前端直連引擎...');
             } catch (e) {
-                // 若目前在預覽視窗尚未部署 `/api/quote`，自動進入引擎 2 直接連線 FinMind
+                appendDiagLog('ℹ️ 略過 /api/quote，改由前端直連台指近全 API...');
             }
 
-            // 引擎 2：前端直接連線 FinMind 官方 CORS API (TaiwanFuturesDaily 台指期 TX 含夜盤)
+            // 【通道 2】鉅亨網 (cnyes) 台指期近全連續合約 API (FUTURES:TXF1:FUTURES，真正包含日盤+夜盤即時 60分K 與日K)
             try {
-                const startDate = new Date(Date.now() - 45 * 86400000).toISOString().slice(0, 10);
-                const fmUrl = `https://api.finmindtrade.com/api/v4/data?dataset=TaiwanFuturesDaily&data_id=TX&start_date=${startDate}${token ? `&token=${encodeURIComponent(token)}` : ''}`;
-                const fmRes = await fetch(fmUrl);
-                if (fmRes.ok) {
-                    const fmJson = await fmRes.json();
-                    const k1d = parseFinMindRows(fmJson.data);
-                    if (k1d && k1d.length >= 5) {
-                        const latest = k1d[k1d.length - 1];
-                        const prev = k1d[k1d.length - 2];
-                        const range = Math.max(150, latest.high - latest.low);
-                        const k60 = generateKlinesSeries(latest.close, 28, Math.round(range * 0.35));
-                        applyFullMarketData(latest.close, prev.close, latest.high, latest.low, k60, k1d, `FinMind 台指全盤 (${latest.date})`);
+                appendDiagLog('2️⃣ 嘗試抓取鉅亨網台指期近全 (FUTURES:TXF1:FUTURES) 即時 60分K 與日K...');
+                const url60m = 'https://ws.api.cnyes.com/ws/api/v1/charting/history?symbol=FUTURES:TXF1:FUTURES&resolution=60';
+                const url1d = 'https://ws.api.cnyes.com/ws/api/v1/charting/history?symbol=FUTURES:TXF1:FUTURES&resolution=D';
+
+                // 同時支援直接連線或公開 CORS Proxy 轉發
+                const fetchWithFallback = async (targetUrl) => {
+                    try {
+                        const directRes = await fetch(targetUrl, { cache: 'no-store' });
+                        if (directRes.ok) return await directRes.json();
+                    } catch (_) {}
+                    try {
+                        const proxy1 = await fetch(`https://corsproxy.io/?${encodeURIComponent(targetUrl)}`, { cache: 'no-store' });
+                        if (proxy1.ok) return await proxy1.json();
+                    } catch (_) {}
+                    const proxy2 = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`, { cache: 'no-store' });
+                    if (proxy2.ok) return await proxy2.json();
+                    throw new Error('Proxy failed');
+                };
+
+                const [json60, json1d] = await Promise.all([
+                    fetchWithFallback(url60m),
+                    fetchWithFallback(url1d).catch(() => null)
+                ]);
+
+                if (json60 && json60.data && Array.isArray(json60.data.c) && json60.data.c.length > 5) {
+                    const { o, h, l, c, t } = json60.data;
+                    const klines60m = [];
+                    // 鉅亨網回傳的時間陣列通常為由新到舊或由舊到新，先依時間戳 t 排序確保由舊到新
+                    const pairs = [];
+                    for (let i = 0; i < c.length; i++) {
+                        if (c[i] > 5000 && o[i] > 5000) {
+                            pairs.push({
+                                time: t ? t[i] : i,
+                                open: Math.round(o[i]),
+                                high: Math.round(h[i]),
+                                low: Math.round(l[i]),
+                                close: Math.round(c[i])
+                            });
+                        }
+                    }
+                    pairs.sort((a, b) => a.time - b.time);
+                    pairs.forEach(p => klines60m.push(p));
+
+                    let klines1d = [];
+                    if (json1d && json1d.data && Array.isArray(json1d.data.c)) {
+                        const dPairs = [];
+                        for (let i = 0; i < json1d.data.c.length; i++) {
+                            if (json1d.data.c[i] > 5000) {
+                                dPairs.push({
+                                    time: json1d.data.t ? json1d.data.t[i] : i,
+                                    open: Math.round(json1d.data.o[i]),
+                                    high: Math.round(json1d.data.h[i]),
+                                    low: Math.round(json1d.data.l[i]),
+                                    close: Math.round(json1d.data.c[i])
+                                });
+                            }
+                        }
+                        dPairs.sort((a, b) => a.time - b.time);
+                        klines1d = dPairs;
+                    }
+
+                    if (klines60m.length >= 5) {
+                        const latestBar = klines60m[klines60m.length - 1];
+                        const recentSessionBars = klines60m.slice(-19); // 台指近全 日盤5小時+夜盤14小時=19根60分K
+                        const sessionHigh = Math.max(...recentSessionBars.map(k => k.high));
+                        const sessionLow = Math.min(...recentSessionBars.map(k => k.low));
+                        const prevDayClose = klines1d.length >= 2
+                            ? klines1d[klines1d.length - 2].close
+                            : klines60m[Math.max(0, klines60m.length - 15)].close;
+
+                        const barTimeStr = latestBar.time > 1000000
+                            ? new Date(latestBar.time * 1000).toLocaleString('zh-TW', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false })
+                            : '最新K棒';
+
+                        appendDiagLog(`✅ 成功抓到台指近全 (TXF1) 60分K！最新價: ${latestBar.close} 點 (K棒時間: ${barTimeStr})`);
+                        applyRealMarketPayload({
+                            lastPrice: latestBar.close,
+                            prevClose: prevDayClose,
+                            dayHigh: sessionHigh,
+                            dayLow: sessionLow,
+                            klines60m,
+                            klines1d,
+                            sourceName: '台指近全 (TXF1 60分K+日K)',
+                            dataDateStr: barTimeStr
+                        });
+                        setTimeout(() => icon.classList.remove('rotate-180'), 500);
                         return;
                     }
                 }
             } catch (e) {
-                // 繼續嘗試引擎 3
+                appendDiagLog(`⚠️ 鉅亨網即時 60分K 連線受阻 (${e.message})，改由 FinMind 官方 API 抓取...`);
             }
 
-            // 引擎 3：公開代理抓取鉅亨網台指近全連續 60分K (FUTURES:TXF1:FUTURES)
+            // 【通道 3】FinMind 官方期貨 API (直接支援 CORS，針對近月主力合約與日夜盤合併進行精準過濾)
             try {
-                const cnyesUrl = encodeURIComponent('https://ws.api.cnyes.com/ws/api/v1/charting/history?symbol=FUTURES:TXF1:FUTURES&resolution=60');
-                const resCn = await fetch(`https://corsproxy.io/?${cnyesUrl}`);
-                if (resCn.ok) {
-                    const cnData = await resCn.json();
-                    if (cnData && cnData.data && Array.isArray(cnData.data.c) && cnData.data.c.length > 5) {
-                        const { o, h, l, c } = cnData.data;
-                        const k60 = [];
-                        for (let i = 0; i < c.length; i++) {
-                            if (c[i] > 10000) {
-                                k60.push({ open: Math.round(o[i]), high: Math.round(h[i]), low: Math.round(l[i]), close: Math.round(c[i]) });
-                            }
-                        }
-                        if (k60.length > 0) {
-                            const latest = k60[k60.length - 1];
-                            const prev = k60[Math.max(0, k60.length - 15)];
-                            const recentSlice = k60.slice(-14);
-                            const maxH = Math.max(...recentSlice.map(k => k.high));
-                            const minL = Math.min(...recentSlice.map(k => k.low));
-                            applyFullMarketData(latest.close, prev.close, maxH, minL, k60, null, '台指近全 60分K (WTXP&)');
-                            return;
-                        }
-                    }
-                }
-            } catch (e) {}
+                appendDiagLog('3️⃣ 正在向 FinMind 官方 API 查詢 TaiwanFuturesDaily (TX 台指期)...');
+                const startDate = new Date(Date.now() - 40 * 86400000).toISOString().slice(0, 10);
+                let fmUrl = `https://api.finmindtrade.com/api/v4/data?dataset=TaiwanFuturesDaily&data_id=TX&start_date=${startDate}`;
+                if (token) fmUrl += `&token=${encodeURIComponent(token)}`;
 
-            // 保底機制
-            const base = parseFloat(document.getElementById('inputBasePrice').value) || 46200;
-            initSimulatedMarketData(base);
-            statusEl.textContent = `⚡ 預覽沙盒連線受限，請展開下方「🚀 方案 B 設定」填入 FinMind Token 或部署至 Vercel`;
-            computeAndRenderSR();
-            showToast(`請展開「方案 B 設定」填入 FinMind Token 或部署至 Vercel`);
+                const fmRes = await fetch(fmUrl, { cache: 'no-store' });
+                const fmJson = await fmRes.json();
+
+                if (fmJson && fmJson.msg === 'success' && Array.isArray(fmJson.data) && fmJson.data.length > 0) {
+                    // 排除跨月價差單 (contract_date 含有 '/' 的資料) 並排除無成交價(close <= 0)的資料
+                    const cleanRows = fmJson.data.filter(r =>
+                        r.contract_date &&
+                        !String(r.contract_date).includes('/') &&
+                        Number(r.close) > 5000 &&
+                        Number(r.volume) > 0
+                    );
+
+                    // 依日期分組，每天只挑出「成交量最大」的主力近月合約，並合併該合約的日盤(position)與夜盤(after_market)
+                    const byDate = {};
+                    cleanRows.forEach(r => {
+                        if (!byDate[r.date]) byDate[r.date] = [];
+                        byDate[r.date].push(r);
+                    });
+
+                    const dates = Object.keys(byDate).sort();
+                    const dailyKlines = [];
+
+                    dates.forEach(d => {
+                        const rowsOfDay = byDate[d];
+                        // 找出當天各 contract_date 的總量，選出主力近月合約月份
+                        const volByContract = {};
+                        rowsOfDay.forEach(r => {
+                            volByContract[r.contract_date] = (volByContract[r.contract_date] || 0) + Number(r.volume || 0);
+                        });
+                        const mainContract = Object.keys(volByContract).sort((a, b) => volByContract[b] - volByContract[a])[0];
+                        const mainRows = rowsOfDay.filter(r => r.contract_date === mainContract);
+
+                        const afterMarketRow = mainRows.find(r => r.trading_session === 'after_market');
+                        const regularRow = mainRows.find(r => r.trading_session === 'position') || mainRows[0];
+
+                        const openPrice = afterMarketRow && Number(afterMarketRow.open) > 5000
+                            ? Number(afterMarketRow.open)
+                            : Number(regularRow.open);
+                        const closePrice = Number(regularRow.close);
+                        const highPrice = Math.max(...mainRows.map(r => Number(r.max || r.close)));
+                        const lowPrice = Math.min(...mainRows.filter(r => Number(r.min) > 5000).map(r => Number(r.min)));
+
+                        dailyKlines.push({
+                            date: d,
+                            contract: mainContract,
+                            open: Math.round(openPrice),
+                            high: Math.round(highPrice),
+                            low: Math.round(lowPrice),
+                            close: Math.round(closePrice)
+                        });
+                    });
+
+                    if (dailyKlines.length >= 2) {
+                        const latestDay = dailyKlines[dailyKlines.length - 1];
+                        const prevDay = dailyKlines[dailyKlines.length - 2];
+                        const range = Math.max(150, latestDay.high - latestDay.low);
+                        const synth60m = generateKlinesSeries(latestDay.close, 28, Math.round(range * 0.35));
+
+                        appendDiagLog(`✅ FinMind 抓取成功！近月主力合約: ${latestDay.contract} | 日期: ${latestDay.date} | 收盤: ${latestDay.close} (全盤高:${latestDay.high} / 低:${latestDay.low})`);
+                        appendDiagLog(`💡 提醒：FinMind 日資料表為收盤結算後更新；若需盤中即時分K，建議在 Vercel 部署下方 api/quote.js 後端。`);
+
+                        applyRealMarketPayload({
+                            lastPrice: latestDay.close,
+                            prevClose: prevDay.close,
+                            dayHigh: latestDay.high,
+                            dayLow: latestDay.low,
+                            klines60m: synth60m,
+                            klines1d: dailyKlines,
+                            sourceName: `FinMind 台指期 (${latestDay.contract})`,
+                            dataDateStr: latestDay.date
+                        });
+                        setTimeout(() => icon.classList.remove('rotate-180'), 500);
+                        return;
+                    }
+                } else {
+                    appendDiagLog(`⚠️ FinMind 回應：${fmJson?.msg || '無資料'}`);
+                }
+            } catch (err) {
+                appendDiagLog(`❌ FinMind 連線發生錯誤：${err.message}`);
+            }
+
+            appendDiagLog(`⚠️ 所有外部接口目前受限或休市中，已維持目前點位設定。您可展開下方「手動校正」直接輸入看盤點位。`);
+            statusEl.textContent = `⚠️ 外部連線受阻，請查看上方診斷日誌或手動輸入點位`;
             setTimeout(() => icon.classList.remove('rotate-180'), 500);
+        }
+
+        // Vercel Serverless Function (api/quote.js) 完整程式碼產生器
+        function getVercelBackendCodeString() {
+            return `// 檔案路徑：api/quote.js (放置於 GitHub 專案的 api 資料夾下，Vercel 會自動部署為後端 API)
+export default async function handler(req, res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Cache-Control', 'no-store, max-age=0');
+
+  try {
+    // 1. 直接從 Vercel 伺服器抓取台指近全 (FUTURES:TXF1:FUTURES) 60分K 與 日K (含日盤+夜盤即時報價)
+    const url60m = 'https://ws.api.cnyes.com/ws/api/v1/charting/history?symbol=FUTURES:TXF1:FUTURES&resolution=60';
+    const url1d  = 'https://ws.api.cnyes.com/ws/api/v1/charting/history?symbol=FUTURES:TXF1:FUTURES&resolution=D';
+
+    const [r60, r1d] = await Promise.all([fetch(url60m), fetch(url1d)]);
+    const j60 = await r60.json();
+    const j1d = await r1d.json();
+
+    if (j60?.data?.c?.length > 5) {
+      const { o, h, l, c, t } = j60.data;
+      const klines60m = c.map(( val, i ) => ({
+        time: t ? t[i] : i,
+        open: Math.round(o[i]),
+        high: Math.round(h[i]),
+        low: Math.round(l[i]),
+        close: Math.round(val)
+      })).filter(k => k.close > 5000).sort((a, b) => a.time - b.time);
+
+      const klines1d = (j1d?.data?.c || []).map((val, i) => ({
+        time: j1d.data.t ? j1d.data.t[i] : i,
+        open: Math.round(j1d.data.o[i]),
+        high: Math.round(j1d.data.h[i]),
+        low: Math.round(j1d.data.l[i]),
+        close: Math.round(val)
+      })).filter(k => k.close > 5000).sort((a, b) => a.time - b.time);
+
+      const latest = klines60m[klines60m.length - 1];
+      const recent19 = klines60m.slice(-19);
+      const dayHigh = Math.max(...recent19.map(k => k.high));
+      const dayLow  = Math.min(...recent19.map(k => k.low));
+      const prevClose = klines1d.length >= 2 ? klines1d[klines1d.length - 2].close : klines60m[0].close;
+
+      return res.status(200).json({
+        ok: true,
+        source: 'Vercel 後端直連 (WTXP& 60分K+日K)',
+        updatedAt: new Date().toLocaleTimeString('zh-TW', { hour12: false }),
+        lastPrice: latest.close,
+        prevClose,
+        dayHigh,
+        dayLow,
+        klines60m: klines60m.slice(-28),
+        klines1d: klines1d.slice(-28)
+      });
+    }
+    throw new Error('Empty cnyes data');
+  } catch (err) {
+    return res.status(500).json({ ok: false, error: err.message });
+  }
+}`;
+        }
+
+        function openVercelCodeModal() {
+            document.getElementById('vercelCodeTextarea').value = getVercelBackendCodeString();
+            document.getElementById('vercelCodeModal').classList.remove('hidden');
+        }
+
+        function closeVercelCodeModal() {
+            document.getElementById('vercelCodeModal').classList.add('hidden');
+        }
+
+        function copyVercelCodeText() {
+            const textarea = document.getElementById('vercelCodeTextarea');
+            textarea.select();
+            textarea.setSelectionRange(0, 99999);
+            try {
+                document.execCommand('copy');
+                showToast('✅ 已複製 api/quote.js 後端程式碼！');
+            } catch (e) {
+                showToast('請手動全選複製');
+            }
         }
 
         function onManualSrInput() {
@@ -2723,6 +2878,7 @@ export default async function handler(req, res) {
         // Initial Render on Load
         window.onload = function () {
             loadStateFromLocalStorage();
+            loadFinMindToken();
             initSimulatedMarketData(parseFloat(document.getElementById('inputBasePrice').value) || 46200);
             recalculateAll();
             computeAndRenderSR();
