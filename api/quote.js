@@ -1,30 +1,54 @@
-// 檔案路徑：api/quote.js (部署於 Vercel 免費 Serverless Function)
+// 檔案路徑：api/quote.js (放置於 GitHub 專案的 api 資料夾下，Vercel 會自動部署為後端 API)
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  if (req.method === 'OPTIONS') return res.status(200).end();
-
-  const token = req.query.token || process.env.FINMIND_TOKEN || '';
+  res.setHeader('Cache-Control', 'no-store, max-age=0');
 
   try {
-    // 1. 先抓取鉅亨網台指期近全 (含夜盤 WTXP&) 60分K連續資料
-    const cnyesRes = await fetch(
-      'https://ws.api.cnyes.com/ws/api/v1/charting/history?symbol=FUTURES:TXF1:FUTURES&resolution=60'
-    );
-    const cnyesJson = await cnyesRes.json();
+    // 1. 直接從 Vercel 伺服器抓取台指近全 (FUTURES:TXF1:FUTURES) 60分K 與 日K (含日盤+夜盤即時報價)
+    const url60m = 'https://ws.api.cnyes.com/ws/api/v1/charting/history?symbol=FUTURES:TXF1:FUTURES&resolution=60';
+    const url1d  = 'https://ws.api.cnyes.com/ws/api/v1/charting/history?symbol=FUTURES:TXF1:FUTURES&resolution=D';
 
-    // 2. 同時抓取 FinMind 台灣期交所台指期 (TX) 日夜盤歷史日K資料
-    const startDate = new Date(Date.now() - 45 * 86400000).toISOString().slice(0, 10);
-    const fmUrl = `https://api.finmindtrade.com/api/v4/data?dataset=TaiwanFuturesDaily&data_id=TX&start_date=${startDate}${token ? `&token=${token}` : ''}`;
-    const fmRes = await fetch(fmUrl);
-    const fmJson = await fmRes.json();
+    const [r60, r1d] = await Promise.all([fetch(url60m), fetch(url1d)]);
+    const j60 = await r60.json();
+    const j1d = await r1d.json();
 
-    return res.status(200).json({
-      ok: true,
-      source: 'Vercel Serverless (WTXP& 60m + FinMind TX 1D)',
-      cnyes60m: cnyesJson?.data || null,
-      finmindDaily: fmJson?.data || null
-    });
+    if (j60?.data?.c?.length > 5) {
+      const { o, h, l, c, t } = j60.data;
+      const klines60m = c.map(( val, i ) => ({
+        time: t ? t[i] : i,
+        open: Math.round(o[i]),
+        high: Math.round(h[i]),
+        low: Math.round(l[i]),
+        close: Math.round(val)
+      })).filter(k => k.close > 5000).sort((a, b) => a.time - b.time);
+
+      const klines1d = (j1d?.data?.c || []).map((val, i) => ({
+        time: j1d.data.t ? j1d.data.t[i] : i,
+        open: Math.round(j1d.data.o[i]),
+        high: Math.round(j1d.data.h[i]),
+        low: Math.round(j1d.data.l[i]),
+        close: Math.round(val)
+      })).filter(k => k.close > 5000).sort((a, b) => a.time - b.time);
+
+      const latest = klines60m[klines60m.length - 1];
+      const recent19 = klines60m.slice(-19);
+      const dayHigh = Math.max(...recent19.map(k => k.high));
+      const dayLow  = Math.min(...recent19.map(k => k.low));
+      const prevClose = klines1d.length >= 2 ? klines1d[klines1d.length - 2].close : klines60m[0].close;
+
+      return res.status(200).json({
+        ok: true,
+        source: 'Vercel 後端直連 (WTXP& 60分K+日K)',
+        updatedAt: new Date().toLocaleTimeString('zh-TW', { hour12: false }),
+        lastPrice: latest.close,
+        prevClose,
+        dayHigh,
+        dayLow,
+        klines60m: klines60m.slice(-28),
+        klines1d: klines1d.slice(-28)
+      });
+    }
+    throw new Error('Empty cnyes data');
   } catch (err) {
     return res.status(500).json({ ok: false, error: err.message });
   }
