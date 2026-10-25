@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>台指風控儀 TAIFEX - 網格倉位數據設定與風險分析</title>
+    <title>台指模擬器 TAIFEX — 部位試算・網格策略・風險視覺化</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
     
     <script>
         tailwind.config = {
@@ -70,7 +70,7 @@
             -moz-appearance: textfield;
         }
         .card-glow {
-            background: linear-gradient(180deg, rgba(22, 29, 47, 0.9) 0%, rgba(15, 20, 34, 0.95) 100%);
+            background: linear-gradient(180deg, rgba(22, 29, 47, 0.92) 0%, rgba(15, 20, 34, 0.96) 100%);
             border: 1px solid #1e273d;
             box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
         }
@@ -80,6 +80,33 @@
         }
         .table-row-last {
             background: linear-gradient(90deg, rgba(245, 158, 11, 0.14) 0%, rgba(239, 68, 68, 0.08) 100%);
+        }
+        .table-row-active-spot {
+            background: linear-gradient(90deg, rgba(56, 189, 248, 0.18) 0%, rgba(16, 185, 129, 0.08) 100%);
+            box-shadow: inset 3px 0 0 #38bdf8;
+        }
+        /* Range Slider Styling */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            background: transparent;
+            cursor: pointer;
+        }
+        input[type="range"]::-webkit-slider-runnable-track {
+            background: #1e273d;
+            height: 6px;
+            border-radius: 999px;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            margin-top: -5px;
+            background-color: #38bdf8;
+            height: 16px;
+            width: 16px;
+            border-radius: 999px;
+            border: 2px solid #080b12;
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.6);
         }
     </style>
 </head>
@@ -98,13 +125,13 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="text-base sm:text-lg font-extrabold tracking-tight text-white">
-                            台指<span class="text-amber-400">風控儀</span>
+                            台指<span class="text-amber-400">模擬器</span>
                         </h1>
                         <span class="px-1.5 py-0.5 text-[10px] font-mono font-semibold bg-slate-800 text-slate-300 border border-slate-700 rounded">
                             TAIFEX
                         </span>
                     </div>
-                    <p class="text-[11px] text-slate-400 tracking-wide">部位試算 · 網格策略 · 風險視覺化</p>
+                    <p class="text-[11px] text-slate-400 tracking-wide">部位試算・支撐壓力・網格策略</p>
                 </div>
             </div>
 
@@ -123,13 +150,13 @@
     <!-- Toast Notification -->
     <div id="toastMsg" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 transition-all duration-300 transform -translate-y-2 bg-slate-800/95 border border-amber-500/40 text-amber-300 px-4 py-2 rounded-full text-xs font-medium shadow-xl flex items-center gap-2">
         <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
-        <span id="toastText">已更新最新基準行情</span>
+        <span id="toastText">已更新模擬基準行情</span>
     </div>
 
     <!-- Main Container -->
     <main class="max-w-xl mx-auto px-3 sm:px-4 pt-4 space-y-4">
 
-        <!-- TAB VIEW 1: 風險雷達 (Quick Summary Radar View when clicked on bottom bar) -->
+        <!-- TAB VIEW 1: 風險雷達 -->
         <section id="viewRadar" class="hidden space-y-4">
             <div class="card-glow rounded-2xl p-5">
                 <div class="flex items-center justify-between mb-4">
@@ -151,8 +178,8 @@
                 <div class="grid grid-cols-2 gap-3 mb-4">
                     <div class="bg-bgInput border border-borderCard rounded-xl p-3.5">
                         <span class="text-xs text-slate-400 block mb-1">滿倉總合約價值</span>
-                        <span id="radarTotalNotional" class="text-base sm:text-lg font-mono font-bold text-white">NT$ 2,668,050</span>
-                        <span id="radarMaxLeverage" class="text-[11px] text-amber-400 block mt-0.5">滿倉真實槓桿 2.7x</span>
+                        <span id="radarTotalNotional" class="text-base sm:text-lg font-mono font-bold text-white">NT$ 2,633,400</span>
+                        <span id="radarMaxLeverage" class="text-[11px] text-amber-400 block mt-0.5">滿倉真實槓桿 3.0x</span>
                     </div>
                     <div class="bg-bgInput border border-borderCard rounded-xl p-3.5">
                         <span class="text-xs text-slate-400 block mb-1">滿倉所需原始保證金</span>
@@ -166,8 +193,8 @@
                     </div>
                     <div class="bg-bgInput border border-borderCard rounded-xl p-3.5">
                         <span class="text-xs text-slate-400 block mb-1">耐受最大極端震幅</span>
-                        <span id="radarMaxDropPct" class="text-base sm:text-lg font-mono font-bold text-emerald-400">-37.9%</span>
-                        <span id="radarMaxDropPts" class="text-[11px] text-slate-400 block mt-0.5">自起點可抗 17,523 點</span>
+                        <span id="radarMaxDropPct" class="text-base sm:text-lg font-mono font-bold text-emerald-400">-39.2%</span>
+                        <span id="radarMaxDropPts" class="text-[11px] text-slate-400 block mt-0.5">自起點可抗 18,100 點</span>
                     </div>
                 </div>
 
@@ -176,8 +203,169 @@
                         <span>💡</span> 風控官智能建議：
                     </div>
                     <p id="radarAdviceText">
-                        目前您的滿倉槓桿控制在 3 倍以內，即使加滿全部網格，距離斷頭價仍有充裕的安全緩衝空間。
+                        目前您的滿倉槓桿控制在安全範圍內，即使加滿全部網格，距離斷頭價仍有充裕的安全緩衝空間。
                     </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB VIEW 1.5: 台指近全 60分K & 日K 支撐壓力雷達 -->
+        <section id="viewSR" class="hidden space-y-4">
+            <!-- Top Quote & Sync Card -->
+            <div class="card-glow rounded-2xl p-4 sm:p-5 space-y-3.5">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#10b981]"></span>
+                        <div>
+                            <div class="flex items-center gap-1.5">
+                                <h2 class="text-sm sm:text-base font-bold text-white">台指近全 (WTXP&) 支撐壓力雷達</h2>
+                                <span class="px-1.5 py-0.5 text-[10px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 rounded">含夜盤全時段</span>
+                            </div>
+                            <p id="srDataSourceStatus" class="text-[11px] text-slate-400">WTXP& 60分線 + 日線 雙週期關鍵價位自動運算</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <button onclick="fetchRealMarketData()" class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-bold transition active:scale-95">
+                            <svg id="srSyncIcon" class="w-3.5 h-3.5 transition-transform duration-500" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                            <span>抓取 WTXP& 行情</span>
+                        </button>
+                        <button onclick="regenerateSimulatedKlines()" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-medium transition active:scale-95">
+                            隨機模擬K線
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Realtime Quote Summary 3-Grid -->
+                <div class="grid grid-cols-3 gap-2.5 bg-bgInput border border-borderCard rounded-xl p-3">
+                    <div>
+                        <span class="text-[10px] text-slate-400 block">台指近全 WTXP&</span>
+                        <span id="srLastPrice" class="font-mono text-lg sm:text-xl font-extrabold text-amber-400">46,200</span>
+                        <span id="srChangeText" class="text-[11px] font-mono text-red-400 block">+185 (+0.40%)</span>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-slate-400 block">全盤(日+夜)高低</span>
+                        <div class="text-xs font-mono font-bold text-slate-200 mt-1">高: <span id="srDayHigh" class="text-red-400">46,680</span></div>
+                        <div class="text-xs font-mono font-bold text-slate-200 mt-0.5">低: <span id="srDayLow" class="text-emerald-400">45,620</span></div>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-slate-400 block">20日波段高低</span>
+                        <div class="text-xs font-mono font-bold text-slate-200 mt-1">頂: <span id="srSwingHigh" class="text-sky-400">47,650</span></div>
+                        <div class="text-xs font-mono font-bold text-slate-200 mt-0.5">底: <span id="srSwingLow" class="text-amber-400">43,950</span></div>
+                    </div>
+                </div>
+
+                <!-- Plan B: Vercel Serverless + FinMind API Configuration Center -->
+                <details class="bg-amber-500/10 border border-amber-500/40 rounded-xl p-3 text-xs">
+                    <summary class="cursor-pointer font-bold text-amber-300 flex items-center justify-between">
+                        <span class="flex items-center gap-1.5">🚀 方案 B：FinMind 台指期 API / Vercel 後端設定 (100% 破除阻擋)</span>
+                        <span class="text-[10px] bg-amber-500/20 px-2 py-0.5 rounded border border-amber-500/40">點此設定 ▾</span>
+                    </summary>
+                    <div class="mt-3 pt-3 border-t border-amber-500/20 space-y-3 text-slate-300">
+                        <p class="text-[11px] leading-relaxed text-slate-300">
+                            本系統已內建支援 <strong class="text-white">Vercel 後端路由 (<code class="text-amber-300">/api/quote</code>)</strong> 與 <strong class="text-white">FinMind 台灣期貨日夜盤資料庫 (<code class="text-amber-300">TaiwanFuturesDaily</code>)</strong>：
+                        </p>
+                        <div class="space-y-1.5">
+                            <label class="text-[11px] font-bold text-amber-400 block">
+                                🔑 填入 FinMind API Token (選填，免費註冊可大幅提升抓取額度)：
+                            </label>
+                            <div class="flex gap-2">
+                                <input id="inputFinMindToken" type="password" placeholder="貼上您的 FinMind Token (不填亦可走公開額度)" oninput="saveFinMindToken()" class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 font-mono text-xs text-white focus:outline-none focus:border-amber-400" />
+                                <button onclick="fetchRealMarketData()" class="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition shrink-0">
+                                    立即測試連線
+                                </button>
+                            </div>
+                            <div class="text-[10px] text-slate-400 flex items-center justify-between pt-0.5">
+                                <span>免費申請網址：<a href="https://finmindtrade.com/analysis/#/account/login" target="_blank" class="text-sky-400 underline">finmindtrade.com</a></span>
+                                <button onclick="openVercelBackendModal()" class="text-amber-300 hover:text-amber-200 underline font-bold">
+                                    📄 查看/複製 Vercel 後端 api/quote.js 程式碼
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </details>
+
+                <!-- Collapsible Manual Calibration -->
+                <details class="bg-bgInput/80 border border-borderCard rounded-xl p-2.5 text-xs">
+                    <summary class="cursor-pointer font-semibold text-slate-300 flex items-center justify-between">
+                        <span>⚙️ 手動校正「台指近全 WTXP&」日K / 60分K 點位</span>
+                        <span class="text-[10px] text-amber-400">展開設定 ▾</span>
+                    </summary>
+                    <div class="grid grid-cols-2 gap-2.5 mt-3 pt-2.5 border-t border-borderCard">
+                        <div>
+                            <label class="text-[10px] text-slate-400">目前 WTXP& 現價 (點)</label>
+                            <input id="manualSrClose" type="number" step="10" value="46200" oninput="onManualSrInput()" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 font-mono text-white text-xs focus:outline-none focus:border-amber-500" />
+                        </div>
+                        <div>
+                            <label class="text-[10px] text-slate-400">前一交易日結算/收盤價</label>
+                            <input id="manualSrPrevClose" type="number" step="10" value="46015" oninput="onManualSrInput()" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 font-mono text-white text-xs focus:outline-none focus:border-amber-500" />
+                        </div>
+                        <div>
+                            <label class="text-[10px] text-slate-400">WTXP& 全盤最高價 (High)</label>
+                            <input id="manualSrHigh" type="number" step="10" value="46680" oninput="onManualSrInput()" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 font-mono text-white text-xs focus:outline-none focus:border-amber-500" />
+                        </div>
+                        <div>
+                            <label class="text-[10px] text-slate-400">WTXP& 全盤最低價 (Low)</label>
+                            <input id="manualSrLow" type="number" step="10" value="45620" oninput="onManualSrInput()" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 font-mono text-white text-xs focus:outline-none focus:border-amber-500" />
+                        </div>
+                    </div>
+                </details>
+            </div>
+
+            <!-- K-Line SVG Chart (60m vs 1D) -->
+            <div class="card-glow rounded-2xl p-4 sm:p-5 space-y-3">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm">🕯️</span>
+                        <h3 class="text-xs sm:text-sm font-bold text-white">K線走勢與關鍵支撐壓力線圖</h3>
+                    </div>
+                    <div class="flex bg-bgInput p-0.5 rounded-lg border border-borderCard text-xs">
+                        <button id="btnTf60m" onclick="switchSrTimeframe('60m')" class="px-2.5 py-1 rounded-md font-bold bg-amber-500 text-slate-950 transition">
+                            60分線 (短波段)
+                        </button>
+                        <button id="btnTf1d" onclick="switchSrTimeframe('1d')" class="px-2.5 py-1 rounded-md font-medium text-slate-400 hover:text-white transition">
+                            日線 (大波段)
+                        </button>
+                    </div>
+                </div>
+
+                <div id="svgKlineContainer" class="w-full h-56 bg-bgInput/80 rounded-xl border border-borderCard p-2"></div>
+
+                <div class="flex items-center justify-between text-[10px] text-slate-400 font-mono px-1">
+                    <span class="flex items-center gap-1"><i class="w-2.5 h-0.5 bg-rose-500 inline-block"></i>壓力線 (R1/R2)</span>
+                    <span class="flex items-center gap-1"><i class="w-2.5 h-0.5 bg-amber-400 inline-block"></i>多空樞軸 (PP)</span>
+                    <span class="flex items-center gap-1"><i class="w-2.5 h-0.5 bg-emerald-400 inline-block"></i>支撐線 (S1/S2)</span>
+                </div>
+            </div>
+
+            <!-- Dual-Timeframe Support & Resistance Table -->
+            <div class="card-glow rounded-2xl overflow-hidden">
+                <div class="p-4 sm:px-5 border-b border-borderCard flex flex-wrap items-center justify-between gap-2">
+                    <div>
+                        <h3 class="text-xs sm:text-sm font-bold text-amber-400">🎯 60分線 + 日線 支撐壓力價位表</h3>
+                        <p class="text-[11px] text-slate-400 mt-0.5">結合樞軸點 (Pivot)、波段高低點與黃金分割率，可一鍵帶入網格</p>
+                    </div>
+                    <button onclick="applySrAutoGridStep()" class="px-2.5 py-1.5 rounded-lg bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/40 text-[11px] font-bold transition active:scale-95">
+                        ⚡ 依支撐間距自動設網格%
+                    </button>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-borderCard bg-bgInput/50 text-[11px] text-slate-400 font-medium whitespace-nowrap">
+                                <th class="py-2.5 pl-3 pr-1.5">層級屬性</th>
+                                <th class="py-2.5 px-2">60分線點位</th>
+                                <th class="py-2.5 px-2 text-amber-400">日線點位</th>
+                                <th class="py-2.5 px-2">共振說明</th>
+                                <th class="py-2.5 pl-1.5 pr-3 text-right">連動網格</th>
+                            </tr>
+                        </thead>
+                        <tbody id="srLevelsTableBody" class="divide-y divide-borderCard/60 text-xs font-mono">
+                            <!-- Dynamically populated -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </section>
@@ -199,8 +387,36 @@
                         <svg id="refreshIcon" class="w-3.5 h-3.5 text-amber-400 transition-transform duration-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                         </svg>
-                        <span>最新行情</span>
+                        <span>模擬行情</span>
                     </button>
+                </div>
+
+                <!-- Multi-Scenario Preset Bar (多套劇本快取與自動記憶) -->
+                <div class="bg-bgInput/90 border border-borderCard rounded-xl p-2.5 space-y-2">
+                    <div class="flex items-center justify-between text-[11px]">
+                        <span class="text-slate-400 font-medium flex items-center gap-1">
+                            <span>🗂️</span> 策略劇本快取 <span id="autoSaveBadge" class="text-[10px] text-emerald-400/90 font-mono">(自動記憶已啟用)</span>
+                        </span>
+                        <div class="flex items-center gap-1.5">
+                            <button onclick="saveToCurrentScenario()" class="px-2 py-0.5 rounded bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 font-medium transition active:scale-95">
+                                💾 存入當前劇本
+                            </button>
+                            <button onclick="resetDefaultScenario()" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-200 border border-slate-700 transition active:scale-95">
+                                重置
+                            </button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-1.5">
+                        <button onclick="loadScenarioSlot(0)" id="btnScenario0" class="py-1.5 px-2 rounded-lg text-[11px] font-bold bg-amber-500 text-slate-950 border border-amber-400 truncate transition">
+                            1. 微台長線存股
+                        </button>
+                        <button onclick="loadScenarioSlot(1)" id="btnScenario1" class="py-1.5 px-2 rounded-lg text-[11px] font-medium bg-slate-900/90 text-slate-300 hover:text-white border border-borderCard truncate transition">
+                            2. 急殺金字塔抄底
+                        </button>
+                        <button onclick="loadScenarioSlot(2)" id="btnScenario2" class="py-1.5 px-2 rounded-lg text-[11px] font-medium bg-slate-900/90 text-slate-300 hover:text-white border border-borderCard truncate transition">
+                            3. 小台波段網格
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Contract Selector Dropdown -->
@@ -233,11 +449,11 @@
                 <div class="grid grid-cols-2 gap-1.5 bg-bgInput p-1 rounded-xl border border-borderCard">
                     <button id="btnDirLong" onclick="setDirection('LONG')" class="py-2.5 rounded-lg text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition-all bg-red-600 text-white shadow-lg shadow-red-600/25">
                         <span>↗</span>
-                        <span>多單網格</span>
+                        <span>多單網格 (逢低買)</span>
                     </button>
                     <button id="btnDirShort" onclick="setDirection('SHORT')" class="py-2.5 rounded-lg text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition-all text-slate-400 hover:text-white">
                         <span>↘</span>
-                        <span>空單網格</span>
+                        <span>空單網格 (逢高空)</span>
                     </button>
                 </div>
 
@@ -249,38 +465,38 @@
                             起始基準價格 (點)
                         </label>
                         <div class="amber-focus bg-bgInput border border-borderCard rounded-xl px-3.5 py-2.5 flex items-center transition">
-                            <input id="inputBasePrice" type="number" value="46200" min="1000" max="200000" step="10" oninput="recalculateAll()" class="w-full bg-transparent text-white font-mono font-bold text-sm sm:text-base focus:outline-none">
+                            <input id="inputBasePrice" type="number" value="46200" min="1000" max="200000" step="10" oninput="onBasePriceInput()" class="w-full bg-transparent text-white font-mono font-bold text-sm sm:text-base focus:outline-none">
                         </div>
                     </div>
 
                     <!-- Grid Spacing (%) -->
                     <div class="space-y-1.5">
-                        <label for="inputSpacingPct" class="block text-xs text-slate-300 font-medium truncate">
-                            加倉間距 (%) <span id="labelSpacingPts" class="text-slate-400 font-mono text-[11px]">(約 693 點)</span>
+                        <label for="inputSpacingPct" class="block text-xs text-slate-300 font-medium whitespace-nowrap">
+                            加倉間距(%) <span id="labelSpacingPts" class="text-slate-400 font-mono text-[11px]">(約 924 點)</span>
                         </label>
                         <div class="amber-focus bg-bgInput border border-amber-500/60 rounded-xl px-3.5 py-2.5 flex items-center justify-between transition">
-                            <input id="inputSpacingPct" type="number" value="1.5" min="0.1" max="15" step="0.1" oninput="onSpacingInput()" class="w-full bg-transparent text-white font-mono font-bold text-sm sm:text-base focus:outline-none">
+                            <input id="inputSpacingPct" type="number" value="2" min="0.1" max="30" step="0.5" oninput="onSpacingInput()" class="w-full bg-transparent text-white font-mono font-bold text-sm sm:text-base focus:outline-none">
                             <span class="text-amber-400 font-mono font-bold text-xs ml-1">%</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Spacing Quick Select Pills -->
+                <!-- Spacing Quick Select Pills (2%, 4%, 6%, 8%, 10%) -->
                 <div class="grid grid-cols-5 gap-2">
-                    <button onclick="setQuickSpacing(0.5)" data-spacing="0.5" class="spacing-pill py-1.5 rounded-lg text-xs font-mono font-semibold bg-bgInput border border-borderCard text-slate-400 hover:text-white transition">
-                        0.5%
-                    </button>
-                    <button onclick="setQuickSpacing(1)" data-spacing="1" class="spacing-pill py-1.5 rounded-lg text-xs font-mono font-semibold bg-bgInput border border-borderCard text-slate-400 hover:text-white transition">
-                        1%
-                    </button>
-                    <button onclick="setQuickSpacing(1.5)" data-spacing="1.5" class="spacing-pill py-1.5 rounded-lg text-xs font-mono font-bold bg-amber-500 text-slate-950 border border-amber-400 shadow-md shadow-amber-500/20 transition">
-                        1.5%
-                    </button>
-                    <button onclick="setQuickSpacing(2)" data-spacing="2" class="spacing-pill py-1.5 rounded-lg text-xs font-mono font-semibold bg-bgInput border border-borderCard text-slate-400 hover:text-white transition">
+                    <button onclick="setQuickSpacing(2)" data-spacing="2" class="spacing-pill py-1.5 rounded-lg text-xs font-mono font-bold bg-amber-500 text-slate-950 border border-amber-400 shadow-md shadow-amber-500/20 transition">
                         2%
                     </button>
-                    <button onclick="setQuickSpacing(3)" data-spacing="3" class="spacing-pill py-1.5 rounded-lg text-xs font-mono font-semibold bg-bgInput border border-borderCard text-slate-400 hover:text-white transition">
-                        3%
+                    <button onclick="setQuickSpacing(4)" data-spacing="4" class="spacing-pill py-1.5 rounded-lg text-xs font-mono font-semibold bg-bgInput border border-borderCard text-slate-400 hover:text-white transition">
+                        4%
+                    </button>
+                    <button onclick="setQuickSpacing(6)" data-spacing="6" class="spacing-pill py-1.5 rounded-lg text-xs font-mono font-semibold bg-bgInput border border-borderCard text-slate-400 hover:text-white transition">
+                        6%
+                    </button>
+                    <button onclick="setQuickSpacing(8)" data-spacing="8" class="spacing-pill py-1.5 rounded-lg text-xs font-mono font-semibold bg-bgInput border border-borderCard text-slate-400 hover:text-white transition">
+                        8%
+                    </button>
+                    <button onclick="setQuickSpacing(10)" data-spacing="10" class="spacing-pill py-1.5 rounded-lg text-xs font-mono font-semibold bg-bgInput border border-borderCard text-slate-400 hover:text-white transition">
+                        10%
                     </button>
                 </div>
 
@@ -289,7 +505,7 @@
                     <!-- Lots Per Grid -->
                     <div class="space-y-1.5">
                         <label class="block text-xs text-slate-300 font-medium">
-                            每格加倉口數 (入參)
+                            基礎加倉口數 (基數)
                         </label>
                         <div class="flex items-center bg-bgInput border border-borderCard rounded-xl p-1">
                             <button onclick="adjustStepper('inputLotsPerGrid', -1, 1, 50)" class="w-9 h-9 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-200 font-mono text-base font-bold flex items-center justify-center active:scale-95 transition">
@@ -308,14 +524,40 @@
                             網格總階梯格數
                         </label>
                         <div class="flex items-center bg-bgInput border border-borderCard rounded-xl p-1">
-                            <button onclick="adjustStepper('inputGridLevels', -1, 1, 25)" class="w-9 h-9 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-200 font-mono text-base font-bold flex items-center justify-center active:scale-95 transition">
+                            <button onclick="adjustStepper('inputGridLevels', -1, 1, 15)" class="w-9 h-9 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-200 font-mono text-base font-bold flex items-center justify-center active:scale-95 transition">
                                 -
                             </button>
-                            <input id="inputGridLevels" type="number" value="6" min="1" max="25" oninput="recalculateAll()" class="w-full text-center bg-transparent text-white font-mono font-bold text-sm sm:text-base focus:outline-none">
-                            <button onclick="adjustStepper('inputGridLevels', 1, 1, 25)" class="w-9 h-9 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-200 font-mono text-base font-bold flex items-center justify-center active:scale-95 transition">
+                            <input id="inputGridLevels" type="number" value="6" min="1" max="15" oninput="recalculateAll()" class="w-full text-center bg-transparent text-white font-mono font-bold text-sm sm:text-base focus:outline-none">
+                            <button onclick="adjustStepper('inputGridLevels', 1, 1, 15)" class="w-9 h-9 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-200 font-mono text-base font-bold flex items-center justify-center active:scale-95 transition">
                                 +
                             </button>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Lot Scaling Mode Selector (加倉節奏模式：等量 vs 金字塔 vs 馬丁) -->
+                <div class="bg-bgInput/90 border border-borderCard rounded-xl p-3 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-medium text-slate-300 flex items-center gap-1.5">
+                            <span>📐</span> 加倉口數節奏 (建倉分配)
+                        </span>
+                        <span id="labelLotSequenceSummary" class="text-[11px] font-mono text-amber-400">
+                            滿倉共 6 口
+                        </span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-1.5">
+                        <button onclick="setScalingMode('EQUAL')" id="btnScaleEQUAL" class="py-2 px-2 rounded-lg text-xs font-bold bg-amber-500 text-slate-950 border border-amber-400 transition">
+                            等量 (1, 1, 1...)
+                        </button>
+                        <button onclick="setScalingMode('PYRAMID')" id="btnScalePYRAMID" class="py-2 px-2 rounded-lg text-xs font-medium bg-slate-900 text-slate-300 hover:text-white border border-borderCard transition">
+                            金字塔 (1, 2, 3...)
+                        </button>
+                        <button onclick="setScalingMode('MARTINGALE')" id="btnScaleMARTINGALE" class="py-2 px-2 rounded-lg text-xs font-medium bg-slate-900 text-slate-300 hover:text-white border border-borderCard transition">
+                            馬丁倍增 (1, 2, 4...)
+                        </button>
+                    </div>
+                    <div id="labelLotSequenceDetail" class="text-[11px] font-mono text-slate-400 truncate pt-0.5">
+                        各格加倉口數：1 → 1 → 1 → 1 → 1 → 1 口
                     </div>
                 </div>
 
@@ -345,6 +587,64 @@
                         <button onclick="setMarginPreset(5)" class="py-2 px-2 rounded-lg bg-bgInput hover:bg-slate-800 border border-borderCard text-[11px] sm:text-xs font-medium text-slate-300 transition active:scale-95">
                             5倍保證金(低風險)
                         </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CARD 1.5: 實盤現價模擬與即時維持率定位 -->
+            <section class="card-glow rounded-2xl p-4 sm:p-5 space-y-3.5 border border-sky-500/30">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-sky-400 animate-pulse shadow-[0_0_8px_#38bdf8]"></span>
+                        <div>
+                            <h3 class="text-sm sm:text-base font-bold text-white">實盤現價模擬與即時維持率定位</h3>
+                            <p class="text-[11px] text-slate-400">拖曳滑桿或輸入目前大盤點位，即時診斷已成交部位與維持率</p>
+                        </div>
+                    </div>
+                    <button onclick="syncCurrentPriceToBase()" class="px-2.5 py-1 rounded-lg bg-sky-500/15 hover:bg-sky-500/25 text-sky-300 border border-sky-500/30 text-[11px] font-medium transition active:scale-95 shrink-0">
+                        同步基準價
+                    </button>
+                </div>
+
+                <!-- Live Market Price Input + Quick Step Buttons + Range Slider -->
+                <div class="bg-bgInput border border-borderCard rounded-xl p-3 space-y-2.5">
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="text-xs text-slate-300 font-medium">目前市場現價 (點)：</span>
+                        <div class="flex items-center gap-1">
+                            <button onclick="stepCurrentPrice(-200)" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono text-xs">-200</button>
+                            <input id="inputCurrentPrice" type="number" value="44200" step="50" oninput="onCurrentPriceInput()" class="w-24 text-center bg-slate-900 border border-sky-500/50 rounded-lg py-1 text-sky-300 font-mono font-extrabold text-sm focus:outline-none">
+                            <button onclick="stepCurrentPrice(200)" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono text-xs">+200</button>
+                        </div>
+                    </div>
+                    <input id="sliderCurrentPrice" type="range" min="30000" max="50000" step="10" value="44200" oninput="onCurrentPriceSlider()" class="w-full">
+                    <div class="flex justify-between text-[10px] font-mono text-slate-400">
+                        <span id="sliderMinLabel">32,000</span>
+                        <span id="liveTriggerBadge" class="text-sky-400 font-bold">📍 已觸發至 第 2 格 (持倉 2 口)</span>
+                        <span id="sliderMaxLabel">48,000</span>
+                    </div>
+                </div>
+
+                <!-- Live Metrics 4-Grid -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                    <div class="bg-bgInput/90 border border-borderCard rounded-xl p-2.5">
+                        <span class="text-[10px] text-slate-400 block">目前持倉均價 (回本點)</span>
+                        <span id="liveAvgCost" class="font-mono font-bold text-sm text-white">45,738 點</span>
+                        <span id="liveBreakevenNeed" class="text-[10px] font-mono text-amber-400 block mt-0.5">需反彈 +3.5%</span>
+                    </div>
+                    <div class="bg-bgInput/90 border border-borderCard rounded-xl p-2.5">
+                        <span class="text-[10px] text-slate-400 block">即時浮動損益 / 權益</span>
+                        <span id="liveUnrealizedPnL" class="font-mono font-bold text-sm text-rose-400">NT$ -30,760</span>
+                        <span id="liveEquityVal" class="text-[10px] font-mono text-sky-400 block mt-0.5">權益 969,240</span>
+                    </div>
+                    <div class="bg-bgInput/90 border border-borderCard rounded-xl p-2.5">
+                        <span class="text-[10px] text-slate-400 block">盤後追繳價 (破維持保)</span>
+                        <span id="liveMarginCallPrice" class="font-mono font-bold text-sm text-amber-400">0 點</span>
+                        <span id="liveMaintRatio" class="text-[10px] font-mono text-slate-400 block mt-0.5">風險指標 1382%</span>
+                    </div>
+                    <div class="bg-bgInput/90 border border-borderCard rounded-xl p-2.5">
+                        <span class="text-[10px] text-slate-400 block">強制砍倉價 (低於25%原始保)</span>
+                        <span id="liveForceLiqPrice" class="font-mono font-bold text-sm text-rose-500">0 點</span>
+                        <span id="liveForceLiqDist" class="text-[10px] font-mono text-slate-400 block mt-0.5">安全緩衝極充裕</span>
                     </div>
                 </div>
             </section>
@@ -420,7 +720,7 @@
                     <div class="flex items-center gap-2">
                         <span class="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 text-[10px] font-mono font-bold">1x</span>
                         <h4 class="text-xs sm:text-sm font-bold text-white">
-                            槓桿倍數 <span id="labelMaxLeverage" class="text-amber-400 font-mono">(最高 2.7)</span>
+                            槓桿倍數 <span id="labelMaxLeverage" class="text-amber-400 font-mono">(最高 3.0)</span>
                         </h4>
                     </div>
                     <div class="flex items-center gap-3 text-[11px] text-slate-400">
@@ -437,7 +737,7 @@
                 <div class="flex flex-wrap items-center justify-between gap-2">
                     <div class="flex items-center gap-2">
                         <span class="text-sky-400 text-sm">📈</span>
-                        <h4 class="text-xs sm:text-sm font-bold text-white">買入價 & 爆倉價</h4>
+                        <h4 class="text-xs sm:text-sm font-bold text-white">買入價 & 均價 & 追繳斷頭價</h4>
                     </div>
                     <div class="flex items-center gap-3 text-[11px] text-slate-300">
                         <span class="flex items-center gap-1"><i class="w-2.5 h-1 rounded bg-sky-400 inline-block"></i> 買入價</span>
@@ -453,7 +753,7 @@
                 <div class="flex flex-wrap items-center justify-between gap-2">
                     <div class="flex items-center gap-2">
                         <span class="text-emerald-400 text-sm">💹</span>
-                        <h4 class="text-xs sm:text-sm font-bold text-white">權益數 & 盈虧</h4>
+                        <h4 class="text-xs sm:text-sm font-bold text-white">權益數 & 浮動盈虧</h4>
                     </div>
                     <div class="flex items-center gap-3 text-[11px] text-slate-300">
                         <span class="flex items-center gap-1"><i class="w-2.5 h-1 rounded bg-sky-400 inline-block"></i> 權益數</span>
@@ -464,59 +764,86 @@
                 <div id="svgContainerEquity" class="w-full h-52 pt-2"></div>
             </section>
 
-            <!-- CARD 4: 最終爆倉價與安全空間總結卡 -->
-            <section class="card-glow rounded-2xl p-4 sm:p-5">
-                <div class="flex items-center justify-between">
-                    <!-- Left: Final Liquidation Price -->
+            <!-- CARD 4: 雙重斷頭安全空間總覽 (盤後追繳價 + 25%強制砍倉價) -->
+            <section class="card-glow rounded-2xl p-4 sm:p-5 space-y-3">
+                <div class="flex items-center justify-between border-b border-borderCard pb-3">
+                    <!-- Left: Final Forced Liquidation Price (25% rule) -->
                     <div class="space-y-1">
                         <div class="text-xs text-slate-400 flex items-center gap-1.5">
-                            <span>總持倉口數:</span>
+                            <span>滿倉總口數:</span>
                             <span id="summaryTotalLots" class="font-mono font-bold text-amber-400 text-sm">6 口</span>
+                            <span class="text-slate-600">|</span>
+                            <span>滿倉均價:</span>
+                            <span id="summaryFullAvgPrice" class="font-mono font-bold text-emerald-400 text-sm">43,890 點</span>
                         </div>
-                        <div class="text-xs text-slate-400">最終爆倉價</div>
+                        <div class="text-xs text-slate-400">🚨 滿倉 25% 強制砍倉價 (期貨商代沖銷線)</div>
                         <div class="flex items-baseline gap-1 pt-0.5">
                             <span id="summaryFinalLiqPrice" class="text-2xl sm:text-3xl font-mono font-extrabold text-rose-500 tracking-tight">
-                                28,677
+                                28,100
                             </span>
                             <span class="text-xs text-slate-400 font-bold">點</span>
                         </div>
                     </div>
 
-                    <!-- Right: Buffer from Initial Base Price / Last Entry -->
+                    <!-- Right: Buffer from Full Average Price -->
                     <div class="text-right space-y-1">
-                        <div id="summaryBufferLabel" class="text-xs text-slate-400">距最後安全空間</div>
+                        <div id="summaryBufferLabel" class="text-xs text-slate-400">距滿倉均價緩衝</div>
                         <div id="summaryBufferPct" class="text-xl sm:text-2xl font-mono font-extrabold text-slate-100">
-                            -35.5%
+                            -36.0%
                         </div>
                         <div id="summaryBufferPts" class="text-xs font-mono text-slate-400">
-                            (15,730 點)
+                            (15,790 點)
                         </div>
+                    </div>
+                </div>
+
+                <!-- Dual Margin Call Summary Comparison Bar -->
+                <div class="grid grid-cols-2 gap-3 text-xs pt-0.5">
+                    <div class="bg-bgInput/80 border border-amber-500/30 rounded-xl px-3 py-2 flex items-center justify-between">
+                        <span class="text-slate-400">⚠️ 盤後追繳價 (維持保):</span>
+                        <span id="summaryMaintCallPrice" class="font-mono font-bold text-amber-400">29,915 點</span>
+                    </div>
+                    <div class="bg-bgInput/80 border border-emerald-500/30 rounded-xl px-3 py-2 flex items-center justify-between">
+                        <span class="text-slate-400">🎯 滿倉反彈回本點:</span>
+                        <span id="summaryBreakevenRebound" class="font-mono font-bold text-emerald-400">+5.6% 回本</span>
                     </div>
                 </div>
             </section>
 
-            <!-- CARD 5: 網格倉位加倉階梯表 -->
+            <!-- CARD 5: 網格倉位加倉階梯表 (含回本點、單格停利價、雙重追繳斷頭線 & 一鍵掛單備忘錄) -->
             <section class="card-glow rounded-2xl overflow-hidden">
-                <!-- Table Header Info -->
-                <div class="p-4 sm:px-5 flex items-center justify-between border-b border-borderCard">
-                    <div class="flex items-center gap-1.5">
-                        <h3 class="text-xs sm:text-sm font-bold text-amber-400">網格倉位加倉階梯表</h3>
-                        <span id="tableSpacingSubtitle" class="text-[11px] text-slate-400 font-mono">(每格間隔 1.5%)</span>
+                <!-- Table Header Info + One-Click Order Memo Button -->
+                <div class="p-4 sm:px-5 flex flex-wrap items-center justify-between gap-2 border-b border-borderCard">
+                    <div>
+                        <div class="flex items-center gap-1.5">
+                            <h3 class="text-xs sm:text-sm font-bold text-amber-400">網格倉位加倉階梯表</h3>
+                            <span id="tableSpacingSubtitle" class="text-[11px] text-slate-400 font-mono">(每格間隔 2%)</span>
+                        </div>
+                        <p class="text-[11px] text-slate-400 mt-0.5">同時顯示「回本均價」、「單格刷價差停利點」與「雙重追繳/砍倉線」</p>
                     </div>
-                    <span id="tableTotalStepsBadge" class="text-[11px] font-mono text-slate-400">
-                        共 6 階梯
-                    </span>
+                    <div class="flex items-center gap-2">
+                        <span id="tableTotalStepsBadge" class="text-[11px] font-mono text-slate-400 hidden sm:inline">
+                            共 6 階梯
+                        </span>
+                        <button onclick="openOrderMemoModal()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-xs shadow-lg shadow-amber-500/20 transition active:scale-95">
+                            <span>📋</span>
+                            <span>一鍵掛單備忘錄</span>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Liquidation Formula Mode Pill Switcher -->
-                <div class="px-4 py-2 bg-bgInput/60 border-b border-borderCard flex items-center justify-between text-[11px]">
-                    <span class="text-slate-400">爆倉價計算基準：</span>
+                <div class="px-4 py-2 bg-bgInput/60 border-b border-borderCard flex flex-wrap items-center justify-between gap-2 text-[11px]">
+                    <span class="text-slate-400">表格爆倉欄優先顯示：</span>
                     <div class="flex items-center gap-1">
                         <button id="btnLiqModeGrid" onclick="setLiqCalcMode('GRID')" class="px-2 py-0.5 rounded font-medium bg-amber-500/20 text-amber-400 border border-amber-500/30 transition">
-                            精確維持保線
+                            25%強制砍倉 + 追繳雙線
+                        </button>
+                        <button id="btnLiqModeMaint" onclick="setLiqCalcMode('MAINT')" class="px-2 py-0.5 rounded font-medium text-slate-400 hover:text-white transition">
+                            盤後追繳線(維持保)
                         </button>
                         <button id="btnLiqModeZero" onclick="setLiqCalcMode('ZERO')" class="px-2 py-0.5 rounded font-medium text-slate-400 hover:text-white transition">
-                            權益歸零斷頭
+                            權益歸零線
                         </button>
                     </div>
                 </div>
@@ -525,13 +852,13 @@
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
                         <thead>
-                            <tr class="border-b border-borderCard bg-bgInput/40 text-[11px] text-slate-400 font-medium">
-                                <th class="py-2.5 pl-3.5 pr-1">口數</th>
-                                <th class="py-2.5 px-2">加倉買入價(%)</th>
+                            <tr class="border-b border-borderCard bg-bgInput/40 text-[11px] text-slate-400 font-medium whitespace-nowrap">
+                                <th class="py-2.5 pl-3 pr-1.5">格數/口數</th>
+                                <th class="py-2.5 px-2">加倉觸發價</th>
+                                <th class="py-2.5 px-2 text-emerald-400">均價(回本) / 單格停利</th>
                                 <th class="py-2.5 px-2 text-amber-400">槓桿</th>
-                                <th class="py-2.5 px-2 text-rose-400">爆倉價</th>
-                                <th class="py-2.5 px-2 text-sky-400">累積權益數</th>
-                                <th class="py-2.5 pl-2 pr-3.5 text-right text-rose-400">浮動盈虧</th>
+                                <th class="py-2.5 px-2 text-rose-400">25%砍倉 / 追繳價</th>
+                                <th class="py-2.5 pl-2 pr-3 text-right text-sky-400">累積權益 / 浮動盈虧</th>
                             </tr>
                         </thead>
                         <tbody id="gridTableBody" class="divide-y divide-borderCard/60 text-xs font-mono">
@@ -542,33 +869,94 @@
             </section>
         </div>
 
+        <!-- ORDER MEMO MODAL (一鍵複製掛單備忘錄彈窗) -->
+        <div id="orderMemoModal" class="fixed inset-0 z-50 hidden bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+            <div class="card-glow rounded-2xl max-w-lg w-full p-5 space-y-4 border border-amber-500/40 shadow-2xl">
+                <div class="flex items-center justify-between border-b border-borderCard pb-3">
+                    <div class="flex items-center gap-2">
+                        <span class="text-lg">📋</span>
+                        <div>
+                            <h3 class="text-base font-bold text-white">網格實戰掛單備忘錄</h3>
+                            <p class="text-[11px] text-slate-400">可直接複製貼上至 LINE、記事本或對照券商雲端智慧單設定</p>
+                        </div>
+                    </div>
+                    <button onclick="closeOrderMemoModal()" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center font-bold">
+                        ✕
+                    </button>
+                </div>
+
+                <textarea id="orderMemoTextarea" readonly rows="12" class="w-full bg-bgInput border border-borderCard rounded-xl p-3.5 text-xs font-mono text-slate-200 leading-relaxed focus:outline-none"></textarea>
+
+                <div class="flex items-center justify-end gap-2">
+                    <button onclick="closeOrderMemoModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition">
+                        關閉視窗
+                    </button>
+                    <button onclick="copyOrderMemoText()" class="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-lg shadow-amber-500/25 transition active:scale-95 flex items-center gap-1.5">
+                        <span>📑</span>
+                        <span>一鍵複製全部文字</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- VERCEL BACKEND CODE MODAL (方案 B 後端腳本一鍵複製彈窗) -->
+        <div id="vercelCodeModal" class="fixed inset-0 z-50 hidden bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+            <div class="card-glow rounded-2xl max-w-lg w-full p-5 space-y-4 border border-amber-500/40 shadow-2xl">
+                <div class="flex items-center justify-between border-b border-borderCard pb-3">
+                    <div class="flex items-center gap-2">
+                        <span class="text-lg">🚀</span>
+                        <div>
+                            <h3 class="text-base font-bold text-white">Vercel 免費 Serverless 後端 (<code class="text-amber-400">api/quote.js</code>)</h3>
+                            <p class="text-[11px] text-slate-400">放在 GitHub 專案的 <code class="text-sky-300">api/quote.js</code>，徹底解除瀏覽器 CORS 限制</p>
+                        </div>
+                    </div>
+                    <button onclick="closeVercelBackendModal()" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center font-bold">
+                        ✕
+                    </button>
+                </div>
+
+                <textarea id="vercelCodeTextarea" readonly rows="13" class="w-full bg-bgInput border border-borderCard rounded-xl p-3.5 text-[11px] font-mono text-emerald-300 leading-relaxed focus:outline-none"></textarea>
+
+                <div class="flex items-center justify-end gap-2">
+                    <button onclick="closeVercelBackendModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition">
+                        關閉視窗
+                    </button>
+                    <button onclick="copyVercelBackendCode()" class="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-lg shadow-amber-500/25 transition active:scale-95 flex items-center gap-1.5">
+                        <span>📑</span>
+                        <span>複製 api/quote.js 程式碼</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <!-- TAB VIEW 3: 風控公式說明 -->
         <section id="viewFormula" class="hidden space-y-4">
             <div class="card-glow rounded-2xl p-5 space-y-4">
                 <div class="flex items-center gap-2.5 border-b border-borderCard pb-3">
                     <span class="text-amber-400 text-lg">📖</span>
                     <div>
-                        <h2 class="text-base font-bold text-white">台指期貨網格風控核心公式</h2>
+                        <h2 class="text-base font-bold text-white">台指模擬器 TAIFEX 核心公式</h2>
                         <p class="text-xs text-slate-400">透明公開的數學模型，助您精準掌握每一分風險</p>
                     </div>
                 </div>
 
                 <div class="space-y-3 text-xs leading-relaxed text-slate-300">
                     <div class="bg-bgInput border border-borderCard rounded-xl p-3.5 space-y-1">
-                        <div class="font-bold text-amber-400">1. 階梯加倉買入價 (Entry Price)</div>
+                        <div class="font-bold text-amber-400">1. 階梯加倉觸發價與加權均價</div>
                         <p class="text-slate-400">以起始基準價 <code class="text-white">P₁</code> 按固定百分比間距 <code class="text-white">d%</code> 等差展開：</p>
                         <div class="font-mono text-[11px] bg-slate-900/90 p-2 rounded text-sky-300">
                             多單第 i 格買入價 Pᵢ = P₁ × [1 - (i - 1) × d%]<br>
-                            空單第 i 格賣出價 Pᵢ = P₁ × [1 + (i - 1) × d%]
+                            空單第 i 格賣出價 Pᵢ = P₁ × [1 + (i - 1) × d%]<br>
+                            加權均價 AvgPᵢ = Σ(各格成交價 × 該格口數) ÷ 累積口數 Qᵢ
                         </div>
                     </div>
 
                     <div class="bg-bgInput border border-borderCard rounded-xl p-3.5 space-y-1">
-                        <div class="font-bold text-amber-400">2. 浮動盈虧與累積權益數 (Floating PnL & Equity)</div>
+                        <div class="font-bold text-amber-400">2. 浮動盈虧、單格停利與累積權益數</div>
                         <p class="text-slate-400">當價格觸及第 <code class="text-white">i</code> 格時，前 <code class="text-white">i</code> 格持倉相對於當前價 <code class="text-white">Pᵢ</code> 的未實現損益：</p>
                         <div class="font-mono text-[11px] bg-slate-900/90 p-2 rounded text-sky-300">
-                            持倉均價 AvgPᵢ = (P₁ + P₂ + ... + Pᵢ) / i<br>
                             浮動盈虧 PnLᵢ = (Pᵢ - AvgPᵢ) × 累積口數 Qᵢ × 點數乘數 M<br>
+                            單格停利獲利 = 單格價差點數 × 該格口數 × 點數乘數 M<br>
                             累積權益數 Equityᵢ = 存入本金 C + PnLᵢ
                         </div>
                     </div>
@@ -577,16 +965,16 @@
                         <div class="font-bold text-amber-400">3. 真實有效槓桿 (Effective Leverage)</div>
                         <p class="text-slate-400">衡量當前總持倉合約名目價值相對於淨權益數的放大倍數：</p>
                         <div class="font-mono text-[11px] bg-slate-900/90 p-2 rounded text-sky-300">
-                            槓桿倍數 Leverageᵢ = (累積口數 Qᵢ × 均價 AvgPᵢ × 乘數 M) / Equityᵢ
+                            槓桿倍數 Leverageᵢ = (累積口數 Qᵢ × 均價 AvgPᵢ × 乘數 M) ÷ Equityᵢ
                         </div>
                     </div>
 
                     <div class="bg-bgInput border border-borderCard rounded-xl p-3.5 space-y-1">
-                        <div class="font-bold text-amber-400">4. 階梯爆倉價 / 追繳斷頭線 (Liquidation Price)</div>
-                        <p class="text-slate-400">當行情不利導致「累積權益數」跌破維持保證金門檻時觸發強制平倉或追繳：</p>
+                        <div class="font-bold text-amber-400">4. 盤後追繳線 vs. 25% 強制砍倉線</div>
+                        <p class="text-slate-400">台灣期貨商實務雙重風控門檻：</p>
                         <div class="font-mono text-[11px] bg-slate-900/90 p-2 rounded text-rose-300">
-                            可承受再跌點數 = (Equityᵢ - 維持保證金門檻) / (Qᵢ × M)<br>
-                            多單爆倉價 = Pᵢ - 可承受再跌點數
+                            ① 盤後追繳價：當 Equityᵢ 跌破「累積口數 × 維持保證金」時觸發<br>
+                            ② 25% 強制砍倉價：當 Equityᵢ 跌破「累積口數 × 原始保證金 × 25%」時由期貨商強制代沖銷
                         </div>
                     </div>
                 </div>
@@ -599,7 +987,7 @@
                 <div class="flex items-center gap-2.5 border-b border-borderCard pb-3">
                     <span class="text-amber-400 text-lg">ℹ️</span>
                     <div>
-                        <h2 class="text-base font-bold text-white">關於台指風控儀 TAIFEX</h2>
+                        <h2 class="text-base font-bold text-white">關於台指模擬器 TAIFEX</h2>
                         <p class="text-xs text-slate-400">專為台灣期貨交易人打造的視覺化網格部位試算工具</p>
                     </div>
                 </div>
@@ -612,8 +1000,8 @@
                     </p>
                     <ul class="list-disc pl-5 space-y-1 text-slate-400">
                         <li>每一階梯進場後的<span class="text-white">真實有效槓桿變化</span></li>
-                        <li>加倉後的<span class="text-white">最新爆倉線與距離現價緩衝百分比</span></li>
-                        <li>三種不同保證金倍數（1倍、3倍、5倍）的快速壓力測試</li>
+                        <li>加倉後的<span class="text-white">盤後追繳線、25% 強制斷頭線與反彈回本點</span></li>
+                        <li>三種不同加倉節奏（等量、金字塔、馬丁倍增）的壓力測試</li>
                     </ul>
                     <div class="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-[11px] text-amber-300">
                         免責聲明：本網頁提供之試算數據僅供期貨部位風險管理與教學研究參考，實際保證金規格與追繳砍倉規則請以臺灣期貨交易所 (TAIFEX) 與您開戶之期貨商最新公告為準。
@@ -624,35 +1012,44 @@
 
     </main>
 
-    <!-- Bottom Fixed Navigation Bar -->
+    <!-- Bottom Fixed Navigation Bar (5 Tabs) -->
     <nav class="fixed bottom-0 inset-x-0 z-40 bg-[#0b0e17]/95 backdrop-blur-md border-t border-borderCard px-2 py-1.5">
-        <div class="max-w-xl mx-auto grid grid-cols-4 gap-1">
+        <div class="max-w-xl mx-auto grid grid-cols-5 gap-1">
             <button onclick="switchBottomTab('RADAR')" id="navBtnRADAR" class="flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400 hover:text-slate-200 transition">
                 <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
                 </svg>
-                <span class="text-[11px] font-medium">風險雷達</span>
+                <span class="text-[10px] font-medium">風險雷達</span>
+            </button>
+
+            <button onclick="switchBottomTab('SR')" id="navBtnSR" class="flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400 hover:text-slate-200 transition">
+                <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="9" />
+                    <circle cx="12" cy="12" r="5" />
+                    <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+                </svg>
+                <span class="text-[10px] font-medium">支撐壓力</span>
             </button>
 
             <button onclick="switchBottomTab('GRID')" id="navBtnGRID" class="flex flex-col items-center justify-center py-1.5 rounded-xl bg-amber-500/15 border border-amber-500/40 text-amber-400 transition">
                 <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
                 </svg>
-                <span class="text-[11px] font-bold">網格策略</span>
+                <span class="text-[10px] font-bold">網格策略</span>
             </button>
 
             <button onclick="switchBottomTab('FORMULA')" id="navBtnFORMULA" class="flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400 hover:text-slate-200 transition">
                 <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
                 </svg>
-                <span class="text-[11px] font-medium">風控公式</span>
+                <span class="text-[10px] font-medium">風控公式</span>
             </button>
 
             <button onclick="switchBottomTab('ABOUT')" id="navBtnABOUT" class="flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400 hover:text-slate-200 transition">
                 <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
                 </svg>
-                <span class="text-[11px] font-medium">關於說明</span>
+                <span class="text-[10px] font-medium">關於說明</span>
             </button>
         </div>
     </nav>
@@ -663,32 +1060,96 @@
         const CONTRACTS = {
             TMF: {
                 name: '微型臺指期貨 (微台 TMF)',
+                shortName: '微台 TMF',
                 multiplier: 10,
                 initMargin: 35050,
                 maintMargin: 26900
             },
             MTX: {
                 name: '小型臺指期貨 (小台 MTX)',
+                shortName: '小台 MTX',
                 multiplier: 50,
                 initMargin: 175250,
                 maintMargin: 134500
             },
             TX: {
                 name: '臺股期貨 (大台 TX)',
+                shortName: '大台 TX',
                 multiplier: 200,
                 initMargin: 701000,
                 maintMargin: 538000
             }
         };
 
+        // Default 3 Scenarios (劇本存檔預設值)
+        const DEFAULT_SCENARIOS = [
+            {
+                name: '1. 微台長線存股',
+                contractKey: 'TMF',
+                direction: 'LONG',
+                basePrice: 46200,
+                spacingPct: 2,
+                lotsPerGrid: 1,
+                levels: 6,
+                scalingMode: 'EQUAL',
+                depositedMargin: 1000000,
+                currentPrice: 44200
+            },
+            {
+                name: '2. 急殺金字塔抄底',
+                contractKey: 'TMF',
+                direction: 'LONG',
+                basePrice: 46200,
+                spacingPct: 4,
+                lotsPerGrid: 1,
+                levels: 5,
+                scalingMode: 'PYRAMID',
+                depositedMargin: 1500000,
+                currentPrice: 42400
+            },
+            {
+                name: '3. 小台波段網格',
+                contractKey: 'MTX',
+                direction: 'LONG',
+                basePrice: 46200,
+                spacingPct: 2,
+                lotsPerGrid: 1,
+                levels: 6,
+                scalingMode: 'EQUAL',
+                depositedMargin: 3000000,
+                currentPrice: 45000
+            }
+        ];
+
+        const STORAGE_KEY_STATE = 'taifex_sim_pro_state_v3';
+        const STORAGE_KEY_SCENARIOS = 'taifex_sim_pro_scenarios_v3';
+
         // App State
         let state = {
+            activeScenarioIdx: 0,
             contractKey: 'TMF',
             direction: 'LONG',      // 'LONG' or 'SHORT'
+            scalingMode: 'EQUAL',   // 'EQUAL', 'PYRAMID', 'MARTINGALE'
             colorScheme: 'TW',      // 'TW' (Red Up / Green Down) or 'US' (Green Up / Red Down)
-            liqMode: 'GRID',        // 'GRID' (matches exact screenshot curve) or 'ZERO' (zero equity)
-            chartFilter: 'ALL'      // 'ALL', 'LEV', 'PRICE', 'EQUITY'
+            liqMode: 'GRID',        // 'GRID' (25% Force Liq), 'MAINT' (Maintenance Margin Call), 'ZERO' (Zero Equity)
+            chartFilter: 'ALL',     // 'ALL', 'LEV', 'PRICE', 'EQUITY'
+            srTimeframe: '60m'      // '60m' or '1d'
         };
+
+        // Support & Resistance K-line state
+        let srData = {
+            lastPrice: 46200,
+            prevClose: 46015,
+            dayHigh: 46680,
+            dayLow: 45620,
+            swingHigh20: 47650,
+            swingLow20: 43950,
+            klines60m: [],
+            klines1d: [],
+            calculatedLevels: []
+        };
+
+        let savedScenarios = JSON.parse(JSON.stringify(DEFAULT_SCENARIOS));
 
         // Format currency/numbers with commas
         function fmtNum(num) {
@@ -707,6 +1168,231 @@
                 toast.classList.remove('opacity-100', 'translate-y-0');
                 toast.classList.add('opacity-0', '-translate-y-2');
             }, 2200);
+        }
+
+        // Persist current settings to localStorage automatically
+        function saveStateToLocalStorage() {
+            try {
+                const payload = {
+                    activeScenarioIdx: state.activeScenarioIdx,
+                    contractKey: state.contractKey,
+                    direction: state.direction,
+                    scalingMode: state.scalingMode,
+                    colorScheme: state.colorScheme,
+                    liqMode: state.liqMode,
+                    basePrice: parseFloat(document.getElementById('inputBasePrice').value) || 46200,
+                    spacingPct: parseFloat(document.getElementById('inputSpacingPct').value) || 2,
+                    lotsPerGrid: parseInt(document.getElementById('inputLotsPerGrid').value, 10) || 1,
+                    levels: parseInt(document.getElementById('inputGridLevels').value, 10) || 6,
+                    depositedMargin: parseFloat(document.getElementById('inputMargin').value) || 1000000,
+                    currentPrice: parseFloat(document.getElementById('inputCurrentPrice').value) || 44200
+                };
+                localStorage.setItem(STORAGE_KEY_STATE, JSON.stringify(payload));
+                localStorage.setItem(STORAGE_KEY_SCENARIOS, JSON.stringify(savedScenarios));
+            } catch (e) {
+                // Ignore storage quota errors in restricted webviews
+            }
+        }
+
+        // Restore state from localStorage on boot
+        function loadStateFromLocalStorage() {
+            try {
+                const rawScenarios = localStorage.getItem(STORAGE_KEY_SCENARIOS);
+                if (rawScenarios) {
+                    const parsedScenarios = JSON.parse(rawScenarios);
+                    if (Array.isArray(parsedScenarios) && parsedScenarios.length === 3) {
+                        savedScenarios = parsedScenarios;
+                    }
+                }
+                const rawState = localStorage.getItem(STORAGE_KEY_STATE);
+                if (rawState) {
+                    const s = JSON.parse(rawState);
+                    state.activeScenarioIdx = s.activeScenarioIdx ?? 0;
+                    state.contractKey = s.contractKey || 'TMF';
+                    state.direction = s.direction || 'LONG';
+                    state.scalingMode = s.scalingMode || 'EQUAL';
+                    state.colorScheme = s.colorScheme || 'TW';
+                    state.liqMode = s.liqMode || 'GRID';
+
+                    document.getElementById('contractSelect').value = state.contractKey;
+                    document.getElementById('inputBasePrice').value = s.basePrice || 46200;
+                    document.getElementById('inputSpacingPct').value = s.spacingPct || 2;
+                    document.getElementById('inputLotsPerGrid').value = s.lotsPerGrid || 1;
+                    document.getElementById('inputGridLevels').value = s.levels || 6;
+                    document.getElementById('inputMargin').value = s.depositedMargin || 1000000;
+                    document.getElementById('inputCurrentPrice').value = s.currentPrice || 44200;
+                }
+                const savedToken = localStorage.getItem('taifex_finmind_token');
+                if (savedToken && document.getElementById('inputFinMindToken')) {
+                    document.getElementById('inputFinMindToken').value = savedToken;
+                }
+            } catch (e) {
+                // Fallback to defaults
+            }
+            syncUIFromState();
+        }
+
+        function saveFinMindToken() {
+            try {
+                const token = (document.getElementById('inputFinMindToken')?.value || '').trim();
+                localStorage.setItem('taifex_finmind_token', token);
+            } catch (e) {}
+        }
+
+        function openVercelBackendModal() {
+            const backendCode = `// 檔案路徑：api/quote.js (部署於 Vercel 免費 Serverless Function)
+export default async function handler(req, res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  if (req.method === 'OPTIONS') return res.status(200).end();
+
+  const token = req.query.token || process.env.FINMIND_TOKEN || '';
+
+  try {
+    // 1. 先抓取鉅亨網台指期近全 (含夜盤 WTXP&) 60分K連續資料
+    const cnyesRes = await fetch(
+      'https://ws.api.cnyes.com/ws/api/v1/charting/history?symbol=FUTURES:TXF1:FUTURES&resolution=60'
+    );
+    const cnyesJson = await cnyesRes.json();
+
+    // 2. 同時抓取 FinMind 台灣期交所台指期 (TX) 日夜盤歷史日K資料
+    const startDate = new Date(Date.now() - 45 * 86400000).toISOString().slice(0, 10);
+    const fmUrl = \`https://api.finmindtrade.com/api/v4/data?dataset=TaiwanFuturesDaily&data_id=TX&start_date=\${startDate}\${token ? \`&token=\${token}\` : ''}\`;
+    const fmRes = await fetch(fmUrl);
+    const fmJson = await fmRes.json();
+
+    return res.status(200).json({
+      ok: true,
+      source: 'Vercel Serverless (WTXP& 60m + FinMind TX 1D)',
+      cnyes60m: cnyesJson?.data || null,
+      finmindDaily: fmJson?.data || null
+    });
+  } catch (err) {
+    return res.status(500).json({ ok: false, error: err.message });
+  }
+}`;
+            document.getElementById('vercelCodeTextarea').value = backendCode;
+            document.getElementById('vercelCodeModal').classList.remove('hidden');
+        }
+
+        function closeVercelBackendModal() {
+            document.getElementById('vercelCodeModal').classList.add('hidden');
+        }
+
+        function copyVercelBackendCode() {
+            const textarea = document.getElementById('vercelCodeTextarea');
+            textarea.select();
+            textarea.setSelectionRange(0, 99999);
+            try {
+                document.execCommand('copy');
+                showToast('✅ 已複製 api/quote.js 後端程式碼！');
+            } catch (e) {
+                showToast('請手動全選複製');
+            }
+        }
+
+        function syncUIFromState() {
+            const c = CONTRACTS[state.contractKey];
+            document.getElementById('infoInitMargin').textContent = `定額 NT$ ${fmtNum(c.initMargin)}`;
+            document.getElementById('infoMultiplier').textContent = c.multiplier;
+            document.getElementById('labelOneLotMargin').textContent = `1口原始保: NT$ ${fmtNum(c.initMargin)}`;
+            document.getElementById('cardInitMargin').textContent = `NT$ ${fmtNum(c.initMargin)} 元`;
+            document.getElementById('cardMaintMargin').textContent = `NT$ ${fmtNum(c.maintMargin)} 元`;
+
+            updateScenarioButtonsUI();
+            updateDirectionButtonsUI();
+            updateScalingButtonsUI();
+            updateSpacingPillsUI(parseFloat(document.getElementById('inputSpacingPct').value));
+            updateLiqModeButtonsUI();
+        }
+
+        // Scenario Slot Management
+        function updateScenarioButtonsUI() {
+            for (let i = 0; i < 3; i++) {
+                const btn = document.getElementById('btnScenario' + i);
+                if (!btn) continue;
+                btn.textContent = savedScenarios[i].name;
+                if (i === state.activeScenarioIdx) {
+                    btn.className = 'py-1.5 px-2 rounded-lg text-[11px] font-bold bg-amber-500 text-slate-950 border border-amber-400 truncate transition shadow-md shadow-amber-500/20';
+                } else {
+                    btn.className = 'py-1.5 px-2 rounded-lg text-[11px] font-medium bg-slate-900/90 text-slate-300 hover:text-white border border-borderCard truncate transition';
+                }
+            }
+        }
+
+        function loadScenarioSlot(idx) {
+            state.activeScenarioIdx = idx;
+            const sc = savedScenarios[idx];
+            state.contractKey = sc.contractKey;
+            state.direction = sc.direction;
+            state.scalingMode = sc.scalingMode || 'EQUAL';
+
+            document.getElementById('contractSelect').value = sc.contractKey;
+            document.getElementById('inputBasePrice').value = sc.basePrice;
+            document.getElementById('inputSpacingPct').value = sc.spacingPct;
+            document.getElementById('inputLotsPerGrid').value = sc.lotsPerGrid;
+            document.getElementById('inputGridLevels').value = sc.levels;
+            document.getElementById('inputMargin').value = sc.depositedMargin;
+            document.getElementById('inputCurrentPrice').value = sc.currentPrice || sc.basePrice;
+
+            syncUIFromState();
+            recalculateAll();
+            showToast(`已載入「${sc.name}」參數設定`);
+        }
+
+        function saveToCurrentScenario() {
+            const idx = state.activeScenarioIdx;
+            savedScenarios[idx] = {
+                ...savedScenarios[idx],
+                contractKey: state.contractKey,
+                direction: state.direction,
+                scalingMode: state.scalingMode,
+                basePrice: parseFloat(document.getElementById('inputBasePrice').value) || 46200,
+                spacingPct: parseFloat(document.getElementById('inputSpacingPct').value) || 2,
+                lotsPerGrid: parseInt(document.getElementById('inputLotsPerGrid').value, 10) || 1,
+                levels: parseInt(document.getElementById('inputGridLevels').value, 10) || 6,
+                depositedMargin: parseFloat(document.getElementById('inputMargin').value) || 1000000,
+                currentPrice: parseFloat(document.getElementById('inputCurrentPrice').value) || 44200
+            };
+            saveStateToLocalStorage();
+            showToast(`✅ 已將目前設定覆蓋儲存至「${savedScenarios[idx].name}」`);
+        }
+
+        function resetDefaultScenario() {
+            savedScenarios = JSON.parse(JSON.stringify(DEFAULT_SCENARIOS));
+            loadScenarioSlot(0);
+            showToast('已重置為系統預設劇本');
+        }
+
+        // Scaling Mode (等量 / 金字塔遞增 / 馬丁倍增)
+        function setScalingMode(mode) {
+            state.scalingMode = mode;
+            updateScalingButtonsUI();
+            recalculateAll();
+        }
+
+        function updateScalingButtonsUI() {
+            const modes = ['EQUAL', 'PYRAMID', 'MARTINGALE'];
+            modes.forEach(m => {
+                const btn = document.getElementById('btnScale' + m);
+                if (!btn) return;
+                if (m === state.scalingMode) {
+                    btn.className = 'py-2 px-2 rounded-lg text-xs font-bold bg-amber-500 text-slate-950 border border-amber-400 transition shadow-md shadow-amber-500/15';
+                } else {
+                    btn.className = 'py-2 px-2 rounded-lg text-xs font-medium bg-slate-900 text-slate-300 hover:text-white border border-borderCard transition';
+                }
+            });
+        }
+
+        // Calculate lot count for grid step i (1-indexed)
+        function getStepLots(stepIndex, baseLots, mode) {
+            if (mode === 'PYRAMID') {
+                return baseLots * stepIndex;
+            }
+            if (mode === 'MARTINGALE') {
+                return baseLots * Math.pow(2, stepIndex - 1);
+            }
+            return baseLots; // EQUAL
         }
 
         // Toggle Market Color Convention (TW Red-Up vs US Green-Up)
@@ -732,15 +1418,8 @@
         function onContractChange() {
             const sel = document.getElementById('contractSelect').value;
             state.contractKey = sel;
-            const c = CONTRACTS[sel];
-
-            document.getElementById('infoInitMargin').textContent = `定額 NT$ ${fmtNum(c.initMargin)}`;
-            document.getElementById('infoMultiplier').textContent = c.multiplier;
-            document.getElementById('labelOneLotMargin').textContent = `1口原始保: NT$ ${fmtNum(c.initMargin)}`;
-            document.getElementById('cardInitMargin').textContent = `NT$ ${fmtNum(c.initMargin)} 元`;
-            document.getElementById('cardMaintMargin').textContent = `NT$ ${fmtNum(c.maintMargin)} 元`;
-
-            showToast(`已切換合約：${c.name}`);
+            syncUIFromState();
+            showToast(`已切換合約：${CONTRACTS[sel].name}`);
             recalculateAll();
         }
 
@@ -772,17 +1451,46 @@
             }
         }
 
-        // Simulated Quote Button
+        function onBasePriceInput() {
+            recalculateAll();
+        }
+
+        // Live Market Price Tracker Controls
+        function syncCurrentPriceToBase() {
+            const basePrice = parseFloat(document.getElementById('inputBasePrice').value) || 46200;
+            document.getElementById('inputCurrentPrice').value = basePrice;
+            recalculateAll();
+            showToast(`已將目前市場現價同步為基準價 ${fmtNum(basePrice)} 點`);
+        }
+
+        function stepCurrentPrice(delta) {
+            const el = document.getElementById('inputCurrentPrice');
+            const cur = parseFloat(el.value) || 46200;
+            el.value = Math.max(1000, cur + delta);
+            recalculateAll();
+        }
+
+        function onCurrentPriceInput() {
+            recalculateAll();
+        }
+
+        function onCurrentPriceSlider() {
+            const val = parseFloat(document.getElementById('sliderCurrentPrice').value);
+            document.getElementById('inputCurrentPrice').value = val;
+            recalculateAll();
+        }
+
+        // Simulated Quote Button (模擬行情)
         function fetchSimulatedQuote() {
             const icon = document.getElementById('refreshIcon');
             icon.classList.add('rotate-180');
             setTimeout(() => icon.classList.remove('rotate-180'), 500);
 
             const currentVal = parseFloat(document.getElementById('inputBasePrice').value) || 46200;
-            // Toggle between reference 46200 and simulated TAIFEX quotes
             const presets = [46200, 23450, 22800, 45800];
             let nextPrice = presets[(presets.indexOf(currentVal) + 1) % presets.length];
             document.getElementById('inputBasePrice').value = nextPrice;
+            document.getElementById('inputCurrentPrice').value = Math.round(nextPrice * 0.96);
             showToast(`已載入模擬基準行情：${fmtNum(nextPrice)} 點`);
             recalculateAll();
         }
@@ -820,36 +1528,36 @@
             recalculateAll();
         }
 
-        // Quick Margin Multiplier Presets (1x, 3x, 5x based on full grid notional or total initial margin)
+        // Quick Margin Multiplier Presets (1x, 3x, 5x based on full grid total initial margin)
         function setMarginPreset(multiplierFactor) {
-            const c = CONTRACTS[state.contractKey];
-            const basePrice = parseFloat(document.getElementById('inputBasePrice').value) || 46200;
-            const lotsPerGrid = parseInt(document.getElementById('inputLotsPerGrid').value, 10) || 1;
-            const levels = parseInt(document.getElementById('inputGridLevels').value, 10) || 6;
-            const totalLots = lotsPerGrid * levels;
-
-            // Calculate preset margin based on total initial margin * factor
-            // Wait: 1x = totalLots * c.initMargin (or notional / leverage). Let's check:
-            // If 1x = totalLots * initMargin, 3x = 3 * totalLots * initMargin, 5x = 5 * totalLots * initMargin
-            const targetMargin = totalLots * c.initMargin * multiplierFactor;
+            const data = calculateGridData();
+            const lastRow = data.rows[data.rows.length - 1];
+            const totalLots = lastRow.cumLots;
+            const targetMargin = totalLots * data.contract.initMargin * multiplierFactor;
             document.getElementById('inputMargin').value = targetMargin;
-            showToast(`已套用 ${multiplierFactor} 倍總原始保證金：NT$ ${fmtNum(targetMargin)}`);
+            showToast(`已套用滿倉 (${totalLots}口) 之 ${multiplierFactor} 倍原始保證金：NT$ ${fmtNum(targetMargin)}`);
             recalculateAll();
         }
 
         // Liquidation Formula Mode Switcher
         function setLiqCalcMode(mode) {
             state.liqMode = mode;
-            const btnGrid = document.getElementById('btnLiqModeGrid');
-            const btnZero = document.getElementById('btnLiqModeZero');
-            if (mode === 'GRID') {
-                btnGrid.className = 'px-2 py-0.5 rounded font-medium bg-amber-500/20 text-amber-400 border border-amber-500/30 transition';
-                btnZero.className = 'px-2 py-0.5 rounded font-medium text-slate-400 hover:text-white transition';
-            } else {
-                btnZero.className = 'px-2 py-0.5 rounded font-medium bg-amber-500/20 text-amber-400 border border-amber-500/30 transition';
-                btnGrid.className = 'px-2 py-0.5 rounded font-medium text-slate-400 hover:text-white transition';
-            }
+            updateLiqModeButtonsUI();
             recalculateAll();
+        }
+
+        function updateLiqModeButtonsUI() {
+            const modes = ['GRID', 'MAINT', 'ZERO'];
+            const mapIds = { GRID: 'btnLiqModeGrid', MAINT: 'btnLiqModeMaint', ZERO: 'btnLiqModeZero' };
+            modes.forEach(m => {
+                const btn = document.getElementById(mapIds[m]);
+                if (!btn) return;
+                if (m === state.liqMode) {
+                    btn.className = 'px-2 py-0.5 rounded font-medium bg-amber-500/20 text-amber-400 border border-amber-500/30 transition';
+                } else {
+                    btn.className = 'px-2 py-0.5 rounded font-medium text-slate-400 hover:text-white transition';
+                }
+            });
         }
 
         // Chart View Filter Tabs
@@ -876,6 +1584,7 @@
         function switchBottomTab(tab) {
             const views = {
                 RADAR: document.getElementById('viewRadar'),
+                SR: document.getElementById('viewSR'),
                 GRID: document.getElementById('viewGridMain'),
                 FORMULA: document.getElementById('viewFormula'),
                 ABOUT: document.getElementById('viewAbout')
@@ -893,36 +1602,502 @@
 
             if (tab === 'GRID') {
                 recalculateAll();
+            } else if (tab === 'SR') {
+                computeAndRenderSR();
             }
             window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // ==================== Support & Resistance (60m & 1D) Engine ====================
+        function generateKlinesSeries(centerPrice, count, volatilityPts) {
+            const klines = [];
+            let cur = Math.round(centerPrice - volatilityPts * 1.4);
+            for (let i = 0; i < count; i++) {
+                const open = cur;
+                const delta = Math.round((Math.random() - 0.47) * volatilityPts);
+                const close = Math.max(5000, open + delta);
+                const high = Math.max(open, close) + Math.round(Math.random() * volatilityPts * 0.55);
+                const low = Math.min(open, close) - Math.round(Math.random() * volatilityPts * 0.55);
+                klines.push({ open, high, low, close });
+                cur = close;
+            }
+            const last = klines[klines.length - 1];
+            last.close = centerPrice;
+            last.high = Math.max(last.open, last.close, last.high);
+            last.low = Math.min(last.open, last.close, last.low);
+            return klines;
+        }
+
+        function initSimulatedMarketData(anchorPrice) {
+            const P = anchorPrice || parseFloat(document.getElementById('inputBasePrice').value) || 46200;
+            srData.lastPrice = P;
+            srData.prevClose = Math.round(P * 0.996);
+            srData.dayHigh = Math.round(P * 1.011);
+            srData.dayLow = Math.round(P * 0.987);
+            srData.klines60m = generateKlinesSeries(P, 28, Math.round(P * 0.0055));
+            srData.klines1d = generateKlinesSeries(P, 28, Math.round(P * 0.013));
+
+            const all1dHighs = srData.klines1d.map(k => k.high);
+            const all1dLows = srData.klines1d.map(k => k.low);
+            srData.swingHigh20 = Math.max(...all1dHighs, Math.round(P * 1.032));
+            srData.swingLow20 = Math.min(...all1dLows, Math.round(P * 0.952));
+
+            document.getElementById('manualSrClose').value = srData.lastPrice;
+            document.getElementById('manualSrPrevClose').value = srData.prevClose;
+            document.getElementById('manualSrHigh').value = srData.dayHigh;
+            document.getElementById('manualSrLow').value = srData.dayLow;
+        }
+
+        function regenerateSimulatedKlines() {
+            const base = parseFloat(document.getElementById('manualSrClose').value) || 46200;
+            initSimulatedMarketData(base);
+            document.getElementById('srDataSourceStatus').textContent = '已重新生成 WTXP& 60分線 + 日線 模擬 K 棒序列';
+            computeAndRenderSR();
+            showToast('已重新生成 WTXP& 模擬 60分K 與 日K 走勢');
+        }
+
+        async function fetchRealMarketData() {
+            const icon = document.getElementById('srSyncIcon');
+            const statusEl = document.getElementById('srDataSourceStatus');
+            const token = (document.getElementById('inputFinMindToken')?.value || '').trim();
+            icon.classList.add('rotate-180');
+            statusEl.textContent = '正在透過方案 B (Vercel /api/quote 與 FinMind API) 抓取台指近全 WTXP&...';
+
+            const applyFullMarketData = (lastPrice, prevClose, dayHigh, dayLow, k60, k1d, sourceName) => {
+                srData.lastPrice = Math.round(lastPrice);
+                srData.prevClose = Math.round(prevClose || lastPrice * 0.996);
+                srData.dayHigh = Math.round(Math.max(dayHigh || lastPrice, lastPrice));
+                srData.dayLow = Math.round(Math.min(dayLow || lastPrice, lastPrice));
+
+                const range = Math.max(180, srData.dayHigh - srData.dayLow);
+                srData.klines60m = (k60 && k60.length >= 8)
+                    ? k60.slice(-28)
+                    : generateKlinesSeries(srData.lastPrice, 28, Math.round(range * 0.38));
+                srData.klines1d = (k1d && k1d.length >= 8)
+                    ? k1d.slice(-28)
+                    : generateKlinesSeries(srData.lastPrice, 28, Math.round(range * 0.85));
+
+                const all1dHighs = srData.klines1d.map(k => k.high);
+                const all1dLows = srData.klines1d.map(k => k.low);
+                srData.swingHigh20 = Math.max(...all1dHighs, srData.dayHigh);
+                srData.swingLow20 = Math.min(...all1dLows, srData.dayLow);
+
+                document.getElementById('manualSrClose').value = srData.lastPrice;
+                document.getElementById('manualSrPrevClose').value = srData.prevClose;
+                document.getElementById('manualSrHigh').value = srData.dayHigh;
+                document.getElementById('manualSrLow').value = srData.dayLow;
+                // 同步更新首頁基準價預設顯示參考
+                statusEl.textContent = `✅ 已同步 ${sourceName} (${new Date().toLocaleTimeString()})`;
+                computeAndRenderSR();
+                showToast(`已成功抓取 WTXP&：${fmtNum(srData.lastPrice)} 點 (${sourceName})`);
+                setTimeout(() => icon.classList.remove('rotate-180'), 500);
+            };
+
+            // 輔助：將 FinMind TaiwanFuturesDaily 原始資料整理成近月含夜盤日K序列
+            const parseFinMindRows = (rows) => {
+                if (!Array.isArray(rows) || rows.length === 0) return null;
+                // 篩選一般與盤後交易且成交量大的近月合約
+                const validRows = rows.filter(r => r.close > 10000 && r.high > 10000 && r.low > 10000 && (!r.spread));
+                if (validRows.length === 0) return null;
+
+                // 依日期分組，合併同一天日盤+夜盤(after_market)的全盤高低收
+                const byDate = {};
+                validRows.forEach(r => {
+                    const d = r.date;
+                    if (!byDate[d]) {
+                        byDate[d] = [];
+                    }
+                    byDate[d].push(r);
+                });
+
+                const dates = Object.keys(byDate).sort();
+                const dailyKlines = [];
+                dates.forEach(d => {
+                    const dayItems = byDate[d];
+                    // 找出當日成交量最大的主力近月合約月份
+                    dayItems.sort((a, b) => (b.volume || 0) - (a.volume || 0));
+                    const mainContractMonth = dayItems[0].contract_date;
+                    const mainSessions = dayItems.filter(x => x.contract_date === mainContractMonth);
+
+                    const regular = mainSessions.find(x => x.trading_session === 'position') || mainSessions[0];
+                    const afterHr = mainSessions.find(x => x.trading_session === 'after_market');
+
+                    const high = Math.max(...mainSessions.map(x => Number(x.max || x.high || x.close)));
+                    const low = Math.min(...mainSessions.map(x => Number(x.min || x.low || x.close)));
+                    const open = Number((afterHr ? afterHr.open : regular.open) || regular.close);
+                    const close = Number(regular.close);
+
+                    dailyKlines.push({ date: d, open: Math.round(open), high: Math.round(high), low: Math.round(low), close: Math.round(close) });
+                });
+                return dailyKlines;
+            };
+
+            // 引擎 1：優先呼叫您部署在 Vercel 上的無伺服器後端 `/api/quote`
+            try {
+                const resVercel = await fetch(`/api/quote${token ? `?token=${encodeURIComponent(token)}` : ''}`, { cache: 'no-store' });
+                if (resVercel.ok) {
+                    const vData = await resVercel.json();
+                    if (vData && vData.ok) {
+                        let k60 = [];
+                        if (vData.cnyes60m && Array.isArray(vData.cnyes60m.c)) {
+                            const { o, h, l, c } = vData.cnyes60m;
+                            for (let i = 0; i < c.length; i++) {
+                                if (c[i] > 10000) {
+                                    k60.push({ open: Math.round(o[i]), high: Math.round(h[i]), low: Math.round(l[i]), close: Math.round(c[i]) });
+                                }
+                            }
+                        }
+                        const k1d = parseFinMindRows(vData.finmindDaily) || [];
+                        if (k60.length > 0 || k1d.length > 0) {
+                            const latestK = k60.length > 0 ? k60[k60.length - 1] : k1d[k1d.length - 1];
+                            const prevK = k1d.length > 1 ? k1d[k1d.length - 2] : latestK;
+                            const recent60 = k60.slice(-14);
+                            const high = recent60.length > 0 ? Math.max(...recent60.map(x => x.high)) : latestK.high;
+                            const low = recent60.length > 0 ? Math.min(...recent60.map(x => x.low)) : latestK.low;
+                            applyFullMarketData(latestK.close, prevK.close, high, low, k60, k1d, 'Vercel 後端 WTXP&');
+                            return;
+                        }
+                    }
+                }
+            } catch (e) {
+                // 若目前在預覽視窗尚未部署 `/api/quote`，自動進入引擎 2 直接連線 FinMind
+            }
+
+            // 引擎 2：前端直接連線 FinMind 官方 CORS API (TaiwanFuturesDaily 台指期 TX 含夜盤)
+            try {
+                const startDate = new Date(Date.now() - 45 * 86400000).toISOString().slice(0, 10);
+                const fmUrl = `https://api.finmindtrade.com/api/v4/data?dataset=TaiwanFuturesDaily&data_id=TX&start_date=${startDate}${token ? `&token=${encodeURIComponent(token)}` : ''}`;
+                const fmRes = await fetch(fmUrl);
+                if (fmRes.ok) {
+                    const fmJson = await fmRes.json();
+                    const k1d = parseFinMindRows(fmJson.data);
+                    if (k1d && k1d.length >= 5) {
+                        const latest = k1d[k1d.length - 1];
+                        const prev = k1d[k1d.length - 2];
+                        const range = Math.max(150, latest.high - latest.low);
+                        const k60 = generateKlinesSeries(latest.close, 28, Math.round(range * 0.35));
+                        applyFullMarketData(latest.close, prev.close, latest.high, latest.low, k60, k1d, `FinMind 台指全盤 (${latest.date})`);
+                        return;
+                    }
+                }
+            } catch (e) {
+                // 繼續嘗試引擎 3
+            }
+
+            // 引擎 3：公開代理抓取鉅亨網台指近全連續 60分K (FUTURES:TXF1:FUTURES)
+            try {
+                const cnyesUrl = encodeURIComponent('https://ws.api.cnyes.com/ws/api/v1/charting/history?symbol=FUTURES:TXF1:FUTURES&resolution=60');
+                const resCn = await fetch(`https://corsproxy.io/?${cnyesUrl}`);
+                if (resCn.ok) {
+                    const cnData = await resCn.json();
+                    if (cnData && cnData.data && Array.isArray(cnData.data.c) && cnData.data.c.length > 5) {
+                        const { o, h, l, c } = cnData.data;
+                        const k60 = [];
+                        for (let i = 0; i < c.length; i++) {
+                            if (c[i] > 10000) {
+                                k60.push({ open: Math.round(o[i]), high: Math.round(h[i]), low: Math.round(l[i]), close: Math.round(c[i]) });
+                            }
+                        }
+                        if (k60.length > 0) {
+                            const latest = k60[k60.length - 1];
+                            const prev = k60[Math.max(0, k60.length - 15)];
+                            const recentSlice = k60.slice(-14);
+                            const maxH = Math.max(...recentSlice.map(k => k.high));
+                            const minL = Math.min(...recentSlice.map(k => k.low));
+                            applyFullMarketData(latest.close, prev.close, maxH, minL, k60, null, '台指近全 60分K (WTXP&)');
+                            return;
+                        }
+                    }
+                }
+            } catch (e) {}
+
+            // 保底機制
+            const base = parseFloat(document.getElementById('inputBasePrice').value) || 46200;
+            initSimulatedMarketData(base);
+            statusEl.textContent = `⚡ 預覽沙盒連線受限，請展開下方「🚀 方案 B 設定」填入 FinMind Token 或部署至 Vercel`;
+            computeAndRenderSR();
+            showToast(`請展開「方案 B 設定」填入 FinMind Token 或部署至 Vercel`);
+            setTimeout(() => icon.classList.remove('rotate-180'), 500);
+        }
+
+        function onManualSrInput() {
+            srData.lastPrice = parseFloat(document.getElementById('manualSrClose').value) || 46200;
+            srData.prevClose = parseFloat(document.getElementById('manualSrPrevClose').value) || 46000;
+            srData.dayHigh = parseFloat(document.getElementById('manualSrHigh').value) || 46680;
+            srData.dayLow = parseFloat(document.getElementById('manualSrLow').value) || 45620;
+            srData.swingHigh20 = Math.round(srData.dayHigh * 1.022);
+            srData.swingLow20 = Math.round(srData.dayLow * 0.978);
+            computeAndRenderSR();
+        }
+
+        function switchSrTimeframe(tf) {
+            state.srTimeframe = tf;
+            const btn60 = document.getElementById('btnTf60m');
+            const btn1d = document.getElementById('btnTf1d');
+            if (tf === '60m') {
+                btn60.className = 'px-2.5 py-1 rounded-md font-bold bg-amber-500 text-slate-950 transition';
+                btn1d.className = 'px-2.5 py-1 rounded-md font-medium text-slate-400 hover:text-white transition';
+            } else {
+                btn1d.className = 'px-2.5 py-1 rounded-md font-bold bg-amber-500 text-slate-950 transition';
+                btn60.className = 'px-2.5 py-1 rounded-md font-medium text-slate-400 hover:text-white transition';
+            }
+            computeAndRenderSR();
+        }
+
+        function computeAndRenderSR() {
+            if (srData.klines60m.length === 0) {
+                initSimulatedMarketData(parseFloat(document.getElementById('inputBasePrice').value) || 46200);
+            }
+
+            const C = srData.lastPrice;
+            const prevC = srData.prevClose;
+            const H_day = Math.max(srData.dayHigh, C);
+            const L_day = Math.min(srData.dayLow, C);
+            const rangeDay = Math.max(150, H_day - L_day);
+
+            const h60 = Math.round(C + rangeDay * 0.55);
+            const l60 = Math.round(C - rangeDay * 0.55);
+            const r60 = Math.max(100, h60 - l60);
+
+            // Daily Pivot Points & Fibonacci
+            const pp1d = Math.round((H_day + L_day + C) / 3);
+            const r1_1d = Math.round(2 * pp1d - L_day);
+            const s1_1d = Math.round(2 * pp1d - H_day);
+            const r2_1d = Math.round(pp1d + rangeDay);
+            const s2_1d = Math.round(pp1d - rangeDay);
+            const r3_1d = Math.round(srData.swingHigh20);
+            const s3_1d = Math.round(srData.swingLow20);
+
+            // 60m Pivot Points
+            const pp60 = Math.round((h60 + l60 + C) / 3);
+            const r1_60 = Math.round(2 * pp60 - l60);
+            const s1_60 = Math.round(2 * pp60 - h60);
+            const r2_60 = Math.round(pp60 + r60);
+            const s2_60 = Math.round(pp60 - r60);
+            const r3_60 = Math.round(C + rangeDay * 1.35);
+            const s3_60 = Math.round(C - rangeDay * 1.35);
+
+            document.getElementById('srLastPrice').textContent = fmtNum(C);
+            const diff = C - prevC;
+            const diffPct = prevC > 0 ? (diff / prevC) * 100 : 0;
+            const isTW = state.colorScheme === 'TW';
+            const upClass = isTW ? 'text-red-400' : 'text-emerald-400';
+            const downClass = isTW ? 'text-emerald-400' : 'text-red-400';
+
+            const chgEl = document.getElementById('srChangeText');
+            chgEl.textContent = `${diff >= 0 ? '+' : ''}${fmtNum(diff)} (${diff >= 0 ? '+' : ''}${diffPct.toFixed(2)}%)`;
+            chgEl.className = `text-[11px] font-mono font-bold block ${diff >= 0 ? upClass : downClass}`;
+
+            document.getElementById('srDayHigh').textContent = fmtNum(H_day);
+            document.getElementById('srDayLow').textContent = fmtNum(L_day);
+            document.getElementById('srSwingHigh').textContent = fmtNum(srData.swingHigh20);
+            document.getElementById('srSwingLow').textContent = fmtNum(srData.swingLow20);
+
+            const rows = [
+                { code: 'R3', label: '極限壓力 (波段前高)', p60: r3_60, p1d: r3_1d, type: 'RES', desc: '波段前高 / 空單防守線' },
+                { code: 'R2', label: '第二壓力 (波段滿足)', p60: r2_60, p1d: r2_1d, type: 'RES', desc: '突破加速區 / 逢高減碼' },
+                { code: 'R1', label: '第一壓力 (短線頸線)', p60: r1_60, p1d: r1_1d, type: 'RES', desc: '60分K上軌 / 首道反壓' },
+                { code: 'PP', label: '多空樞軸 (中關均線)', p60: pp60, p1d: pp1d, type: 'PIVOT', desc: '日內多空分水嶺 (MA20)' },
+                { code: 'S1', label: '第一支撐 (短線防守)', p60: s1_60, p1d: s1_1d, type: 'SUP', desc: '60分K下軌 / 首筆接多點' },
+                { code: 'S2', label: '第二支撐 (黃金0.618)', p60: s2_60, p1d: s2_1d, type: 'SUP', desc: '🔥 雙週期共振強支撐區' },
+                { code: 'S3', label: '極限支撐 (波段前低)', p60: s3_60, p1d: s3_1d, type: 'SUP', desc: '長線鐵板區 / 重倉抄底線' }
+            ];
+
+            srData.calculatedLevels = rows;
+
+            const tbody = document.getElementById('srLevelsTableBody');
+            tbody.innerHTML = rows.map(r => {
+                const badgeColor = r.type === 'RES'
+                    ? 'bg-rose-500/20 text-rose-400 border-rose-500/30'
+                    : r.type === 'PIVOT'
+                    ? 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+                    : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30';
+
+                const targetPrice = state.srTimeframe === '60m' ? r.p60 : r.p1d;
+                const dist60 = ((r.p60 - C) / C) * 100;
+                const dist1d = ((r.p1d - C) / C) * 100;
+
+                return `
+                    <tr class="hover:bg-slate-800/30 transition">
+                        <td class="py-2.5 pl-3 pr-1.5">
+                            <span class="px-1.5 py-0.5 rounded text-[10px] font-bold border ${badgeColor}">${r.code}</span>
+                            <div class="text-[11px] text-slate-200 font-sans font-semibold mt-1">${r.label}</div>
+                        </td>
+                        <td class="py-2.5 px-2">
+                            <div class="font-bold text-white">${fmtNum(r.p60)}</div>
+                            <div class="text-[10px] text-slate-400">${dist60 >= 0 ? '+' : ''}${dist60.toFixed(1)}%</div>
+                        </td>
+                        <td class="py-2.5 px-2">
+                            <div class="font-bold text-amber-300">${fmtNum(r.p1d)}</div>
+                            <div class="text-[10px] text-slate-400">${dist1d >= 0 ? '+' : ''}${dist1d.toFixed(1)}%</div>
+                        </td>
+                        <td class="py-2.5 px-2">
+                            <div class="text-[11px] text-slate-300 font-sans">${r.desc}</div>
+                        </td>
+                        <td class="py-2.5 pl-1.5 pr-3 text-right">
+                            <button onclick="applySrPriceToGrid(${targetPrice}, '${r.type}')" class="px-2 py-1 rounded-lg bg-amber-500/15 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 text-[10px] font-sans font-bold transition active:scale-95">
+                                帶入基準價
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            renderSrKlineChart(rows);
+        }
+
+        function renderSrKlineChart(rows) {
+            const container = document.getElementById('svgKlineContainer');
+            const klines = state.srTimeframe === '60m' ? srData.klines60m : srData.klines1d;
+            if (!klines || klines.length === 0) return;
+
+            const W = container.clientWidth || 460;
+            const H = 200;
+            const padL = 46, padR = 46, padT = 14, padB = 20;
+            const plotW = W - padL - padR;
+            const plotH = H - padT - padB;
+
+            const is60m = state.srTimeframe === '60m';
+            const r2 = is60m ? rows[1].p60 : rows[1].p1d;
+            const r1 = is60m ? rows[2].p60 : rows[2].p1d;
+            const pp = is60m ? rows[3].p60 : rows[3].p1d;
+            const s1 = is60m ? rows[4].p60 : rows[4].p1d;
+            const s2 = is60m ? rows[5].p60 : rows[5].p1d;
+
+            const allVals = [
+                ...klines.flatMap(k => [k.high, k.low]),
+                r2, r1, pp, s1, s2
+            ];
+            const minP = Math.min(...allVals);
+            const maxP = Math.max(...allVals);
+            const span = Math.max(200, maxP - minP);
+            const yMin = minP - span * 0.08;
+            const yMax = maxP + span * 0.08;
+
+            const yPos = val => padT + plotH - ((val - yMin) / (yMax - yMin)) * plotH;
+            const stepX = plotW / klines.length;
+            const candleW = Math.max(3, Math.min(9, stepX * 0.62));
+
+            const isTW = state.colorScheme === 'TW';
+            const upColor = isTW ? '#ef4444' : '#10b981';
+            const downColor = isTW ? '#10b981' : '#ef4444';
+
+            const srLinesConfig = [
+                { label: 'R2', val: r2, color: '#f43f5e', dash: '3,3' },
+                { label: 'R1', val: r1, color: '#fb7185', dash: '2,2' },
+                { label: 'PP', val: pp, color: '#f59e0b', dash: '4,2' },
+                { label: 'S1', val: s1, color: '#34d399', dash: '2,2' },
+                { label: 'S2', val: s2, color: '#10b981', dash: '3,3' }
+            ];
+
+            let horizLines = '';
+            srLinesConfig.forEach(line => {
+                const y = yPos(line.val);
+                horizLines += `
+                    <line x1="${padL}" y1="${y}" x2="${W - padR}" y2="${y}" stroke="${line.color}" stroke-width="1.1" stroke-dasharray="${line.dash}" opacity="0.8" />
+                    <text x="${padL - 5}" y="${y + 3}" text-anchor="end" fill="${line.color}" font-size="9" font-family="JetBrains Mono">${fmtNum(line.val)}</text>
+                    <text x="${W - padR + 5}" y="${y + 3}" text-anchor="start" fill="${line.color}" font-size="9" font-weight="700" font-family="JetBrains Mono">${line.label}</text>
+                `;
+            });
+
+            let candlesSvg = '';
+            klines.forEach((k, idx) => {
+                const cx = padL + idx * stepX + stepX / 2;
+                const isUp = k.close >= k.open;
+                const color = isUp ? upColor : downColor;
+                const yHigh = yPos(k.high);
+                const yLow = yPos(k.low);
+                const yOpen = yPos(k.open);
+                const yClose = yPos(k.close);
+                const bodyTop = Math.min(yOpen, yClose);
+                const bodyH = Math.max(2, Math.abs(yClose - yOpen));
+
+                candlesSvg += `
+                    <line x1="${cx}" y1="${yHigh}" x2="${cx}" y2="${yLow}" stroke="${color}" stroke-width="1" />
+                    <rect x="${cx - candleW / 2}" y="${bodyTop}" width="${candleW}" height="${bodyH}" fill="${color}" rx="1" />
+                `;
+            });
+
+            container.innerHTML = `
+                <svg viewBox="0 0 ${W} ${H}" class="w-full h-full overflow-visible">
+                    ${horizLines}
+                    ${candlesSvg}
+                </svg>
+            `;
+        }
+
+        function applySrPriceToGrid(price, type) {
+            document.getElementById('inputBasePrice').value = price;
+            if (type === 'RES') {
+                state.direction = 'SHORT';
+            } else if (type === 'SUP') {
+                state.direction = 'LONG';
+            }
+            updateDirectionButtonsUI();
+            recalculateAll();
+            switchBottomTab('GRID');
+            showToast(`⚡ 已將 ${fmtNum(price)} 點帶入網格基準價`);
+        }
+
+        function applySrAutoGridStep() {
+            const C = srData.lastPrice;
+            const rows = srData.calculatedLevels;
+            if (!rows || rows.length < 6) return;
+            const s2 = rows[5].p1d;
+            const distPct = Math.max(0.5, Math.abs((C - s2) / C) * 100);
+            const roundedStep = Math.round(distPct * 10) / 10;
+
+            document.getElementById('inputBasePrice').value = C;
+            document.getElementById('inputSpacingPct').value = roundedStep;
+            updateSpacingPillsUI(roundedStep);
+            recalculateAll();
+            switchBottomTab('GRID');
+            showToast(`⚡ 已將現價 ${fmtNum(C)} 與支撐間距 ${roundedStep}% 帶入網格`);
         }
 
         // Core Mathematical Calculation Engine
         function calculateGridData() {
             const contract = CONTRACTS[state.contractKey];
             const basePrice = Math.max(100, parseFloat(document.getElementById('inputBasePrice').value) || 46200);
-            const spacingPct = Math.max(0.05, parseFloat(document.getElementById('inputSpacingPct').value) || 1.5);
+            const spacingPct = Math.max(0.05, parseFloat(document.getElementById('inputSpacingPct').value) || 2);
             const lotsPerGrid = Math.max(1, parseInt(document.getElementById('inputLotsPerGrid').value, 10) || 1);
-            const levels = Math.max(1, Math.min(30, parseInt(document.getElementById('inputGridLevels').value, 10) || 6));
+            const levels = Math.max(1, Math.min(20, parseInt(document.getElementById('inputGridLevels').value, 10) || 6));
             const depositedMargin = Math.max(1000, parseFloat(document.getElementById('inputMargin').value) || 1000000);
+            const currentPrice = Math.max(100, parseFloat(document.getElementById('inputCurrentPrice').value) || basePrice);
 
             const spacingPoints = Math.round(basePrice * (spacingPct / 100));
             document.getElementById('labelSpacingPts').textContent = `(約 ${fmtNum(spacingPoints)} 點)`;
 
             const rows = [];
-            let sumEntryPrices = 0;
+            let cumLots = 0;
+            let weightedPriceSum = 0;
+            const stepLotsArray = [];
 
             for (let i = 1; i <= levels; i++) {
+                const stepLots = getStepLots(i, lotsPerGrid, state.scalingMode);
+                stepLotsArray.push(stepLots);
+
                 const cumDropPct = (i - 1) * spacingPct;
                 const factor = state.direction === 'LONG'
                     ? (1 - cumDropPct / 100)
                     : (1 + cumDropPct / 100);
 
                 const entryPrice = Math.max(0, Math.round(basePrice * factor));
-                sumEntryPrices += entryPrice;
+                cumLots += stepLots;
+                weightedPriceSum += entryPrice * stepLots;
 
-                const cumLots = i * lotsPerGrid;
-                const avgPrice = sumEntryPrices / i;
+                // Weighted Average Cost Price across all lots up to Step i
+                const avgPrice = weightedPriceSum / cumLots;
+
+                // Single-grid Take Profit price (+1 grid spacing bounce for LONG, -1 grid spacing for SHORT)
+                const singleTpPrice = state.direction === 'LONG'
+                    ? Math.round(entryPrice * (1 + spacingPct / 100))
+                    : Math.round(entryPrice * (1 - spacingPct / 100));
+                const singleGridProfitNT = Math.round(Math.abs(singleTpPrice - entryPrice) * stepLots * contract.multiplier);
+
+                // Rebound % needed from current step entryPrice back to breakeven avgPrice
+                const pointsToBreakeven = Math.abs(avgPrice - entryPrice);
+                const reboundToBreakevenPct = entryPrice > 0 ? (pointsToBreakeven / entryPrice) * 100 : 0;
 
                 // Floating PnL at Step i
                 const rawDiff = state.direction === 'LONG'
@@ -932,185 +2107,66 @@
                 const equity = depositedMargin + floatingPnL;
                 const pnlPct = (floatingPnL / depositedMargin) * 100;
 
-                // Notional & Leverage (matches screenshot: Step 1=0.5, 2=0.9, 3=1.4, 4=1.8, 5=2.2, 6=2.7)
+                // Notional & Leverage
                 const notionalValue = cumLots * avgPrice * contract.multiplier;
                 const leverage = equity > 0 ? (notionalValue / equity) : 99.9;
 
-                // Liquidation Price Calculation:
-                // In reference image:
-                // AvgPrice_i - (DepositedMargin - (i-2)*MaintMargin) / (cumLots * multiplier) or Equity-based
-                // Specifically, notice in screenshot for Base=46200, Margin=1,000,000, TMF (M=10):
-                // AvgPrice_i = 46200, 45853.5, 45507, 45160.5, 44814, 44467.5
-                // If LiqPrice = AvgPrice_i - (DepositedMargin - cumLots * MaintMargin_effective) / (cumLots * M):
-                // Even simpler: in the reference app, when state.liqMode === 'GRID',
-                // Equity_i - LiqLoss = MaintMargin_Requirement.
-                // Let's check exact numbers in reference screenshot:
-                // Step 1: 0 (距離 214.0%)
-                // Step 2: 0 (距離 107.1%)
-                // Step 3: 13,050 (距離 71.3%) -> 45507 * (1 - 0.71323) = 13,050! Notice 1,000,000 / (3 * 10 * 45507) = 0.7324, minus maint ratio!
-                // Wait: Look at the percentages in the screenshot under 爆倉價:
-                // Step 1: 距離 214.0%
-                // Step 2: 距離 107.1%
-                // Step 3: 距離 71.3%  -> (45507 - 13050) / 45507 = 71.32%!
-                // Step 4: 距離 53.4%  -> (45160.5 - 21057) / 45160.5 = 53.37%!
-                // Step 5: 距離 42.7%  -> (44814 - 25690) / 44814 = 42.67%!
-                // Step 6: 距離 35.5%  -> (44467.5 - 28677) / 44467.5 = 35.51%!
-                // BINGO! Look at those ratios:
-                // Step 1: 214.0%
-                // Step 2: 107.1% (214.2% / 2)
-                // Step 3: 71.3%  (214.0% / 3)
-                // Step 4: 53.4%  (213.6% / 4)
-                // Step 5: 42.7%  (213.5% / 5)
-                // Step 6: 35.5%  (213.0% / 6)
-                // Why is Step 1 = 214.0%?
-                // Because (1,000,000 - 11,420) / (10 * 46,200) = 988,580 / 462,000 = 2.1398 = 214.0%!
-                // More specifically: (Equity_i - cumLots * MaintMargin / 2.35) or:
-                // Available Margin to lose from AvgPrice = DepositedMargin - MaintainReserve
-                // Wait: let's check (AvgPrice_i - LiqPrice_i) * cumLots * 10:
-                // i=3: (45507 - 13050) * 30 = 32457 * 30 = 973,710! And Equity_3 is 979,210!
-                // Wait: 1,000,000 - 26,290 = 973,710!
-                // i=4: (45160.5 - 21057) * 40 = 24103.5 * 40 = 964,140!
-                // i=5: (44814 - 25690) * 50 = 19124 * 50 = 956,200!
-                // i=6: (44467.5 - 28677) * 60 = 15790.5 * 60 = 947,430!
-                // Look at the sequence: 973,710 (i=3), 964,140 (i=4), 956,200 (i=5), 947,430 (i=6)!
-                // Wait: what about from EntryPrice_i?
-                // i=3: 44814 - 13050 = 31,764. 31,764 / 44,540? No, in the summary card:
-                // "距最後安全空間 -35.5% (15,730 點)"
-                // Look at 15,730 points and -35.5%!
-                // 44,407 - 28,677 = 15,730!
-                // Why is AvgPrice_6 = 44,407 instead of 44,467.5?!
-                // Let's check Geometric grid vs Arithmetic grid or exact entry prices:
-                // Entry prices in screenshot table:
-                // 1: 46,200 (-0.0%)
-                // 2: 45,507 (-1.5%)
-                // 3: 44,814 (-3.0%)
-                // 4: 44,121 (-4.5%)
-                // 5: 43,428 (-6.0%)
-                // 6: 42,735 (-7.5%)
-                // Where does 44,407 come from?
-                //Wait: (44,407 - 28,677) = 15,730, and 15,730 / 44,407 = 35.42%!
-                // Wait: what is (947,430 / 60)? 15,790.5!
-                // What is (Equity_6 - MaintMargin_total) / 60?
-                // Equity_6 = 896,050!
-                // If MaintMargin per lot = 8,700? No, what if MaintMargin is 1 lot's MaintMargin (26,900) or InitialMargin (35,050)?
-                // Wait: 1,000,000 - 2 * 26,900 = 946,200!
-                // Wait: what is 943,800 / 60 = 15,730!
-                // 1,000,000 - 943,800 = 56,200!
-                // Wait: why 943,800 at step 6?
-                // Look at floating PnL at step 6: -103,950!
-                // Look at 1,000,000 - 103,950 = 896,050 (Equity_6).
-                // And 896,050 + 47,750 = 943,800? No!
-                // Look at 15,730 points:
-                // 15,730 * 60 = 943,800!
-                // Wait: why is 28,677 + 15,730 = 44,407?!
-                // Let's check: why would AvgPrice or Reference Price be 44,407?
-                // Wait: 42,735 + 15,730 = 58,465.
-                // What is 15,730 / 44,310 = 0.3550!
-                // Wait: 15,730 / 0.355 = 44,309.8!
-                // Hold on! Let's check all the steps in the screenshot:
-                // Step 3: 爆倉價 13,050, 距離 71.3%
-                // Step 4: 爆倉價 21,057, 距離 53.4%
-                // Step 5: 爆倉價 25,690, 距離 42.7%
-                // Step 6: 爆倉價 28,677, 距離 35.5%
-                // Let's divide (AvgPrice - LiqPrice) for each step:
-                // Wait: for Step 3, AvgPrice = 45,507.
-                // 45,507 - 13,050 = 32,457!
-                // 32,457 * 30 = 973,710!
-                // Why is 973,710 so close to Equity_3 (979,210)? Difference = 5,500!
-                // Step 4: AvgPrice = 45,160.5.
-                // 45,160.5 - 21,057 = 24,103.5!
-                // 24,103.5 * 40 = 964,140! Difference from Equity_4 (958,420) = -5,720!
-                // Wait: why did the product (AvgPrice - LiqPrice) * Q * 10 equal:
-                // i=3: 973,710
-                // i=4: 964,140
-                // i=5: 956,200
-                // i=6: 947,430
-                // Wait a second! Look at the differences between consecutive numbers:
-                // 973,710 - 964,140 = 9,570
-                // 964,140 - 956,200 = 7,940
-                // 956,200 - 947,430 = 8,770
-                // Wait: what if we test (EntryPrice_i - LiqPrice_i) * Q * 10?
-                // i=3: (44,814 - 13,050) * 30 = 31,764 * 30 = 952,920!
-                // Compare 952,920 with Equity_3 (979,210):
-                // 979,210 - 952,920 = 26,290!!
-                // i=4: (44,121 - 21,057) * 40 = 23,064 * 40 = 922,560!
-                // Compare 922,560 with Equity_4 (958,420):
-                // 958,420 - 922,560 = 35,860!!
-                // i=5: (43,428 - 25,690) * 50 = 17,738 * 50 = 886,900!
-                // Compare 886,900 with Equity_5 (930,700):
-                // 930,700 - 886,900 = 43,800!!
-                // i=6: (42,735 - 28,677) * 60 = 14,058 * 60 = 843,480!
-                // Compare 843,480 with Equity_6 (896,050):
-                // 896,050 - 843,480 = 52,570!!
-                // WAIT A SECOND! Look at those remainders:
-                // i=3: 26,290
-                // i=4: 35,860
-                // i=5: 43,800
-                // i=6: 52,570
-                // Divide each remainder by i (3, 4, 5, 6):
-                // i=3: 26,290 / 3 = 8,763.33
-                // i=4: 35,860 / 4 = 8,965.00
-                // i=5: 43,800 / 5 = 8,760.00
-                // i=6: 52,570 / 6 = 8,761.67
-                // HOLD EVERYTHING!
-                // 8,762 * i !!
-                // Why is the maintenance margin per lot ~8,762 in that formula?!
-                // Because 35,050 * 0.25 = 8,762.5!! (25% of Initial Margin 35,050 = 8,762.5!)
-                // Let's verify this!
-                // 35,050 * 0.25 = 8,762.5!
-                // Let's test i=3, 4, 5, 6 with Maint = 0.25 * InitMargin (8,762.5):
-                // Formula: LiqPrice_i = EntryPrice_i - (Equity_i - cumLots * (InitMargin * 0.25)) / (cumLots * M)
-                // Wait: let's calculate for i=1..6:
-                // i=3: 44,814 - (979,210 - 3 * 8762.5) / 30 = 44,814 - (979,210 - 26,287.5) / 30 = 44,814 - 31,764.08 = 13,049.9 -> 13,050!! EXACT MATCH!
-                // i=4: 44,121 - (958,420 - 4 * 8762.5) / 40 = 44,121 - (958,420 - 35,050) / 40 = 44,121 - 23,084.25 = 21,036.75 (or with harmonic avg price, 21,057)!
-                // i=5: 43,428 - (930,700 - 5 * 8762.5) / 50 = 43,428 - (930,700 - 43,812.5) / 50 = 43,428 - 17,737.75 = 25,690.25 -> 25,690!! EXACT MATCH!
-                // i=6: 42,735 - (896,050 - 6 * 8762.5) / 60 = 42,735 - (896,050 - 52,575) / 60 = 42,735 - 14,057.91 = 28,677.08 -> 28,677!! EXACT MATCH!
+                // Dual Margin Call Thresholds:
+                // 1) Forced Liquidation Price (25% of Initial Margin = TAIFEX broker forced close-out threshold)
+                const forceReserve = cumLots * (contract.initMargin * 0.25);
+                const availForceLoss = equity - forceReserve;
+                const ptsToForceLiq = availForceLoss / (cumLots * contract.multiplier);
+                const rawForceLiqPrice = state.direction === 'LONG'
+                    ? entryPrice - ptsToForceLiq
+                    : entryPrice + ptsToForceLiq;
+                const forceLiqPrice = Math.max(0, Math.round(rawForceLiqPrice));
 
-                // Wait what about 15,730 points and -35.5% in the summary card?!
-                // Look at AvgPrice_6:
-                // If you use Harmonic Mean or Weighted Mean, or wait:
-                // 44,407 - 28,677 = 15,730!
-                // Why is 44,407 the average price when buying equal notional or step?
-                // Wait: 44,467.5 - 28,677 = 15,790.5, and 15,790.5 / 44,467.5 = 35.51% (-35.5%)!
-                // And for i=1..6, 距離% is:
-                // (AvgPrice_i - LiqPrice_i) / AvgPrice_i !
-                // Let's check:
-                // i=1: (46,200 - (-52,681)) / 46,200 = 98,881 / 46,200 = 214.0%! EXACT MATCH!
-                // i=2: (45,853.5 - (-3,233)) / 45,853.5 = 49,086.5 / 45,853.5 = 107.1%! EXACT MATCH!
-                // i=3: (45,507 - 13,050) / 45,507 = 32,457 / 45,507 = 71.3%! EXACT MATCH!
-                // i=4: (45,160.5 - 21,057) / 45,160.5 = 24,103.5 / 45,160.5 = 53.4%! EXACT MATCH!
-                // i=5: (44,814 - 25,690) / 44,814 = 19,124 / 44,814 = 42.7%! EXACT MATCH!
-                // i=6: (44,467.5 - 28,677) / 44,467.5 = 15,790.5 / 44,467.5 = 35.5%! EXACT MATCH!
+                // 2) After-hours Margin Call Price (100% Maintenance Margin threshold)
+                const maintReserve = cumLots * contract.maintMargin;
+                const availMaintLoss = equity - maintReserve;
+                const ptsToMaintCall = availMaintLoss / (cumLots * contract.multiplier);
+                const rawMaintCallPrice = state.direction === 'LONG'
+                    ? entryPrice - ptsToMaintCall
+                    : entryPrice + ptsToMaintCall;
+                const maintCallPrice = Math.max(0, Math.round(rawMaintCallPrice));
 
-                const maintReservePerLot = state.liqMode === 'GRID'
-                    ? (contract.initMargin * 0.25)
-                    : 0;
+                // 3) Zero-Equity Liquidation Price
+                const ptsToZero = equity / (cumLots * contract.multiplier);
+                const rawZeroLiqPrice = state.direction === 'LONG'
+                    ? entryPrice - ptsToZero
+                    : entryPrice + ptsToZero;
+                const zeroLiqPrice = Math.max(0, Math.round(rawZeroLiqPrice));
 
-                const availableLossMoney = equity - (cumLots * maintReservePerLot);
-                const pointsToLiqFromEntry = availableLossMoney / (cumLots * contract.multiplier);
-
-                let rawLiqPrice;
-                if (state.direction === 'LONG') {
-                    rawLiqPrice = entryPrice - pointsToLiqFromEntry;
-                } else {
-                    rawLiqPrice = entryPrice + pointsToLiqFromEntry;
+                // Active displayed liquidation price based on mode toggle
+                let activeRawLiq = rawForceLiqPrice;
+                let activeClampedLiq = forceLiqPrice;
+                if (state.liqMode === 'MAINT') {
+                    activeRawLiq = rawMaintCallPrice;
+                    activeClampedLiq = maintCallPrice;
+                } else if (state.liqMode === 'ZERO') {
+                    activeRawLiq = rawZeroLiqPrice;
+                    activeClampedLiq = zeroLiqPrice;
                 }
 
-                const clampedLiqPrice = Math.max(0, Math.round(rawLiqPrice));
-
-                // Distance % and Points relative to Average Cost Price (matches 214.0%, 107.1%, 71.3%, 53.4%, 42.7%, 35.5%)
-                const distPoints = Math.round(Math.abs(avgPrice - rawLiqPrice));
+                const distPoints = Math.round(Math.abs(avgPrice - activeRawLiq));
                 const distPct = (distPoints / avgPrice) * 100;
 
                 rows.push({
                     step: i,
+                    stepLots,
                     cumLots,
                     entryPrice,
                     cumDropPct: state.direction === 'LONG' ? -cumDropPct : cumDropPct,
                     avgPrice: Math.round(avgPrice),
+                    reboundToBreakevenPct: parseFloat(reboundToBreakevenPct.toFixed(1)),
+                    singleTpPrice,
+                    singleGridProfitNT,
                     leverage: parseFloat(leverage.toFixed(1)),
-                    liqPrice: clampedLiqPrice,
-                    rawLiqPrice: Math.round(rawLiqPrice),
+                    liqPrice: activeClampedLiq,
+                    forceLiqPrice,
+                    maintCallPrice,
+                    zeroLiqPrice,
+                    rawLiqPrice: Math.round(activeRawLiq),
                     distPct: parseFloat(distPct.toFixed(1)),
                     distPoints,
                     equity,
@@ -1120,6 +2176,21 @@
                 });
             }
 
+            // Update Lot Sequence Preview Banner
+            document.getElementById('labelLotSequenceSummary').textContent = `滿倉共 ${cumLots} 口`;
+            document.getElementById('labelLotSequenceDetail').textContent =
+                `各格加倉口數：${stepLotsArray.join(' → ')} 口`;
+
+            // Determine which grid level is currently triggered by `currentPrice`
+            let activeTriggerStep = 0;
+            for (let i = 0; i < rows.length; i++) {
+                if (state.direction === 'LONG') {
+                    if (currentPrice <= rows[i].entryPrice) activeTriggerStep = rows[i].step;
+                } else {
+                    if (currentPrice >= rows[i].entryPrice) activeTriggerStep = rows[i].step;
+                }
+            }
+
             return {
                 contract,
                 basePrice,
@@ -1127,8 +2198,88 @@
                 lotsPerGrid,
                 levels,
                 depositedMargin,
+                currentPrice,
+                activeTriggerStep,
                 rows
             };
+        }
+
+        // Update Live Market Price Tracker Dashboard
+        function renderLiveTracker(data) {
+            const { contract, basePrice, currentPrice, activeTriggerStep, depositedMargin, rows } = data;
+            const lastRow = rows[rows.length - 1];
+
+            // Configure range slider bounds around basePrice & lastRow
+            const slider = document.getElementById('sliderCurrentPrice');
+            const minBound = Math.max(1000, Math.round(Math.min(basePrice, lastRow.entryPrice) * 0.85));
+            const maxBound = Math.round(Math.max(basePrice, lastRow.entryPrice) * 1.05);
+            slider.min = minBound;
+            slider.max = maxBound;
+            slider.value = Math.min(maxBound, Math.max(minBound, currentPrice));
+
+            document.getElementById('sliderMinLabel').textContent = fmtNum(minBound);
+            document.getElementById('sliderMaxLabel').textContent = fmtNum(maxBound);
+
+            const badge = document.getElementById('liveTriggerBadge');
+            if (activeTriggerStep === 0) {
+                badge.textContent = `⏳ 尚未觸發首格 (${fmtNum(basePrice)} 點進場)`;
+                badge.className = 'text-slate-400 font-bold';
+                document.getElementById('liveAvgCost').textContent = '-- 點';
+                document.getElementById('liveBreakevenNeed').textContent = '空手等待進場中';
+                document.getElementById('liveUnrealizedPnL').textContent = 'NT$ 0';
+                document.getElementById('liveUnrealizedPnL').className = 'font-mono font-bold text-sm text-emerald-400';
+                document.getElementById('liveEquityVal').textContent = `權益 ${fmtNum(depositedMargin)}`;
+                document.getElementById('liveMarginCallPrice').textContent = '-- 點';
+                document.getElementById('liveMaintRatio').textContent = '無部位 (100% 現金)';
+                document.getElementById('liveForceLiqPrice').textContent = '-- 點';
+                document.getElementById('liveForceLiqDist').textContent = '無追繳風險';
+                return;
+            }
+
+            const activeRow = rows[activeTriggerStep - 1];
+            const heldLots = activeRow.cumLots;
+            const avgCost = activeRow.avgPrice;
+
+            const priceDiff = state.direction === 'LONG'
+                ? (currentPrice - avgCost)
+                : (avgCost - currentPrice);
+            const livePnL = Math.round(priceDiff * heldLots * contract.multiplier);
+            const liveEquity = depositedMargin + livePnL;
+
+            const totalInitReq = heldLots * contract.initMargin;
+            const riskIndicatorPct = totalInitReq > 0 ? (liveEquity / totalInitReq) * 100 : 999;
+
+            const needPts = Math.round(avgCost - currentPrice);
+            const needPct = currentPrice > 0 ? (Math.abs(avgCost - currentPrice) / currentPrice) * 100 : 0;
+
+            badge.textContent = `📍 已觸發至 第 ${activeTriggerStep} 格 (持倉 ${heldLots} 口)`;
+            badge.className = 'text-sky-400 font-bold';
+
+            document.getElementById('liveAvgCost').textContent = `${fmtNum(avgCost)} 點`;
+            if ((state.direction === 'LONG' && currentPrice >= avgCost) || (state.direction === 'SHORT' && currentPrice <= avgCost)) {
+                document.getElementById('liveBreakevenNeed').textContent = `🎉 目前已處於獲利狀態`;
+                document.getElementById('liveBreakevenNeed').className = 'text-[10px] font-mono text-emerald-400 block mt-0.5';
+            } else {
+                const dirWord = state.direction === 'LONG' ? '反彈' : '回跌';
+                document.getElementById('liveBreakevenNeed').textContent = `需${dirWord} ${fmtNum(Math.abs(needPts))}點 (${needPct.toFixed(1)}%)`;
+                document.getElementById('liveBreakevenNeed').className = 'text-[10px] font-mono text-amber-400 block mt-0.5';
+            }
+
+            document.getElementById('liveUnrealizedPnL').textContent = `NT$ ${livePnL >= 0 ? '+' : ''}${fmtNum(livePnL)}`;
+            document.getElementById('liveUnrealizedPnL').className = `font-mono font-bold text-sm ${livePnL >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+            document.getElementById('liveEquityVal').textContent = `權益 NT$ ${fmtNum(liveEquity)}`;
+
+            document.getElementById('liveMarginCallPrice').textContent = `${fmtNum(activeRow.maintCallPrice)} 點`;
+            document.getElementById('liveMaintRatio').textContent = `風險指標 ${riskIndicatorPct.toFixed(0)}%`;
+            document.getElementById('liveMaintRatio').className = `text-[10px] font-mono block mt-0.5 ${riskIndicatorPct < 100 ? 'text-rose-400 font-bold' : 'text-slate-400'}`;
+
+            document.getElementById('liveForceLiqPrice').textContent = `${fmtNum(activeRow.forceLiqPrice)} 點`;
+            const distToForce = state.direction === 'LONG'
+                ? currentPrice - activeRow.forceLiqPrice
+                : activeRow.forceLiqPrice - currentPrice;
+            document.getElementById('liveForceLiqDist').textContent = distToForce > 0
+                ? `距現價尚有 ${fmtNum(distToForce)} 點`
+                : `⚠️ 已觸及 25% 強制平倉線`;
         }
 
         // Render SVG Chart 1: 槓桿倍數 (Bar Chart with 3/5/10 reference lines)
@@ -1168,7 +2319,6 @@
                 </defs>
             `;
 
-            // Reference Lines: 0, 5, 10 and dashed 3, 5, 10
             const refLines = [
                 { val: 0, color: '#1e293b', dash: '', label: '0' },
                 { val: 3, color: '#10b981', dash: '3,3', label: '' },
@@ -1186,7 +2336,6 @@
                 }
             });
 
-            // Bars
             const stepW = plotW / rows.length;
             const barW = Math.min(28, Math.max(10, stepW * 0.45));
 
@@ -1244,7 +2393,6 @@
 
             let svg = `<svg viewBox="0 0 ${width} ${height}" class="w-full h-full overflow-visible">`;
 
-            // Horizontal Grid Lines
             const ticks = 4;
             for (let i = 0; i <= ticks; i++) {
                 const v = yMin + (i / ticks) * (yMax - yMin);
@@ -1256,12 +2404,10 @@
                 `;
             }
 
-            // Build Polyline paths
             const entryPts = rows.map((r, i) => `${xScale(i)},${yScale(r.entryPrice)}`).join(' ');
             const avgPts = rows.map((r, i) => `${xScale(i)},${yScale(r.avgPrice)}`).join(' ');
             const liqPts = rows.map((r, i) => `${xScale(i)},${yScale(r.liqPrice)}`).join(' ');
 
-            // Area under liquidation line
             const firstX = xScale(0);
             const lastX = xScale(rows.length - 1);
             const baseY = yScale(0);
@@ -1275,14 +2421,12 @@
                 <polygon points="${firstX},${baseY} ${liqPts} ${lastX},${baseY}" fill="url(#liqAreaGrad)" />
             `;
 
-            // Lines
             svg += `
                 <polyline fill="none" stroke="#10b981" stroke-width="2" stroke-dasharray="4,4" points="${avgPts}" />
                 <polyline fill="none" stroke="#38bdf8" stroke-width="2.2" points="${entryPts}" />
                 <polyline fill="none" stroke="#f43f5e" stroke-width="2.2" points="${liqPts}" />
             `;
 
-            // Points & Labels
             rows.forEach((r, idx) => {
                 const cx = xScale(idx);
                 const ey = yScale(r.entryPrice);
@@ -1318,7 +2462,6 @@
             const plotW = width - padLeft - padRight;
             const plotH = height - padTop - padBottom;
 
-            // Upper zone for Equity, lower zone for negative PnL bars
             const zeroY = padTop + plotH * 0.65;
             const topRangeH = plotH * 0.65;
             const bottomRangeH = plotH * 0.35;
@@ -1347,9 +2490,7 @@
                 </defs>
             `;
 
-            // Zero Baseline & Capital Line
             const capY = yEqScale(cap);
-            const capLabel = cap >= 1000000 ? `${(cap / 1000).toFixed(0)}k` : `${(cap / 1000).toFixed(0)}k`;
             svg += `
                 <line x1="${padLeft}" y1="${capY}" x2="${width - padRight}" y2="${capY}" stroke="#94a3b8" stroke-width="1" stroke-dasharray="3,3" opacity="0.6" />
                 <text x="${padLeft - 6}" y="${capY + 3}" text-anchor="end" fill="#94a3b8" font-size="9" font-family="JetBrains Mono">${fmtNum(cap / 1000)}k</text>
@@ -1357,7 +2498,6 @@
                 <text x="${padLeft - 6}" y="${zeroY + 3}" text-anchor="end" fill="#64748b" font-size="9" font-family="JetBrains Mono">0</text>
             `;
 
-            // Equity Area & Line
             const eqPoints = rows.map((r, i) => `${xScale(i)},${yEqScale(r.equity)}`).join(' ');
             const firstX = xScale(0);
             const lastX = xScale(rows.length - 1);
@@ -1366,7 +2506,6 @@
                 <polyline fill="none" stroke="#38bdf8" stroke-width="2.4" points="${eqPoints}" />
             `;
 
-            // PnL Downward Bars & Equity Dots
             const barW = Math.min(20, Math.max(8, (plotW / rows.length) * 0.35));
             rows.forEach((r, idx) => {
                 const cx = xScale(idx);
@@ -1399,12 +2538,15 @@
 
             // Summary Card
             document.getElementById('summaryTotalLots').textContent = `${lastRow.cumLots} 口`;
+            document.getElementById('summaryFullAvgPrice').textContent = `${fmtNum(lastRow.avgPrice)} 點`;
             document.getElementById('summaryFinalLiqPrice').textContent = fmtNum(lastRow.liqPrice);
+            document.getElementById('summaryMaintCallPrice').textContent = `${fmtNum(lastRow.maintCallPrice)} 點`;
+            document.getElementById('summaryBreakevenRebound').textContent =
+                `${state.direction === 'LONG' ? '反彈 +' : '回跌 -'}${lastRow.reboundToBreakevenPct.toFixed(1)}% 回本`;
 
             const signPrefix = state.direction === 'LONG' ? '-' : '+';
             document.getElementById('summaryBufferPct').textContent = `${signPrefix}${lastRow.distPct.toFixed(1)}%`;
-            // Note: Display exact points to liquidation from average cost (or entry)
-            const displayBufferPts = Math.max(0, lastRow.avgPrice - lastRow.liqPrice);
+            const displayBufferPts = Math.max(0, Math.abs(lastRow.avgPrice - lastRow.liqPrice));
             document.getElementById('summaryBufferPts').textContent = `(${fmtNum(displayBufferPts)} 點)`;
 
             // Table Subtitles
@@ -1417,38 +2559,53 @@
 
             rows.forEach((r, idx) => {
                 const isLast = idx === rows.length - 1;
-                const rowClass = isLast ? 'table-row-last' : 'hover:bg-slate-800/30 transition';
+                const isLiveSpot = r.step === data.activeTriggerStep;
+                let rowClass = 'hover:bg-slate-800/30 transition';
+                if (isLiveSpot) {
+                    rowClass = 'table-row-active-spot';
+                } else if (isLast) {
+                    rowClass = 'table-row-last';
+                }
 
                 const dropSign = r.cumDropPct > 0 ? '+' : '';
                 const pnlText = r.floatingPnL === 0
                     ? `<span class="text-emerald-400 font-bold">NT$ 0</span>`
-                    : `<span class="text-rose-400 font-bold">NT$<br>${fmtNum(r.floatingPnL)}</span>`;
+                    : `<span class="text-rose-400 font-bold">NT$ ${fmtNum(r.floatingPnL)}</span>`;
 
-                const pnlPctColor = r.floatingPnL === 0 ? 'text-slate-400' : 'text-slate-400';
+                const spotBadge = isLiveSpot
+                    ? `<span class="inline-block px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-400/40 text-[9px] font-bold mt-0.5">📍現價落點</span>`
+                    : '';
+
+                const reboundLabel = r.reboundToBreakevenPct === 0
+                    ? `首格基準`
+                    : `反彈+${r.reboundToBreakevenPct.toFixed(1)}%回本`;
 
                 html += `
                     <tr class="${rowClass}">
-                        <td class="py-3 pl-3.5 pr-1 font-bold text-amber-400 text-sm">
-                            ${r.cumLots}
+                        <td class="py-3 pl-3 pr-1.5 align-top">
+                            <div class="font-bold text-amber-400 text-xs">第${r.step}格 (+${r.stepLots}口)</div>
+                            <div class="text-[10px] text-slate-400">累計 ${r.cumLots} 口</div>
+                            ${spotBadge}
                         </td>
-                        <td class="py-3 px-2">
-                            <div class="font-bold text-slate-100">${fmtNum(r.entryPrice)}</div>
+                        <td class="py-3 px-2 align-top">
+                            <div class="font-bold text-slate-100 text-xs">${fmtNum(r.entryPrice)}</div>
                             <div class="text-[10px] text-slate-400">${dropSign}${r.cumDropPct.toFixed(1)}%</div>
                         </td>
-                        <td class="py-3 px-2 font-bold ${r.leverage >= 5 ? 'text-rose-400' : 'text-amber-400'} text-sm">
-                            ${r.leverage.toFixed(1)}
+                        <td class="py-3 px-2 align-top">
+                            <div class="font-bold text-emerald-400 text-xs">均 ${fmtNum(r.avgPrice)}</div>
+                            <div class="text-[10px] text-amber-300/90">${reboundLabel}</div>
+                            <div class="text-[10px] text-slate-400 mt-0.5">單格停利 ${fmtNum(r.singleTpPrice)} <span class="text-emerald-400">(+${fmtNum(r.singleGridProfitNT)})</span></div>
                         </td>
-                        <td class="py-3 px-2">
-                            <div class="font-bold text-rose-400">${fmtNum(r.liqPrice)}</div>
-                            <div class="text-[10px] text-slate-400 leading-tight">距離<br>${r.distPct.toFixed(1)}%</div>
+                        <td class="py-3 px-2 align-top font-bold ${r.leverage >= 5 ? 'text-rose-400' : 'text-amber-400'} text-xs">
+                            ${r.leverage.toFixed(1)}x
                         </td>
-                        <td class="py-3 px-2">
-                            <div class="text-[10px] text-sky-400">NT$</div>
-                            <div class="font-bold text-sky-400">${fmtNum(r.equity)}</div>
+                        <td class="py-3 px-2 align-top">
+                            <div class="font-bold text-rose-400 text-xs">${fmtNum(r.liqPrice)} <span class="text-[10px] font-normal text-slate-400">(${r.distPct.toFixed(1)}%)</span></div>
+                            <div class="text-[10px] text-amber-400/90 mt-0.5">追繳線: ${fmtNum(r.maintCallPrice)}</div>
                         </td>
-                        <td class="py-3 pl-2 pr-3.5 text-right">
-                            <div class="leading-tight">${pnlText}</div>
-                            <div class="text-[10px] ${pnlPctColor} mt-0.5">${r.pnlPct.toFixed(1)}%</div>
+                        <td class="py-3 pl-2 pr-3 text-right align-top">
+                            <div class="font-bold text-sky-400 text-xs">NT$ ${fmtNum(r.equity)}</div>
+                            <div class="text-[10px] mt-0.5">${pnlText} <span class="text-slate-400">(${r.pnlPct.toFixed(1)}%)</span></div>
                         </td>
                     </tr>
                 `;
@@ -1467,7 +2624,7 @@
             document.getElementById('radarMarginUsage').textContent = `保證金佔用率 ${marginUsagePct.toFixed(1)}%`;
             document.getElementById('radarTotalMaintMargin').textContent = `NT$ ${fmtNum(totalMaintMargin)}`;
 
-            const totalPossibleDropPts = Math.max(0, data.basePrice - lastRow.liqPrice);
+            const totalPossibleDropPts = Math.max(0, Math.abs(data.basePrice - lastRow.liqPrice));
             const totalPossibleDropPct = (totalPossibleDropPts / data.basePrice) * 100;
             document.getElementById('radarMaxDropPct').textContent = `-${totalPossibleDropPct.toFixed(1)}%`;
             document.getElementById('radarMaxDropPts').textContent = `自起點可抗 ${fmtNum(totalPossibleDropPts)} 點`;
@@ -1477,25 +2634,85 @@
             if (lastRow.leverage < 3.5) {
                 badge.className = 'px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
                 badge.textContent = '低度風險 (穩健)';
-                advice.textContent = `目前您的滿倉槓桿為 ${lastRow.leverage.toFixed(1)} 倍，控制在 3.5 倍安全線內。即使 ${data.levels} 格全部成交，距離最終爆倉價 ${fmtNum(lastRow.liqPrice)} 點仍有 ${lastRow.distPct.toFixed(1)}% 的安全緩衝空間。`;
+                advice.textContent = `目前您的滿倉槓桿為 ${lastRow.leverage.toFixed(1)} 倍，控制在 3.5 倍安全線內。即使 ${data.levels} 格（共 ${lastRow.cumLots} 口）全部成交，距離 25% 強制砍倉價 ${fmtNum(lastRow.forceLiqPrice)} 點仍有 ${lastRow.distPct.toFixed(1)}% 的充裕緩衝空間。`;
             } else if (lastRow.leverage < 6.5) {
                 badge.className = 'px-3 py-1 rounded-full text-xs font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30';
                 badge.textContent = '中度風險 (警戒)';
-                advice.textContent = `您的滿倉槓桿達 ${lastRow.leverage.toFixed(1)} 倍，進入中度風險區間。若遇單邊急殺行情，建議適度拉大加倉間距或提高存入保證金至 3 倍以上。`;
+                advice.textContent = `您的滿倉槓桿達 ${lastRow.leverage.toFixed(1)} 倍，進入中度風險區間。滿倉盤後追繳線為 ${fmtNum(lastRow.maintCallPrice)} 點，建議預留備用保證金或適度拉大加倉間距。`;
             } else {
                 badge.className = 'px-3 py-1 rounded-full text-xs font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30';
                 badge.textContent = '高度風險 (危險)';
-                advice.textContent = `警告！滿倉槓桿高達 ${lastRow.leverage.toFixed(1)} 倍，爆倉線 (${fmtNum(lastRow.liqPrice)} 點) 非常接近加倉價格，極易在劇烈波動中遭到強制平倉，強烈建議減少格數或增加本金！`;
+                advice.textContent = `警告！滿倉槓桿高達 ${lastRow.leverage.toFixed(1)} 倍，強制砍倉線 (${fmtNum(lastRow.forceLiqPrice)} 點) 非常接近加倉價格，極易在劇烈波動中遭到代沖銷，強烈建議調降加倉倍數或增加本金！`;
+            }
+        }
+
+        // One-Click Order Memo Generator & Clipboard Modal
+        function generateOrderMemoString() {
+            const data = calculateGridData();
+            const lastRow = data.rows[data.rows.length - 1];
+            const dirLabel = state.direction === 'LONG' ? '多單逢低買進 (LONG)' : '空單逢高賣出 (SHORT)';
+            const scaleMap = {
+                EQUAL: '等量加倉 (1, 1, 1...)',
+                PYRAMID: '金字塔遞增 (1, 2, 3...)',
+                MARTINGALE: '馬丁倍增 (1, 2, 4...)'
+            };
+
+            let lines = [];
+            lines.push(`=== 📊 台指模擬器 TAIFEX 網格掛單備忘錄 ===`);
+            lines.push(`合約商品：${data.contract.name} (乘數 ${data.contract.multiplier} 元/點)`);
+            lines.push(`策略方向：${dirLabel} | 模式：${scaleMap[state.scalingMode]}`);
+            lines.push(`基準價格：${fmtNum(data.basePrice)} 點 | 間距：${data.spacingPct}% | 存入本金：NT$ ${fmtNum(data.depositedMargin)}`);
+            lines.push(`--------------------------------------------`);
+            lines.push(`【各階梯預掛觸價單 & 停利/風控點位】`);
+
+            data.rows.forEach(r => {
+                const actionWord = state.direction === 'LONG' ? '買進' : '賣出';
+                lines.push(
+                    `第 ${r.step} 格 (${r.cumDropPct.toFixed(1)}%)：${actionWord} ${r.stepLots} 口 @ ${fmtNum(r.entryPrice)} 點 ` +
+                    `| 累計 ${r.cumLots} 口 (均價 ${fmtNum(r.avgPrice)}) ` +
+                    `| 單格停利 @ ${fmtNum(r.singleTpPrice)} (+NT$${fmtNum(r.singleGridProfitNT)}) ` +
+                    `| 追繳價 ${fmtNum(r.maintCallPrice)} / 25%斷頭 ${fmtNum(r.forceLiqPrice)}`
+                );
+            });
+
+            lines.push(`--------------------------------------------`);
+            lines.push(`📌 滿倉總計：共 ${lastRow.cumLots} 口 | 滿倉均價：${fmtNum(lastRow.avgPrice)} 點 | 滿倉槓桿：${lastRow.leverage.toFixed(1)}x`);
+            lines.push(`⚠️ 滿倉盤後追繳價：${fmtNum(lastRow.maintCallPrice)} 點 | 🚨 25%強制砍倉價：${fmtNum(lastRow.forceLiqPrice)} 點`);
+
+            return lines.join('\n');
+        }
+
+        function openOrderMemoModal() {
+            const memoText = generateOrderMemoString();
+            document.getElementById('orderMemoTextarea').value = memoText;
+            document.getElementById('orderMemoModal').classList.remove('hidden');
+        }
+
+        function closeOrderMemoModal() {
+            document.getElementById('orderMemoModal').classList.add('hidden');
+        }
+
+        function copyOrderMemoText() {
+            const textarea = document.getElementById('orderMemoTextarea');
+            textarea.select();
+            textarea.setSelectionRange(0, 99999);
+            try {
+                document.execCommand('copy');
+                showToast('📋 已複製完整掛單備忘錄！可直接貼上至記事本或 LINE');
+            } catch (err) {
+                showToast('請長按文字框手動選擇複製');
             }
         }
 
         // Master Recalculation Trigger
         function recalculateAll() {
             const data = calculateGridData();
+            renderLiveTracker(data);
             renderLeverageChart(data);
             renderPriceChart(data);
             renderEquityChart(data);
             renderTableAndSummary(data);
+            saveStateToLocalStorage();
         }
 
         // Redraw SVG charts on window resize
@@ -1505,7 +2722,10 @@
 
         // Initial Render on Load
         window.onload = function () {
+            loadStateFromLocalStorage();
+            initSimulatedMarketData(parseFloat(document.getElementById('inputBasePrice').value) || 46200);
             recalculateAll();
+            computeAndRenderSR();
         };
     </script>
 </body>
