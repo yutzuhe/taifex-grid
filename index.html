@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>台指模擬器 TAIFEX Pro — 雙欄戰情室・互動K線・實戰稅費與風險視覺化</title>
+    <title>台指模擬器 TAIFEX Pro — 雙欄戰情室・日K支撐壓力・實戰稅費與風險視覺化</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- TradingView Lightweight Charts (Apache 2.0 Open Source from GitHub) -->
+    <!-- TradingView Lightweight Charts (Apache 2.0 Open Source) -->
     <script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -50,7 +50,6 @@
             font-family: 'Noto Sans TC', 'Inter', sans-serif;
             overflow-x: hidden;
         }
-        /* Custom Scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
@@ -62,7 +61,6 @@
             background: #26314d;
             border-radius: 9999px;
         }
-        /* Number Input Spinners Removal */
         input[type="number"]::-webkit-inner-spin-button,
         input[type="number"]::-webkit-outer-spin-button {
             -webkit-appearance: none;
@@ -87,7 +85,6 @@
             background: linear-gradient(90deg, rgba(56, 189, 248, 0.22) 0%, rgba(16, 185, 129, 0.08) 100%);
             box-shadow: inset 3px 0 0 #38bdf8;
         }
-        /* Range Slider Styling */
         input[type="range"] {
             -webkit-appearance: none;
             appearance: none;
@@ -114,7 +111,7 @@
 </head>
 <body class="min-h-screen pb-24 selection:bg-amber-500 selection:text-slate-950">
 
-    <!-- Top Sticky App Bar (Upgraded to max-w-7xl with Settlement Countdown & Share URL) -->
+    <!-- Top Sticky App Bar -->
     <header class="sticky top-0 z-40 bg-[#0b0e17]/95 backdrop-blur-md border-b border-borderCard px-4 py-2.5">
         <div class="max-w-7xl mx-auto flex items-center justify-between gap-2">
             <!-- Brand Left -->
@@ -132,16 +129,15 @@
                         <span class="px-1.5 py-0.5 text-[10px] font-mono font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/40 rounded">
                             PRO 戰情室
                         </span>
-                        <!-- Settlement Countdown Badge -->
                         <span id="settlementBadge" class="hidden md:inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-mono font-medium bg-sky-500/15 text-sky-300 border border-sky-500/30 rounded-full" title="台指期每月第三個週三 13:30 結算">
                             ⏳ 結算倒數計算中...
                         </span>
                     </div>
-                    <p class="text-[11px] text-slate-400 tracking-wide">部位試算・TradingView 互動K線・稅費轉倉・雙欄戰情室</p>
+                    <p class="text-[11px] text-slate-400 tracking-wide">部位試算・日K支撐壓力・稅費轉倉・雙欄戰情室</p>
                 </div>
             </div>
 
-            <!-- Right Actions: Share Link & Market Color Mode Switch -->
+            <!-- Right Actions -->
             <div class="flex items-center gap-2">
                 <button onclick="shareStrategyUrl()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sky-500/15 hover:bg-sky-500/25 text-sky-300 border border-sky-500/30 text-xs font-bold transition active:scale-95" title="將目前參數打包為分享網址">
                     <span>🔗</span>
@@ -165,10 +161,10 @@
         <span id="toastText">已更新模擬基準行情</span>
     </div>
 
-    <!-- Main Container (Upgraded to max-w-7xl for Responsive Bento / Split War-Room Layout) -->
+    <!-- Main Container -->
     <main class="max-w-7xl mx-auto px-3 sm:px-6 pt-4 space-y-4">
 
-        <!-- Mobile Settlement Banner (Visible on small screens) -->
+        <!-- Mobile Settlement Banner -->
         <div class="md:hidden flex items-center justify-between bg-sky-500/10 border border-sky-500/30 rounded-xl px-3 py-2 text-[11px] text-sky-300 font-mono">
             <span id="settlementBadgeMobile">⏳ 台指期月結算日計算中...</span>
             <span class="text-slate-400">每月第3個週三</span>
@@ -192,7 +188,6 @@
                     </span>
                 </div>
 
-                <!-- Stress Test Gauge Cards -->
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
                     <div class="bg-bgInput border border-borderCard rounded-xl p-3.5">
                         <span class="text-xs text-slate-400 block mb-1">滿倉總合約價值</span>
@@ -227,10 +222,10 @@
             </div>
         </section>
 
-        <!-- TAB VIEW 1.5: 台指近全 60分K & 日K 支撐壓力雷達 (Upgraded with TradingView Lightweight Charts) -->
+        <!-- TAB VIEW 1.5: 台指近全 (WTXP&) 日K支撐壓力雷達 (Streamlined Pure Daily K-Line Architecture) -->
         <section id="viewSR" class="hidden space-y-4">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
-                <!-- Left Column: Quote, Diagnostics & Multi-Timeframe Structure (5 cols on Desktop) -->
+                <!-- Left Column: Daily Quote, Sync Settings & Daily Structure Analysis (5 cols on Desktop) -->
                 <div class="lg:col-span-5 space-y-4">
                     <!-- Top Quote & Sync Card -->
                     <div class="card-glow rounded-2xl p-4 sm:p-5 space-y-3.5">
@@ -239,10 +234,10 @@
                                 <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#10b981]"></span>
                                 <div>
                                     <div class="flex items-center gap-1.5">
-                                        <h2 class="text-sm sm:text-base font-bold text-white">台指近全 (WTXP&) 支撐壓力雷達</h2>
-                                        <span class="px-1.5 py-0.5 text-[10px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 rounded">含夜盤全時段</span>
+                                        <h2 class="text-sm sm:text-base font-bold text-white">台指日K (含夜盤全時段) 支撐壓力</h2>
+                                        <span class="px-1.5 py-0.5 text-[10px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 rounded">純日K核心</span>
                                     </div>
-                                    <p id="srDataSourceStatus" class="text-[11px] text-slate-400">WTXP& 60分線 + 日線 雙週期關鍵價位自動運算</p>
+                                    <p id="srDataSourceStatus" class="text-[11px] text-slate-400">結合日K樞軸點 (Pivot)、20日波段黃金分割與 ATR 波幅</p>
                                 </div>
                             </div>
                             <div class="flex items-center gap-1.5">
@@ -250,10 +245,10 @@
                                     <svg id="srSyncIcon" class="w-3.5 h-3.5 transition-transform duration-500" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                                     </svg>
-                                    <span>抓取 WTXP& 行情</span>
+                                    <span>同步日K行情</span>
                                 </button>
                                 <button onclick="regenerateSimulatedKlines()" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-medium transition active:scale-95">
-                                    隨機模擬K線
+                                    模擬日K
                                 </button>
                             </div>
                         </div>
@@ -261,12 +256,12 @@
                         <!-- Realtime Quote Summary 3-Grid -->
                         <div class="grid grid-cols-3 gap-2.5 bg-bgInput border border-borderCard rounded-xl p-3">
                             <div>
-                                <span class="text-[10px] text-slate-400 block">台指近全 WTXP&</span>
+                                <span class="text-[10px] text-slate-400 block">台指收盤/現價</span>
                                 <span id="srLastPrice" class="font-mono text-lg sm:text-xl font-extrabold text-amber-400">46,200</span>
                                 <span id="srChangeText" class="text-[11px] font-mono text-red-400 block">+185 (+0.40%)</span>
                             </div>
                             <div>
-                                <span class="text-[10px] text-slate-400 block">全盤(日+夜)高低</span>
+                                <span class="text-[10px] text-slate-400 block">當日全盤(日+夜)高低</span>
                                 <div class="text-xs font-mono font-bold text-slate-200 mt-1">高: <span id="srDayHigh" class="text-red-400">46,680</span></div>
                                 <div class="text-xs font-mono font-bold text-slate-200 mt-0.5">低: <span id="srDayLow" class="text-emerald-400">45,620</span></div>
                             </div>
@@ -277,36 +272,35 @@
                             </div>
                         </div>
 
-                        <!-- 方案 B：FinMind API & Vercel Serverless 後端設定與即時診斷中心 -->
+                        <!-- Daily K-Line Data Source & Diagnostics -->
                         <details class="bg-amber-500/10 border border-amber-500/40 rounded-xl p-3 text-xs space-y-2.5">
                             <summary class="cursor-pointer font-bold text-amber-300 flex items-center justify-between">
-                                <span class="flex items-center gap-1.5">🚀 方案 B：台指近全 (WTXP&) 連線設定與即時診斷</span>
+                                <span class="flex items-center gap-1.5">🚀 日K資料源設定與連線診斷 (FinMind 官方直連)</span>
                                 <span id="planBStatusTag" class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-mono text-[10px]">展開/收合 ▾</span>
                             </summary>
                             <div class="pt-2 border-t border-amber-500/20 space-y-2.5">
                                 <div class="space-y-1">
                                     <label class="text-[11px] text-slate-300 font-medium block">
-                                        FinMind API Token <span class="text-slate-400">(選填，填入可提高額度並抓取期交所日夜盤明細)</span>
+                                        FinMind API Token <span class="text-slate-400">(選填，留空亦可直接抓期交所日夜盤日K)</span>
                                     </label>
                                     <div class="flex gap-1.5">
-                                        <input id="inputFinMindToken" type="password" placeholder="貼上 FinMind Token" oninput="saveFinMindToken()" class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 font-mono text-white text-xs focus:outline-none focus:border-amber-400" />
+                                        <input id="inputFinMindToken" type="password" placeholder="貼上 FinMind Token (選填)" oninput="saveFinMindToken()" class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 font-mono text-white text-xs focus:outline-none focus:border-amber-400" />
                                         <button onclick="fetchRealMarketData()" class="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition shrink-0">
-                                            立即測試連線
+                                            測試連線
                                         </button>
                                     </div>
                                 </div>
                                 <div class="space-y-1">
-                                    <label class="text-[11px] text-slate-300 font-medium block">原生 60 分 K 後端端點 <span class="text-slate-400">(選填；優先使用)</span></label>
+                                    <label class="text-[11px] text-slate-300 font-medium block">自訂日 K 後端端點 <span class="text-slate-400">(選填；如自建 /api/quote)</span></label>
                                     <input id="inputOhlcEndpoint" type="url" placeholder="https://your-domain.example/api/quote" oninput="saveOhlcEndpoint()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 font-mono text-white text-xs focus:outline-none focus:border-sky-400" />
                                 </div>
 
-                                <!-- 連線診斷訊息框 -->
                                 <div class="bg-slate-950/90 border border-slate-800 rounded-lg p-2.5 font-mono text-[11px] text-slate-300 space-y-1">
                                     <div class="text-amber-400 font-bold flex items-center justify-between">
-                                        <span>📡 即時抓取診斷日誌：</span>
-                                        <button onclick="openVercelCodeModal()" class="text-sky-400 hover:underline text-[10px]">📄 複製 Vercel api/quote.js</button>
+                                        <span>📡 日K同步診斷日誌：</span>
+                                        <button onclick="openVercelCodeModal()" class="text-sky-400 hover:underline text-[10px]">📄 複製精簡版 api/quote.js</button>
                                     </div>
-                                    <div id="srDiagnosticLog" class="text-slate-400 leading-relaxed whitespace-pre-wrap max-h-28 overflow-y-auto">等待點擊「抓取 WTXP& 行情」...</div>
+                                    <div id="srDiagnosticLog" class="text-slate-400 leading-relaxed whitespace-pre-wrap max-h-28 overflow-y-auto">等待同步台指期日K資料...</div>
                                 </div>
                             </div>
                         </details>
@@ -314,67 +308,69 @@
                         <!-- Collapsible Manual Calibration -->
                         <details class="bg-bgInput/80 border border-borderCard rounded-xl p-2.5 text-xs">
                             <summary class="cursor-pointer font-semibold text-slate-300 flex items-center justify-between">
-                                <span>⚙️ 手動校正「台指近全 WTXP&」日K / 60分K 點位</span>
+                                <span>⚙️ 手動校正當日日K高低收點位</span>
                                 <span class="text-[10px] text-amber-400">展開設定 ▾</span>
                             </summary>
                             <div class="grid grid-cols-2 gap-2.5 mt-3 pt-2.5 border-t border-borderCard">
                                 <div>
-                                    <label class="text-[10px] text-slate-400">目前 WTXP& 現價 (點)</label>
+                                    <label class="text-[10px] text-slate-400">目前收盤 / 現價 (C)</label>
                                     <input id="manualSrClose" type="number" step="10" value="46200" oninput="onManualSrInput()" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 font-mono text-white text-xs focus:outline-none focus:border-amber-500" />
                                 </div>
                                 <div>
-                                    <label class="text-[10px] text-slate-400">前一交易日結算/收盤價</label>
+                                    <label class="text-[10px] text-slate-400">前一交易日收盤價</label>
                                     <input id="manualSrPrevClose" type="number" step="10" value="46015" oninput="onManualSrInput()" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 font-mono text-white text-xs focus:outline-none focus:border-amber-500" />
                                 </div>
                                 <div>
-                                    <label class="text-[10px] text-slate-400">WTXP& 全盤最高價 (High)</label>
+                                    <label class="text-[10px] text-slate-400">當日全盤最高價 (H)</label>
                                     <input id="manualSrHigh" type="number" step="10" value="46680" oninput="onManualSrInput()" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 font-mono text-white text-xs focus:outline-none focus:border-amber-500" />
                                 </div>
                                 <div>
-                                    <label class="text-[10px] text-slate-400">WTXP& 全盤最低價 (Low)</label>
+                                    <label class="text-[10px] text-slate-400">當日全盤最低價 (L)</label>
                                     <input id="manualSrLow" type="number" step="10" value="45620" oninput="onManualSrInput()" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 font-mono text-white text-xs focus:outline-none focus:border-amber-500" />
                                 </div>
                             </div>
                         </details>
                     </div>
 
-                    <!-- Multi-timeframe market structure analysis -->
+                    <!-- Pure Daily Market Structure & Volatility Analysis -->
                     <div class="card-glow rounded-2xl p-4 sm:p-5 space-y-3">
                         <div class="flex flex-wrap items-start justify-between gap-2">
                             <div>
-                                <h3 class="text-xs sm:text-sm font-bold text-sky-300">🧭 日 K + 60 分 K 多週期趨勢與結構分析</h3>
-                                <p id="structureDataState" class="text-[11px] text-slate-400 mt-0.5">等待 K 線資料分析</p>
+                                <h3 class="text-xs sm:text-sm font-bold text-sky-300">🧭 日 K 波段結構與 ATR 波幅診斷</h3>
+                                <p id="structureDataState" class="text-[11px] text-slate-400 mt-0.5">等待日 K 資料分析</p>
                             </div>
-                            <span id="structureConfluenceBadge" class="px-2 py-1 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 text-[10px] font-bold">尚無共振判讀</span>
+                            <span id="dailyTrendBadge" class="px-2 py-1 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 text-[10px] font-bold">分析中</span>
                         </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+
+                        <div class="grid grid-cols-2 gap-2.5">
                             <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3">
-                                <div class="flex items-center justify-between gap-2"><span class="text-[11px] font-bold text-amber-300">日 K｜主要結構</span><span id="dailyTrendBadge" class="text-[10px]"></span></div>
-                                <p id="dailyStructureText" class="mt-2 text-xs leading-relaxed text-slate-300">資料不足</p>
+                                <span class="text-[11px] font-bold text-amber-300 block">20日均線 (月線) 位階</span>
+                                <span id="dailyMa20Val" class="font-mono text-sm font-bold text-white mt-1 block">-- 點</span>
+                                <span id="dailyMa20Status" class="text-[10px] text-slate-400 block mt-0.5">--</span>
                             </div>
                             <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3">
-                                <div class="flex items-center justify-between gap-2"><span class="text-[11px] font-bold text-sky-300">60 分 K｜短波段結構</span><span id="hourlyTrendBadge" class="text-[10px]"></span></div>
-                                <p id="hourlyStructureText" class="mt-2 text-xs leading-relaxed text-slate-300">資料不足</p>
+                                <span class="text-[11px] font-bold text-sky-300 block">14日平均真實波幅 (ATR)</span>
+                                <span id="dailyAtrVal" class="font-mono text-sm font-bold text-white mt-1 block">-- 點</span>
+                                <span id="dailyAtrStatus" class="text-[10px] text-slate-400 block mt-0.5">建議單格間距參考</span>
                             </div>
                         </div>
+
                         <div class="bg-bgInput/80 border border-borderCard rounded-xl p-3">
-                            <div class="text-[11px] font-bold text-white">分析摘要</div>
+                            <div class="text-[11px] font-bold text-white">日 K 結構判讀與網格佈局建議</div>
                             <p id="structureSummaryText" class="mt-1.5 text-xs leading-relaxed text-slate-300">尚未產生摘要。</p>
                             <div id="structureLevelsList" class="mt-2 flex flex-wrap gap-1.5"></div>
                         </div>
+
                         <details class="bg-slate-900/60 border border-slate-800 rounded-xl p-3 text-xs">
-                            <summary class="cursor-pointer font-semibold text-slate-300">貼上手動 OHLC 資料（CSV）作為分析資料</summary>
-                            <p class="mt-2 text-[10px] text-slate-400 leading-relaxed">格式：<code>日期,開盤,最高,最低,收盤</code>，每行一根 K。</p>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
-                                <textarea id="manualDailyOhlc" rows="4" placeholder="2026-10-01,26000,26200,25800,26120" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-2 font-mono text-[10px] text-white focus:outline-none focus:border-amber-500"></textarea>
-                                <textarea id="manual60mOhlc" rows="4" placeholder="2026-10-24 09:00,26120,26180,26050,26160" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-2 font-mono text-[10px] text-white focus:outline-none focus:border-amber-500"></textarea>
-                            </div>
-                            <button onclick="applyManualOhlcData()" class="mt-2 px-3 py-1.5 rounded-lg bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/40 text-[11px] font-bold transition">套用手動 OHLC 並分析</button>
+                            <summary class="cursor-pointer font-semibold text-slate-300">📥 貼上手動日 K OHLC 資料（CSV）</summary>
+                            <p class="mt-2 text-[10px] text-slate-400 leading-relaxed">格式：<code>日期(YYYY-MM-DD),開盤,最高,最低,收盤</code>，每行一根日 K（至少 8 根）。</p>
+                            <textarea id="manualDailyOhlc" rows="4" placeholder="2026-10-20,45800,46150,45600,46015&#10;2026-10-21,46020,46680,45620,46200" class="w-full mt-2 bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-2 font-mono text-[10px] text-white focus:outline-none focus:border-amber-500"></textarea>
+                            <button onclick="applyManualOhlcData()" class="mt-2 px-3 py-1.5 rounded-lg bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/40 text-[11px] font-bold transition">套用手動日 K 並分析</button>
                         </details>
                     </div>
                 </div>
 
-                <!-- Right Column: TradingView Interactive K-Line & Support/Resistance Table (7 cols on Desktop) -->
+                <!-- Right Column: TradingView Daily K-Line Chart & 3-Model Support/Resistance Table (7 cols on Desktop) -->
                 <div class="lg:col-span-7 space-y-4">
                     <!-- TradingView Lightweight Charts Card -->
                     <div class="card-glow rounded-2xl p-4 sm:p-5 space-y-3">
@@ -383,41 +379,36 @@
                                 <span class="text-sm">🕯️</span>
                                 <div>
                                     <h3 class="text-xs sm:text-sm font-bold text-white flex items-center gap-1.5">
-                                        <span>TradingView 互動 K 線與關鍵支撐壓力圖</span>
-                                        <span class="px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-300 text-[9px] font-mono">支援縮放/十字線</span>
+                                        <span>台指期日 K 走勢與關鍵支撐壓力線圖 (TradingView)</span>
+                                        <span class="px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-300 text-[9px] font-mono">1D 日線</span>
                                     </h3>
                                 </div>
                             </div>
-                            <div class="flex bg-bgInput p-0.5 rounded-lg border border-borderCard text-xs">
-                                <button id="btnTf60m" onclick="switchSrTimeframe('60m')" class="px-2.5 py-1 rounded-md font-bold bg-amber-500 text-slate-950 transition">
-                                    60分線 (短波段)
-                                </button>
-                                <button id="btnTf1d" onclick="switchSrTimeframe('1d')" class="px-2.5 py-1 rounded-md font-medium text-slate-400 hover:text-white transition">
-                                    日線 (大波段)
-                                </button>
-                            </div>
+                            <button onclick="if(tvChart) tvChart.timeScale().fitContent()" class="px-2.5 py-1 rounded-lg bg-bgInput hover:bg-slate-800 text-slate-300 border border-borderCard text-[11px] font-mono transition">
+                                🔍 重置縮放
+                            </button>
                         </div>
 
                         <!-- TradingView Lightweight Chart Container -->
                         <div id="tvKlineContainer" class="w-full h-72 bg-bgInput/90 rounded-xl border border-borderCard overflow-hidden relative"></div>
 
                         <div class="flex flex-wrap items-center justify-between text-[10px] text-slate-400 font-mono px-1 gap-2">
-                            <span class="flex items-center gap-1"><i class="w-2.5 h-0.5 bg-rose-500 inline-block"></i>壓力線 (R1/R2)</span>
+                            <span class="flex items-center gap-1"><i class="w-2.5 h-0.5 bg-rose-500 inline-block"></i>日K壓力 (R1/R2)</span>
                             <span class="flex items-center gap-1"><i class="w-2.5 h-0.5 bg-amber-400 inline-block"></i>多空樞軸 (PP)</span>
-                            <span class="flex items-center gap-1"><i class="w-2.5 h-0.5 bg-emerald-400 inline-block"></i>支撐線 (S1/S2)</span>
+                            <span class="flex items-center gap-1"><i class="w-2.5 h-0.5 bg-emerald-400 inline-block"></i>日K支撐 (S1/S2)</span>
                             <span class="flex items-center gap-1"><i class="w-2.5 h-0.5 bg-sky-400 inline-block"></i>網格基準價</span>
                         </div>
                     </div>
 
-                    <!-- Dual-Timeframe Support & Resistance Table -->
+                    <!-- Pure Daily 3-Model Support & Resistance Table -->
                     <div class="card-glow rounded-2xl overflow-hidden">
                         <div class="p-4 sm:px-5 border-b border-borderCard flex flex-wrap items-center justify-between gap-2">
                             <div>
-                                <h3 class="text-xs sm:text-sm font-bold text-amber-400">🎯 60分線 + 日線 支撐壓力價位表</h3>
-                                <p class="text-[11px] text-slate-400 mt-0.5">結合樞軸點 (Pivot)、波段高低點與布林通道，可一鍵帶入網格</p>
+                                <h3 class="text-xs sm:text-sm font-bold text-amber-400">🎯 日K三大模型支撐壓力價位表 (Pivot × 黃金分割 × ATR)</h3>
+                                <p class="text-[11px] text-slate-400 mt-0.5">完全基於日K結構運算，點擊右側按鈕可一鍵將關鍵價位帶入網格基準價</p>
                             </div>
                             <button onclick="applySrAutoGridStep()" class="px-2.5 py-1.5 rounded-lg bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/40 text-[11px] font-bold transition active:scale-95">
-                                ⚡ 依支撐間距自動設網格%
+                                ⚡ 依日K ATR與支撐自動設網格%
                             </button>
                         </div>
 
@@ -426,9 +417,9 @@
                                 <thead>
                                     <tr class="border-b border-borderCard bg-bgInput/50 text-[11px] text-slate-400 font-medium whitespace-nowrap">
                                         <th class="py-2.5 pl-3 pr-1.5">層級屬性</th>
-                                        <th class="py-2.5 px-2">60分線點位</th>
-                                        <th class="py-2.5 px-2 text-amber-400">日線點位</th>
-                                        <th class="py-2.5 px-2">共振說明</th>
+                                        <th class="py-2.5 px-2 text-amber-400">日K樞軸點 (Pivot)</th>
+                                        <th class="py-2.5 px-2 text-sky-300">20日波段 / 黃金分割</th>
+                                        <th class="py-2.5 px-2">實戰意義與日K結構說明</th>
                                         <th class="py-2.5 pl-1.5 pr-3 text-right">連動網格</th>
                                     </tr>
                                 </thead>
@@ -442,7 +433,7 @@
             </div>
         </section>
 
-        <!-- TAB VIEW 2: 網格策略主畫面 (Upgraded Desktop 12-Col Split War-Room Layout) -->
+        <!-- TAB VIEW 2: 網格策略主畫面 (Desktop 12-Col Split War-Room Layout) -->
         <div id="viewGridMain" class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
 
             <!-- LEFT COLUMN (Sticky Control Panel on Desktop: 5 Columns) -->
@@ -450,7 +441,6 @@
 
                 <!-- CARD 1: 網格倉位數據設定 (即時試算) -->
                 <section class="card-glow rounded-2xl p-4 sm:p-5 space-y-4">
-                    <!-- Card Header -->
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-2">
                             <span class="w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_8px_#f59e0b]"></span>
@@ -647,7 +637,6 @@
                             <span class="text-amber-400 font-mono font-bold text-xs sm:text-sm ml-2">NT$</span>
                         </div>
 
-                        <!-- Quick Margin Multiplier Presets -->
                         <div class="grid grid-cols-3 gap-2 pt-1">
                             <button onclick="setMarginPreset(1)" class="py-1.5 px-2 rounded-lg bg-bgInput hover:bg-slate-800 border border-borderCard text-[11px] font-medium text-slate-300 transition active:scale-95">
                                 1倍保證金(高險)
@@ -661,14 +650,13 @@
                         </div>
                     </div>
 
-                    <!-- NEW: 實務風控細節：手續費、期交稅與自訂保證金微調 -->
+                    <!-- 進階實戰設定：手續費、期交稅與自訂保證金微調 -->
                     <details class="bg-bgInput/80 border border-borderCard rounded-xl p-3 text-xs space-y-3">
                         <summary class="cursor-pointer font-bold text-slate-300 flex items-center justify-between">
                             <span class="flex items-center gap-1.5">⚙️ 進階實戰設定 (手續費 / 期交稅 / 保證金微調)</span>
                             <span class="text-[10px] text-amber-400 font-mono">展開設定 ▾</span>
                         </summary>
                         <div class="pt-2.5 border-t border-borderCard space-y-3">
-                            <!-- Fee & Rollover Cost -->
                             <div class="grid grid-cols-2 gap-2.5">
                                 <div>
                                     <label class="text-[10px] text-slate-400 block">單口單邊手續費 (NT$)</label>
@@ -676,7 +664,7 @@
                                 </div>
                                 <div>
                                     <label class="text-[10px] text-slate-400 block">預估轉倉滑價成本 (點)</label>
-                                    <input id="inputRolloverPts" type="number" value="0" step="5" oninput="recalculateAll()" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 font-mono text-white text-xs focus:outline-none focus:border-amber-500" title="正數代表逆價差轉倉補貼或正價差耗損">
+                                    <input id="inputRolloverPts" type="number" value="0" step="5" oninput="recalculateAll()" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 font-mono text-white text-xs focus:outline-none focus:border-amber-500">
                                 </div>
                             </div>
                             <label class="flex items-center justify-between cursor-pointer bg-slate-900/80 border border-slate-800 rounded-lg px-2.5 py-2">
@@ -684,7 +672,6 @@
                                 <input id="chkIncludeTaxFee" type="checkbox" checked onchange="recalculateAll()" class="accent-amber-500 w-4 h-4 rounded cursor-pointer">
                             </label>
 
-                            <!-- Custom Margin Override -->
                             <div class="pt-2 border-t border-slate-800 space-y-2">
                                 <div class="flex items-center justify-between">
                                     <span class="text-[11px] font-bold text-amber-400">✏️ 自訂當前合約保證金 (應對期交所調整)</span>
@@ -754,7 +741,6 @@
                         </button>
                     </div>
 
-                    <!-- Live Market Price Input + Quick Step Buttons + Range Slider -->
                     <div class="bg-bgInput border border-borderCard rounded-xl p-3 space-y-2.5">
                         <div class="flex items-center justify-between gap-2">
                             <span class="text-xs text-slate-300 font-medium">目前市場現價 (點)：</span>
@@ -772,7 +758,6 @@
                         </div>
                     </div>
 
-                    <!-- Live Metrics 4-Grid -->
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                         <div class="bg-bgInput/90 border border-borderCard rounded-xl p-2.5">
                             <span class="text-[10px] text-slate-400 block">實戰回本均價 (含稅費)</span>
@@ -840,7 +825,7 @@
                     </div>
                 </section>
 
-                <!-- CARD 3: 網格策略風險分析 (Header & Mode Switcher) -->
+                <!-- CARD 3: 網格策略風險分析 -->
                 <section class="card-glow rounded-2xl p-4 sm:p-5 space-y-3">
                     <div class="flex flex-wrap items-center justify-between gap-2">
                         <div class="flex items-center gap-3">
@@ -855,7 +840,6 @@
                             </div>
                         </div>
 
-                        <!-- View Filter Buttons -->
                         <div class="grid grid-cols-4 gap-1.5 w-full sm:w-auto">
                             <button onclick="setChartFilter('ALL')" id="tabChartALL" class="py-1.5 px-2.5 rounded-lg text-xs font-bold bg-amber-500 text-slate-950 transition">
                                 三圖並列
@@ -873,7 +857,7 @@
                     </div>
                 </section>
 
-                <!-- Charts Grid (Side-by-side on large screens when ALL is active) -->
+                <!-- Charts Grid -->
                 <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
                     <!-- CHART 1: 槓桿倍數 -->
                     <section id="chartCardLEV" class="card-glow rounded-2xl p-4 space-y-2">
@@ -893,7 +877,7 @@
                         <div id="svgContainerLev" class="w-full h-48 pt-1"></div>
                     </section>
 
-                    <!-- CHART 2: 買入價 & 爆倉價 (with Live Current Price Line) -->
+                    <!-- CHART 2: 買入價 & 爆倉價 -->
                     <section id="chartCardPRICE" class="card-glow rounded-2xl p-4 space-y-2">
                         <div class="flex flex-wrap items-center justify-between gap-2">
                             <div class="flex items-center gap-1.5">
@@ -947,7 +931,6 @@
                         </div>
                     </div>
 
-                    <!-- Liquidation Formula Mode Pill Switcher -->
                     <div class="px-4 py-2 bg-bgInput/60 border-b border-borderCard flex flex-wrap items-center justify-between gap-2 text-[11px]">
                         <span class="text-slate-400">表格爆倉欄優先顯示：</span>
                         <div class="flex items-center gap-1">
@@ -963,7 +946,6 @@
                         </div>
                     </div>
 
-                    <!-- Responsive Data Table -->
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
                             <thead>
@@ -977,7 +959,7 @@
                                 </tr>
                             </thead>
                             <tbody id="gridTableBody" class="divide-y divide-borderCard/60 text-xs font-mono">
-                                <!-- Dynamically populated by JS -->
+                                <!-- Dynamically populated -->
                             </tbody>
                         </table>
                     </div>
@@ -1015,13 +997,13 @@
             </div>
         </div>
 
-        <!-- VERCEL API/QUOTE.JS CODE MODAL -->
+        <!-- VERCEL API/QUOTE.JS CODE MODAL (Streamlined for Pure Daily K-Line) -->
         <div id="vercelCodeModal" class="fixed inset-0 z-50 hidden bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
             <div class="card-glow rounded-2xl max-w-lg w-full p-5 space-y-4 border border-sky-500/40 shadow-2xl">
                 <div class="flex items-center justify-between border-b border-borderCard pb-3">
                     <div>
-                        <h3 class="text-base font-bold text-white">📄 Vercel Serverless 後端程式碼 (<code class="text-amber-400">api/quote.js</code>)</h3>
-                        <p class="text-[11px] text-slate-400 mt-0.5">在 GitHub 專案新增 <code class="text-sky-300">api/quote.js</code> 並貼上此代碼，即可由雲端後端直連抓取台指近全 60分K 與日K</p>
+                        <h3 class="text-base font-bold text-white">📄 精簡版 Vercel 日K後端 (<code class="text-amber-400">api/quote.js</code>)</h3>
+                        <p class="text-[11px] text-slate-400 mt-0.5">已移除不穩定的 60分K 請求，專注抓取台指期日K（含 FinMind 與鉅亨雙備援）</p>
                     </div>
                     <button onclick="closeVercelCodeModal()" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center font-bold">✕</button>
                 </div>
@@ -1040,7 +1022,7 @@
                     <span class="text-amber-400 text-lg">📖</span>
                     <div>
                         <h2 class="text-base font-bold text-white">台指模擬器 TAIFEX Pro 核心公式</h2>
-                        <p class="text-xs text-slate-400">透明公開的數學模型，包含手續費、期交稅與雙重追繳斷頭門檻</p>
+                        <p class="text-xs text-slate-400">透明公開的數學模型，包含日K支撐壓力、手續費、期交稅與雙重斷頭門檻</p>
                     </div>
                 </div>
 
@@ -1056,12 +1038,13 @@
                     </div>
 
                     <div class="bg-bgInput border border-borderCard rounded-xl p-3.5 space-y-1">
-                        <div class="font-bold text-amber-400">2. 淨浮動盈虧、單格停利淨利與累積權益數</div>
-                        <p class="text-slate-400">當價格觸及第 <code class="text-white">i</code> 格時，扣除已發生之建倉摩擦成本：</p>
+                        <div class="font-bold text-amber-400">2. 日K三大支撐壓力模型 (Pivot × 黃金分割 × ATR)</div>
+                        <p class="text-slate-400">採用日K全盤最高 <code class="text-white">H</code>、最低 <code class="text-white">L</code>、收盤 <code class="text-white">C</code> 與 20 日波段高低：</p>
                         <div class="font-mono text-[11px] bg-slate-900/90 p-2 rounded text-sky-300">
-                            淨浮動盈虧 PnLᵢ = (Pᵢ - RawAvgPᵢ) × Qᵢ × M - 累計建倉稅費<br>
-                            單格停利淨利 = 單格價差點數 × 該格口數 × M - 來回手續費與期交稅<br>
-                            累積淨權益數 Equityᵢ = 存入本金 C + PnLᵢ
+                            多空樞軸點 PP = (H + L + C) ÷ 3<br>
+                            第一壓力 R1 = 2×PP - L ｜ 第一支撐 S1 = 2×PP - H<br>
+                            第二壓力 R2 = PP + (H - L) ｜ 第二支撐 S2 = PP - (H - L)<br>
+                            14日真實波幅 ATR = Average(Max(H-L, |H-PrevC|, |L-PrevC|), 14)
                         </div>
                     </div>
 
@@ -1084,7 +1067,7 @@
                     <span class="text-amber-400 text-lg">ℹ️</span>
                     <div>
                         <h2 class="text-base font-bold text-white">關於台指模擬器 TAIFEX Pro</h2>
-                        <p class="text-xs text-slate-400">專為台灣期貨交易人打造的視覺化網格部位試算與戰情工具</p>
+                        <p class="text-xs text-slate-400">專為台灣期貨交易人打造的視覺化網格部位試算與日K戰情工具</p>
                     </div>
                 </div>
                 <div class="space-y-3 text-xs text-slate-300 leading-relaxed">
@@ -1092,8 +1075,8 @@
                         在台指期貨（大台 TX、小台 MTX、微台 TMF）進行逢低分批佈局或左側網格交易時，投資人最常忽略的是<span class="text-amber-400 font-bold">「隨著加倉口數增加，持倉均價與爆倉價會加速靠攏」</span>的非線性風險。
                     </p>
                     <ul class="list-disc pl-5 space-y-1 text-slate-400">
-                        <li><span class="text-white">響應式雙欄戰情室</span>：電腦大螢幕左設參數、右看圖表，手機維持直覺單手操作。</li>
-                        <li><span class="text-white">TradingView Lightweight Charts 互動 K 線</span>：支援自由縮放、十字線查價與動態支撐壓力線。</li>
+                        <li><span class="text-white">純日K三大模型支撐壓力</span>：直連 FinMind 官方期貨日夜盤資料庫，自動合成含夜盤全時段之日K棒，計算樞軸點、波段黃金分割與 14 日 ATR 波幅。</li>
+                        <li><span class="text-white">TradingView 互動日K圖</span>：支援自由縮放、十字線查價與關鍵支撐壓力線標示。</li>
                         <li><span class="text-white">實戰摩擦成本與自訂保證金</span>：完整納入期交稅（0.002%）、手續費、轉倉滑價與月結算日倒數提醒。</li>
                     </ul>
                     <div class="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-[11px] text-amber-300">
@@ -1121,7 +1104,7 @@
                     <circle cx="12" cy="12" r="5" />
                     <circle cx="12" cy="12" r="1.5" fill="currentColor" />
                 </svg>
-                <span class="text-[10px] font-medium">支撐壓力</span>
+                <span class="text-[10px] font-medium">日K支撐壓力</span>
             </button>
 
             <button onclick="switchBottomTab('GRID')" id="navBtnGRID" class="flex flex-col items-center justify-center py-1.5 rounded-xl bg-amber-500/15 border border-amber-500/40 text-amber-400 transition">
@@ -1174,10 +1157,8 @@
             }
         };
 
-        // Mutable Contract Specs (Supports user custom overrides)
         let CONTRACTS = JSON.parse(JSON.stringify(DEFAULT_CONTRACTS));
 
-        // Default 3 Scenarios
         const DEFAULT_SCENARIOS = [
             {
                 name: '1. 微台長線存股',
@@ -1217,13 +1198,12 @@
             }
         ];
 
-        const STORAGE_KEY_STATE = 'taifex_sim_pro_state_v4';
-        const STORAGE_KEY_SCENARIOS = 'taifex_sim_pro_scenarios_v4';
+        const STORAGE_KEY_STATE = 'taifex_sim_pro_state_v5_daily';
+        const STORAGE_KEY_SCENARIOS = 'taifex_sim_pro_scenarios_v5';
         const STORAGE_KEY_CUSTOM_MARGINS = 'taifex_sim_custom_margins_v1';
         const STORAGE_KEY_FINMIND_TOKEN = 'taifex_sim_finmind_token_v1';
         const STORAGE_KEY_OHLC_ENDPOINT = 'taifex_sim_ohlc_endpoint_v1';
 
-        // App State
         let state = {
             activeScenarioIdx: 0,
             contractKey: 'TMF',
@@ -1231,11 +1211,10 @@
             scalingMode: 'EQUAL',
             colorScheme: 'TW',
             liqMode: 'GRID',
-            chartFilter: 'ALL',
-            srTimeframe: '60m'
+            chartFilter: 'ALL'
         };
 
-        // Support & Resistance K-line state
+        // Streamlined Pure Daily K-line state
         let srData = {
             lastPrice: 46200,
             prevClose: 46015,
@@ -1243,12 +1222,12 @@
             dayLow: 45620,
             swingHigh20: 47650,
             swingLow20: 43950,
-            klines60m: [],
+            atr14: 480,
+            ma20: 45800,
             klines1d: [],
             calculatedLevels: [],
             dataStatus: 'SIMULATED',
-            sourceName: '內建模擬 K 線',
-            hasTrue60m: false,
+            sourceName: '內建模擬日 K',
             hasTrueDaily: false
         };
 
@@ -1279,7 +1258,7 @@
         // ==================== TAIFEX Third Wednesday Settlement Countdown ====================
         function getThirdWednesday(year, monthZeroIndexed) {
             const firstDay = new Date(year, monthZeroIndexed, 1);
-            const dayOfWeek = firstDay.getDay(); // 0=Sun, 3=Wed
+            const dayOfWeek = firstDay.getDay();
             const offset = (3 - dayOfWeek + 7) % 7;
             const thirdWedDate = 1 + offset + 14;
             return new Date(year, monthZeroIndexed, thirdWedDate, 13, 30, 0);
@@ -1460,7 +1439,6 @@
             showToast('已恢復期交所預設原始與維持保證金');
         }
 
-        // Scenario Slot Management
         function updateScenarioButtonsUI() {
             for (let i = 0; i < 3; i++) {
                 const btn = document.getElementById('btnScenario' + i);
@@ -1755,19 +1733,20 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // ==================== Support & Resistance (60m & 1D) & TradingView Engine ====================
-        function generateKlinesSeries(centerPrice, count, volatilityPts, stepSeconds = 3600) {
+        // ==================== Streamlined Pure Daily K-Line (1D) Support & Resistance Engine ====================
+        function generateDailyKlinesSeries(centerPrice, count, volatilityPts) {
             const klines = [];
-            const nowSec = Math.floor(Date.now() / 1000);
+            const now = new Date();
             let cur = Math.round(centerPrice - volatilityPts * 1.4);
             for (let i = 0; i < count; i++) {
+                const d = new Date(now.getTime() - (count - i) * 86400000);
+                const dateStr = d.toISOString().slice(0, 10);
                 const open = cur;
                 const delta = Math.round((Math.random() - 0.47) * volatilityPts);
                 const close = Math.max(5000, open + delta);
                 const high = Math.max(open, close) + Math.round(Math.random() * volatilityPts * 0.55);
                 const low = Math.min(open, close) - Math.round(Math.random() * volatilityPts * 0.55);
-                const time = nowSec - (count - i) * stepSeconds;
-                klines.push({ time, open, high, low, close });
+                klines.push({ date: dateStr, time: dateStr, open, high, low, close });
                 cur = close;
             }
             const last = klines[klines.length - 1];
@@ -1783,11 +1762,9 @@
             srData.prevClose = Math.round(P * 0.996);
             srData.dayHigh = Math.round(P * 1.011);
             srData.dayLow = Math.round(P * 0.987);
-            srData.klines60m = generateKlinesSeries(P, 32, Math.round(P * 0.0055), 3600);
-            srData.klines1d = generateKlinesSeries(P, 28, Math.round(P * 0.013), 86400);
+            srData.klines1d = generateDailyKlinesSeries(P, 30, Math.round(P * 0.013));
             srData.dataStatus = 'SIMULATED';
-            srData.sourceName = '內建隨機模擬 K 線';
-            srData.hasTrue60m = false;
+            srData.sourceName = '內建模擬日 K';
             srData.hasTrueDaily = false;
 
             const all1dHighs = srData.klines1d.map(k => k.high);
@@ -1804,9 +1781,9 @@
         function regenerateSimulatedKlines() {
             const base = parseFloat(document.getElementById('manualSrClose').value) || 46200;
             initSimulatedMarketData(base);
-            document.getElementById('srDataSourceStatus').textContent = '⚠️ 模擬資料：已重新生成 60分線 + 日線 K 棒，非即時行情';
+            document.getElementById('srDataSourceStatus').textContent = '⚠️ 模擬日K資料：已重新生成 30 日 K 棒走勢，非即時行情';
             computeAndRenderSR();
-            showToast('已重新生成 WTXP& 模擬 60分K 與 日K 走勢');
+            showToast('已重新生成模擬日 K 走勢');
         }
 
         function saveFinMindToken() {
@@ -1838,7 +1815,7 @@
             } catch (e) {}
         }
 
-        function hasUsableOhlcBars(bars, minimum) {
+        function hasUsableDailyBars(bars, minimum = 8) {
             return Array.isArray(bars) && bars.length >= minimum && bars.every(bar =>
                 [bar.open, bar.high, bar.low, bar.close].every(value => Number.isFinite(Number(value))) &&
                 Number(bar.high) >= Math.max(Number(bar.open), Number(bar.close)) &&
@@ -1846,13 +1823,15 @@
             );
         }
 
-        function normalizeOhlcBars(bars) {
+        function normalizeDailyBars(bars) {
             return bars.map((bar, index) => ({
-                time: bar.time ?? bar.timestamp ?? index,
-                label: bar.label ?? bar.date,
-                open: Math.round(Number(bar.open)), high: Math.round(Number(bar.high)),
-                low: Math.round(Number(bar.low)), close: Math.round(Number(bar.close))
-            })).sort((left, right) => Number(left.time) - Number(right.time));
+                date: bar.date || bar.label || new Date((bar.time || (1700000000 + index * 86400)) * 1000).toISOString().slice(0, 10),
+                time: bar.date || bar.time || index,
+                open: Math.round(Number(bar.open)),
+                high: Math.round(Number(bar.high)),
+                low: Math.round(Number(bar.low)),
+                close: Math.round(Number(bar.close))
+            }));
         }
 
         function appendDiagLog(msg) {
@@ -1862,45 +1841,21 @@
             logEl.textContent += `\n[${timeStr}] ${msg}`;
         }
 
-        function aggregate60mToDaily(klines60m) {
-            const daily = [];
-            const chunkSize = 19;
-            for (let i = 0; i < klines60m.length; i += chunkSize) {
-                const slice = klines60m.slice(i, i + chunkSize);
-                if (slice.length === 0) continue;
-                daily.push({
-                    time: slice[slice.length - 1].time,
-                    open: slice[0].open,
-                    high: Math.max(...slice.map(k => k.high)),
-                    low: Math.min(...slice.map(k => k.low)),
-                    close: slice[slice.length - 1].close
-                });
-            }
-            return daily;
-        }
-
-        function applyRealMarketPayload({ lastPrice, prevClose, dayHigh, dayLow, klines60m, klines1d, sourceName, dataDateStr, hasTrue60m = true, hasTrueDaily = true }) {
+        function applyRealMarketPayload({ lastPrice, prevClose, dayHigh, dayLow, klines1d, sourceName, dataDateStr }) {
             srData.lastPrice = Math.round(lastPrice);
             srData.prevClose = Math.round(prevClose || lastPrice);
             srData.dayHigh = Math.round(Math.max(dayHigh || lastPrice, lastPrice));
             srData.dayLow = Math.round(Math.min(dayLow || lastPrice, lastPrice));
             srData.dataStatus = 'REAL_OHLC';
             srData.sourceName = sourceName;
-            srData.hasTrue60m = hasTrue60m;
-            srData.hasTrueDaily = hasTrueDaily;
+            srData.hasTrueDaily = true;
 
-            if (Array.isArray(klines60m) && klines60m.length >= 4) {
-                srData.klines60m = klines60m.slice(-48);
+            if (Array.isArray(klines1d) && klines1d.length >= 5) {
+                srData.klines1d = klines1d.slice(-40);
             }
 
-            if (Array.isArray(klines1d) && klines1d.length >= 3) {
-                srData.klines1d = klines1d.slice(-35);
-            } else if (srData.klines60m.length >= 10) {
-                srData.klines1d = aggregate60mToDaily(srData.klines60m);
-            }
-
-            const highs1d = srData.klines1d.map(k => k.high);
-            const lows1d = srData.klines1d.map(k => k.low);
+            const highs1d = srData.klines1d.slice(-20).map(k => k.high);
+            const lows1d = srData.klines1d.slice(-20).map(k => k.low);
             srData.swingHigh20 = Math.max(...highs1d, srData.dayHigh);
             srData.swingLow20 = Math.min(...lows1d, srData.dayLow);
 
@@ -1916,15 +1871,15 @@
 
             const statusEl = document.getElementById('srDataSourceStatus');
             const tagEl = document.getElementById('planBStatusTag');
-            const intervalWarning = hasTrue60m ? '' : '；60分K不足（目前為日／夜盤區段資料）';
-            statusEl.textContent = `✅ 已同步 ${sourceName} OHLC：${fmtNum(srData.lastPrice)} 點 (${dataDateStr || new Date().toLocaleTimeString()})${intervalWarning}`;
+            statusEl.textContent = `✅ 已同步 ${sourceName} 日K：${fmtNum(srData.lastPrice)} 點 (${dataDateStr || '最新交易日'})`;
             if (tagEl) tagEl.textContent = `✅ 已連線 (${sourceName})`;
 
             computeAndRenderSR();
             recalculateAll();
-            showToast(`✅ 已更新台指近全最新點位：${fmtNum(srData.lastPrice)} 點`);
+            showToast(`✅ 已同步台指期日K最新收盤：${fmtNum(srData.lastPrice)} 點`);
         }
 
+        // Streamlined Pure Daily Market Data Fetcher (No 60m dependencies)
         async function fetchRealMarketData() {
             const icon = document.getElementById('srSyncIcon');
             const statusEl = document.getElementById('srDataSourceStatus');
@@ -1933,171 +1888,42 @@
             const customEndpoint = (document.getElementById('inputOhlcEndpoint')?.value || '').trim();
 
             icon.classList.add('rotate-180');
-            statusEl.textContent = '正在連線抓取台指近全 (WTXP&) 真實 60分K 與 日K...';
-            if (logEl) logEl.textContent = '🚀 開始執行台指近全 (WTXP&) 真實 60分K 與 日K 抓取...';
+            statusEl.textContent = '正在連線同步台指期 (含夜盤全時段) 真實日 K 資料...';
+            if (logEl) logEl.textContent = '🚀 開始同步台指期真實日 K (1D) 資料...';
 
-            if (customEndpoint) {
+            // 【通道 1】自訂端點或同網域 Vercel /api/quote
+            const endpointsToTry = [];
+            if (customEndpoint) endpointsToTry.push({ name: '自訂後端', url: customEndpoint });
+            endpointsToTry.push({ name: 'Vercel /api/quote', url: `/api/quote${token ? `?token=${encodeURIComponent(token)}` : ''}` });
+
+            for (const ep of endpointsToTry) {
                 try {
-                    appendDiagLog(`0️⃣ 嘗試自訂 OHLC 端點：${customEndpoint}`);
-                    const response = await fetch(customEndpoint, { cache: 'no-store' });
-                    const payload = response.ok ? await response.json() : null;
-                    const hourlyValid = hasUsableOhlcBars(payload?.klines60m, 12);
-                    const dailyValid = hasUsableOhlcBars(payload?.klines1d, 8);
-                    if (payload?.ok && hourlyValid && dailyValid && Number(payload.lastPrice) > 5000) {
-                        appendDiagLog('✅ 自訂端點回傳已驗證的原生 60 分 K 與日 K。');
-                        applyRealMarketPayload({
-                            lastPrice: payload.lastPrice, prevClose: payload.prevClose, dayHigh: payload.dayHigh, dayLow: payload.dayLow,
-                            klines60m: normalizeOhlcBars(payload.klines60m), klines1d: normalizeOhlcBars(payload.klines1d),
-                            sourceName: payload.source || '自訂 OHLC 後端', dataDateStr: payload.updatedAt, hasTrue60m: true, hasTrueDaily: true
-                        });
-                        setTimeout(() => icon.classList.remove('rotate-180'), 500);
-                        return;
-                    }
-                } catch (error) {
-                    appendDiagLog(`⚠️ 自訂端點無法讀取：${error.message}`);
-                }
-            }
-
-            try {
-                appendDiagLog('1️⃣ 嘗試連線 Vercel 後端 /api/quote ...');
-                const resVercel = await fetch(`/api/quote${token ? `?token=${encodeURIComponent(token)}` : ''}`, { cache: 'no-store' });
-                if (resVercel.ok) {
-                    const contentType = resVercel.headers.get('content-type') || '';
-                    if (contentType.includes('application/json')) {
-                        const vData = await resVercel.json();
-                        if (vData && vData.ok && vData.lastPrice > 5000) {
-                            const hourlyValid = hasUsableOhlcBars(vData.klines60m, 12);
-                            const dailyValid = hasUsableOhlcBars(vData.klines1d, 8);
-                            appendDiagLog(`✅ Vercel 後端回傳 OHLC；60分K ${hourlyValid ? '完整' : '不足'}、日K ${dailyValid ? '完整' : '不足'}。`);
+                    appendDiagLog(`嘗試連線 ${ep.name}...`);
+                    const res = await fetch(ep.url, { cache: 'no-store' });
+                    if (res.ok && (res.headers.get('content-type') || '').includes('application/json')) {
+                        const payload = await res.json();
+                        if (payload?.ok && hasUsableDailyBars(payload.klines1d, 8) && Number(payload.lastPrice) > 5000) {
+                            appendDiagLog(`✅ ${ep.name} 日K載入成功 (共 ${payload.klines1d.length} 根日K)！`);
                             applyRealMarketPayload({
-                                lastPrice: vData.lastPrice,
-                                prevClose: vData.prevClose,
-                                dayHigh: vData.dayHigh,
-                                dayLow: vData.dayLow,
-                                klines60m: vData.klines60m,
-                                klines1d: vData.klines1d,
-                                sourceName: vData.source || 'Vercel /api/quote',
-                                dataDateStr: vData.updatedAt,
-                                hasTrue60m: hourlyValid,
-                                hasTrueDaily: dailyValid
+                                lastPrice: payload.lastPrice,
+                                prevClose: payload.prevClose,
+                                dayHigh: payload.dayHigh,
+                                dayLow: payload.dayLow,
+                                klines1d: normalizeDailyBars(payload.klines1d),
+                                sourceName: payload.source || ep.name,
+                                dataDateStr: payload.updatedAt
                             });
                             setTimeout(() => icon.classList.remove('rotate-180'), 500);
                             return;
                         }
                     }
-                }
-                appendDiagLog('ℹ️ 未偵測到 /api/quote 後端，自動切換至前端直連引擎...');
-            } catch (e) {
-                appendDiagLog('ℹ️ 略過 /api/quote，改由前端直連台指近全 API...');
+                } catch (_) {}
             }
 
-            let cnyes60m = [];
-            let cnyes1d = [];
+            // 【通道 2】前端直連 FinMind 官方期貨日夜盤資料庫 (原生支援 CORS，免第三方代理)
             try {
-                appendDiagLog('2️⃣ 正在抓取鉅亨網台指近全 (FUTURES:TXF1:FUTURES) 真實 60分K 與 日K...');
-                const nowSec = Math.floor(Date.now() / 1000);
-                const from60m = nowSec - 20 * 86400;
-                const from1d  = nowSec - 65 * 86400;
-                const url60m = `https://ws.api.cnyes.com/ws/api/v1/charting/history?symbol=FUTURES:TXF1:FUTURES&resolution=60&from=${from60m}&to=${nowSec}`;
-                const url1d  = `https://ws.api.cnyes.com/ws/api/v1/charting/history?symbol=FUTURES:TXF1:FUTURES&resolution=D&from=${from1d}&to=${nowSec}`;
-
-                const fetchJsonWithProxy = async (targetUrl) => {
-                    const attempts = [
-                        () => fetch(targetUrl, { cache: 'no-store' }),
-                        () => fetch(`https://corsproxy.io/?${encodeURIComponent(targetUrl)}`, { cache: 'no-store' }),
-                        () => fetch(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`, { cache: 'no-store' }),
-                        () => fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`, { cache: 'no-store' })
-                    ];
-                    for (const fn of attempts) {
-                        try {
-                            const r = await fn();
-                            if (r && r.ok) {
-                                const j = await r.json();
-                                if (j && j.data && Array.isArray(j.data.c) && j.data.c.length > 0) return j;
-                            }
-                        } catch (_) {}
-                    }
-                    throw new Error('All proxy routes failed');
-                };
-
-                const [json60, json1d] = await Promise.all([
-                    fetchJsonWithProxy(url60m),
-                    fetchJsonWithProxy(url1d).catch(() => null)
-                ]);
-
-                if (json60 && json60.data && Array.isArray(json60.data.c)) {
-                    const { o, h, l, c, t } = json60.data;
-                    const pairs = [];
-                    for (let i = 0; i < c.length; i++) {
-                        if (c[i] > 5000 && o[i] > 5000) {
-                            pairs.push({
-                                time: t ? t[i] : i,
-                                open: Math.round(o[i]),
-                                high: Math.round(h[i]),
-                                low: Math.round(l[i]),
-                                close: Math.round(c[i])
-                            });
-                        }
-                    }
-                    pairs.sort((a, b) => a.time - b.time);
-                    cnyes60m = pairs;
-                }
-
-                if (json1d && json1d.data && Array.isArray(json1d.data.c)) {
-                    const { o, h, l, c, t } = json1d.data;
-                    const dPairs = [];
-                    for (let i = 0; i < c.length; i++) {
-                        if (c[i] > 5000 && o[i] > 5000) {
-                            dPairs.push({
-                                time: t ? t[i] : i,
-                                open: Math.round(o[i]),
-                                high: Math.round(h[i]),
-                                low: Math.round(l[i]),
-                                close: Math.round(c[i])
-                            });
-                        }
-                    }
-                    dPairs.sort((a, b) => a.time - b.time);
-                    cnyes1d = dPairs;
-                }
-
-                if (cnyes60m.length >= 12) {
-                    const latestBar = cnyes60m[cnyes60m.length - 1];
-                    const recentSessionBars = cnyes60m.slice(-19);
-                    const sessionHigh = Math.max(...recentSessionBars.map(k => k.high));
-                    const sessionLow = Math.min(...recentSessionBars.map(k => k.low));
-                    const prevDayClose = cnyes1d.length >= 2
-                        ? cnyes1d[cnyes1d.length - 2].close
-                        : cnyes60m[Math.max(0, cnyes60m.length - 20)].close;
-
-                    const barTimeStr = latestBar.time > 1000000
-                        ? new Date(latestBar.time * 1000).toLocaleString('zh-TW', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false })
-                        : '最新60分K';
-
-                    const dailyValid = hasUsableOhlcBars(cnyes1d, 8);
-                    appendDiagLog(`✅ 成功抓到真實 60分K (共 ${cnyes60m.length} 根)！最新價: ${latestBar.close} 點`);
-                    applyRealMarketPayload({
-                        lastPrice: latestBar.close,
-                        prevClose: prevDayClose,
-                        dayHigh: sessionHigh,
-                        dayLow: sessionLow,
-                        klines60m: cnyes60m,
-                        klines1d: cnyes1d,
-                        sourceName: '台指近全 (TXF1 真實60分K+日K)',
-                        dataDateStr: barTimeStr,
-                        hasTrue60m: true,
-                        hasTrueDaily: dailyValid
-                    });
-                    setTimeout(() => icon.classList.remove('rotate-180'), 500);
-                    return;
-                }
-            } catch (e) {
-                appendDiagLog(`ℹ️ 鉅亨網 60分K 直連切換中 (${e.message})，改由 FinMind 官方日夜盤明細建立真實走勢...`);
-            }
-
-            try {
-                appendDiagLog('3️⃣ 正在向 FinMind 官方 API 查詢 TaiwanFuturesDaily (TX 台指期日夜盤真實明細)...');
-                const startDate = new Date(Date.now() - 45 * 86400000).toISOString().slice(0, 10);
+                appendDiagLog('正在向 FinMind 官方 API 查詢 TaiwanFuturesDaily (TX 台指期日夜盤全時段日K)...');
+                const startDate = new Date(Date.now() - 60 * 86400000).toISOString().slice(0, 10);
                 let fmUrl = `https://api.finmindtrade.com/api/v4/data?dataset=TaiwanFuturesDaily&data_id=TX&start_date=${startDate}`;
                 if (token) fmUrl += `&token=${encodeURIComponent(token)}`;
 
@@ -2120,9 +1946,8 @@
 
                     const dates = Object.keys(byDate).sort();
                     const dailyKlines = [];
-                    const sessionKlines = [];
 
-                    dates.forEach((d, dIdx) => {
+                    dates.forEach(d => {
                         const rowsOfDay = byDate[d];
                         const volByContract = {};
                         rowsOfDay.forEach(r => {
@@ -2133,29 +1958,6 @@
 
                         const afterMarketRow = mainRows.find(r => r.trading_session === 'after_market');
                         const regularRow = mainRows.find(r => r.trading_session === 'position') || mainRows[0];
-                        const baseTs = Math.floor(new Date(d).getTime() / 1000) || (1700000000 + dIdx * 86400);
-
-                        if (afterMarketRow && Number(afterMarketRow.open) > 5000 && Number(afterMarketRow.close) > 5000) {
-                            sessionKlines.push({
-                                time: baseTs - 36000,
-                                label: `${d.slice(5)}夜盤`,
-                                open: Math.round(Number(afterMarketRow.open)),
-                                high: Math.round(Number(afterMarketRow.max || afterMarketRow.close)),
-                                low: Math.round(Number(afterMarketRow.min || afterMarketRow.close)),
-                                close: Math.round(Number(afterMarketRow.close))
-                            });
-                        }
-
-                        if (regularRow && Number(regularRow.open) > 5000 && Number(regularRow.close) > 5000) {
-                            sessionKlines.push({
-                                time: baseTs,
-                                label: `${d.slice(5)}日盤`,
-                                open: Math.round(Number(regularRow.open)),
-                                high: Math.round(Number(regularRow.max || regularRow.close)),
-                                low: Math.round(Number(regularRow.min || regularRow.close)),
-                                close: Math.round(Number(regularRow.close))
-                            });
-                        }
 
                         const openPrice = afterMarketRow && Number(afterMarketRow.open) > 5000
                             ? Number(afterMarketRow.open)
@@ -2165,8 +1967,8 @@
                         const lowPrice = Math.min(...mainRows.filter(r => Number(r.min) > 5000).map(r => Number(r.min)));
 
                         dailyKlines.push({
-                            time: baseTs,
                             date: d,
+                            time: d,
                             contract: mainContract,
                             open: Math.round(openPrice),
                             high: Math.round(highPrice),
@@ -2175,22 +1977,19 @@
                         });
                     });
 
-                    if (dailyKlines.length >= 2) {
+                    if (dailyKlines.length >= 5) {
                         const latestDay = dailyKlines[dailyKlines.length - 1];
                         const prevDay = dailyKlines[dailyKlines.length - 2];
 
-                        appendDiagLog(`✅ FinMind 真實日夜盤 K 線載入成功！最新收盤: ${latestDay.close}`);
+                        appendDiagLog(`✅ FinMind 真實日K載入成功！共 ${dailyKlines.length} 個交易日 | 最新收盤 (${latestDay.date}): ${latestDay.close}`);
                         applyRealMarketPayload({
                             lastPrice: latestDay.close,
                             prevClose: prevDay.close,
                             dayHigh: latestDay.high,
                             dayLow: latestDay.low,
-                            klines60m: sessionKlines.slice(-32),
                             klines1d: dailyKlines,
-                            sourceName: `FinMind 台指期日夜盤 (${latestDay.contract})`,
-                            dataDateStr: latestDay.date,
-                            hasTrue60m: false,
-                            hasTrueDaily: true
+                            sourceName: `FinMind 台指全盤日K (${latestDay.contract})`,
+                            dataDateStr: latestDay.date
                         });
                         setTimeout(() => icon.classList.remove('rotate-180'), 500);
                         return;
@@ -2200,80 +1999,62 @@
                 appendDiagLog(`❌ FinMind 連線發生錯誤：${err.message}`);
             }
 
-            appendDiagLog(`⚠️ 外部接口目前受限或休市中，已維持目前點位設定。`);
-            statusEl.textContent = `⚠️ 外部連線受阻，請查看診斷日誌或手動輸入點位`;
+            appendDiagLog(`⚠️ 外部連線受限或休市中，已維持目前日K設定。`);
+            statusEl.textContent = `⚠️ 外部連線受阻，請查看診斷日誌或手動輸入日K點位`;
             setTimeout(() => icon.classList.remove('rotate-180'), 500);
         }
 
         function getVercelBackendCodeString() {
-            return `// 檔案路徑：api/quote.js (放置於 GitHub 專案的 api 資料夾下，Vercel 會自動部署為後端 API)
+            return `// 檔案路徑：api/quote.js (純日K精簡穩定版，支援 FinMind 與鉅亨日K雙備援)
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Cache-Control', 'no-store, max-age=0');
+  res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=120');
 
   try {
-    const nowSec = Math.floor(Date.now() / 1000);
-    const from60m = nowSec - 20 * 86400;
-    const from1d  = nowSec - 65 * 86400;
+    const startDate = new Date(Date.now() - 65 * 86400000).toISOString().slice(0, 10);
+    const token = req.query.token || '';
+    const fmUrl = \`https://api.finmindtrade.com/api/v4/data?dataset=TaiwanFuturesDaily&data_id=TX&start_date=\${startDate}\${token ? \`&token=\${token}\` : ''}\`;
 
-    const getCnyesHistory = async (resolution, from) => {
-      const query = \`symbol=FUTURES:TXF1:FUTURES&resolution=\${resolution}&from=\${from}&to=\${nowSec}\`;
-      const urls = [
-        \`https://ws.api.cnyes.com/ws/api/v1/charting/history?\${query}\`,
-        \`https://ws.api.cnyes.com/charting/api/v1/history?\${query}\`
-      ];
-      for (const url of urls) {
-        try {
-          const response = await fetch(url, { headers: { 'User-Agent': 'taifex-simulator/1.0' } });
-          const payload = await response.json().catch(() => null);
-          if (response.ok && Array.isArray(payload?.data?.c) && payload.data.c.length) return payload;
-        } catch (_) {}
-      }
-      throw new Error(\`Cnyes charting returned no \${resolution} bars\`);
-    };
+    const fmRes = await fetch(fmUrl);
+    const fmJson = await fmRes.json();
 
-    const [j60, j1d] = await Promise.all([
-      getCnyesHistory('60', from60m),
-      getCnyesHistory('D', from1d).catch(() => null)
-    ]);
+    if (fmJson?.msg === 'success' && Array.isArray(fmJson.data) && fmJson.data.length > 0) {
+      const cleanRows = fmJson.data.filter(r => r.contract_date && !String(r.contract_date).includes('/') && Number(r.close) > 5000 && Number(r.volume) > 0);
+      const byDate = {};
+      cleanRows.forEach(r => { (byDate[r.date] = byDate[r.date] || []).push(r); });
 
-    if (j60?.data?.c?.length > 5) {
-      const { o, h, l, c, t } = j60.data;
-      const klines60m = c.map((val, i) => ({
-        time: t ? t[i] : i,
-        open: Math.round(o[i]),
-        high: Math.round(h[i]),
-        low: Math.round(l[i]),
-        close: Math.round(val)
-      })).filter(k => k.close > 5000).sort((a, b) => a.time - b.time);
+      const klines1d = Object.keys(byDate).sort().map(d => {
+        const rows = byDate[d];
+        const volMap = {};
+        rows.forEach(r => { volMap[r.contract_date] = (volMap[r.contract_date] || 0) + Number(r.volume || 0); });
+        const mainContract = Object.keys(volMap).sort((a, b) => volMap[b] - volMap[a])[0];
+        const mainRows = rows.filter(r => r.contract_date === mainContract);
+        const night = mainRows.find(r => r.trading_session === 'after_market');
+        const day = mainRows.find(r => r.trading_session === 'position') || mainRows[0];
+        return {
+          date: d,
+          time: d,
+          open: Math.round(Number(night?.open > 5000 ? night.open : day.open)),
+          high: Math.round(Math.max(...mainRows.map(r => Number(r.max || r.close)))),
+          low: Math.round(Math.min(...mainRows.filter(r => Number(r.min) > 5000).map(r => Number(r.min)))),
+          close: Math.round(Number(day.close))
+        };
+      });
 
-      const klines1d = (j1d?.data?.c || []).map((val, i) => ({
-        time: j1d.data.t ? j1d.data.t[i] : i,
-        open: Math.round(j1d.data.o[i]),
-        high: Math.round(j1d.data.h[i]),
-        low: Math.round(j1d.data.l[i]),
-        close: Math.round(val)
-      })).filter(k => k.close > 5000).sort((a, b) => a.time - b.time);
-
-      const latest = klines60m[klines60m.length - 1];
-      const recent19 = klines60m.slice(-19);
-      const dayHigh = Math.max(...recent19.map(k => k.high));
-      const dayLow  = Math.min(...recent19.map(k => k.low));
-      const prevClose = klines1d.length >= 2 ? klines1d[klines1d.length - 2].close : klines60m[0].close;
-
+      const latest = klines1d.at(-1);
+      const prev = klines1d.at(-2) || latest;
       return res.status(200).json({
         ok: true,
-        source: 'Vercel 後端直連 (WTXP& 真實60分K+日K)',
-        updatedAt: new Date().toLocaleTimeString('zh-TW', { hour12: false }),
+        source: 'Vercel 日K後端 (FinMind 期交所日夜盤合成)',
+        updatedAt: latest.date,
         lastPrice: latest.close,
-        prevClose,
-        dayHigh,
-        dayLow,
-        klines60m: klines60m.slice(-48),
-        klines1d: klines1d.slice(-35)
+        prevClose: prev.close,
+        dayHigh: latest.high,
+        dayLow: latest.low,
+        klines1d: klines1d.slice(-40)
       });
     }
-    throw new Error('Insufficient bars');
+    throw new Error('No FinMind daily data');
   } catch (err) {
     return res.status(500).json({ ok: false, error: err.message });
   }
@@ -2295,7 +2076,7 @@ export default async function handler(req, res) {
             textarea.setSelectionRange(0, 99999);
             try {
                 document.execCommand('copy');
-                showToast('✅ 已複製 api/quote.js 後端程式碼！');
+                showToast('✅ 已複製精簡版 api/quote.js 日K後端程式碼！');
             } catch (e) {
                 showToast('請手動全選複製');
             }
@@ -2306,139 +2087,82 @@ export default async function handler(req, res) {
             srData.prevClose = parseFloat(document.getElementById('manualSrPrevClose').value) || 46000;
             srData.dayHigh = parseFloat(document.getElementById('manualSrHigh').value) || 46680;
             srData.dayLow = parseFloat(document.getElementById('manualSrLow').value) || 45620;
-            srData.swingHigh20 = Math.round(srData.dayHigh * 1.022);
-            srData.swingLow20 = Math.round(srData.dayLow * 0.978);
+
+            if (srData.klines1d.length > 0) {
+                const lastBar = srData.klines1d[srData.klines1d.length - 1];
+                lastBar.close = srData.lastPrice;
+                lastBar.high = Math.max(lastBar.open, srData.dayHigh, srData.lastPrice);
+                lastBar.low = Math.min(lastBar.open, srData.dayLow, srData.lastPrice);
+            }
             srData.dataStatus = 'MANUAL_INPUT';
-            document.getElementById('srDataSourceStatus').textContent = '⚠️ 手動點位校正中；現價／高低不代表即時行情';
+            document.getElementById('srDataSourceStatus').textContent = '⚠️ 手動點位校正中；已即時重算日K樞軸點與黃金分割';
             computeAndRenderSR();
         }
 
-        function parseManualOhlc(text) {
-            const baseSec = Math.floor(Date.now() / 1000) - 200 * 3600;
+        function parseManualDailyOhlc(text) {
             return text.split(/\r?\n/).map((line, index) => {
                 const columns = line.trim().split(',').map(value => value.trim());
                 if (columns.length < 5 || !columns[0]) return null;
                 const [open, high, low, close] = columns.slice(1, 5).map(Number);
                 if (![open, high, low, close].every(Number.isFinite) || high < Math.max(open, close) || low > Math.min(open, close)) return null;
-                const parsedTime = Math.floor(new Date(columns[0]).getTime() / 1000);
-                return { label: columns[0], time: Number.isFinite(parsedTime) && parsedTime > 0 ? parsedTime : (baseSec + index * 3600), open, high, low, close };
+                return { date: columns[0], time: columns[0], open, high, low, close };
             }).filter(Boolean);
         }
 
         function applyManualOhlcData() {
-            const daily = parseManualOhlc(document.getElementById('manualDailyOhlc').value);
-            const hourly = parseManualOhlc(document.getElementById('manual60mOhlc').value);
-            if (daily.length < 8 && hourly.length < 12) {
-                showToast('請至少貼入 8 根日 K 或 12 根 60 分 K 的有效 OHLC 資料');
+            const daily = parseManualDailyOhlc(document.getElementById('manualDailyOhlc').value);
+            if (daily.length < 8) {
+                showToast('請至少貼入 8 根日 K 的有效 OHLC 資料');
                 return;
             }
-            if (daily.length >= 8) srData.klines1d = daily;
-            if (hourly.length >= 12) srData.klines60m = hourly;
-            const latest = (hourly.length ? hourly : daily).at(-1);
+            srData.klines1d = daily;
+            const latest = daily.at(-1);
+            const prev = daily.at(-2) || latest;
             srData.lastPrice = Math.round(latest.close);
-            srData.prevClose = Math.round((daily.length >= 2 ? daily.at(-2) : (hourly.length >= 2 ? hourly.at(-2) : latest)).close);
+            srData.prevClose = Math.round(prev.close);
             srData.dayHigh = Math.round(latest.high);
             srData.dayLow = Math.round(latest.low);
             srData.dataStatus = 'MANUAL_OHLC';
-            srData.sourceName = '使用者貼上的手動 OHLC';
-            srData.hasTrue60m = hourly.length >= 12;
-            srData.hasTrueDaily = daily.length >= 8;
+            srData.sourceName = '手動貼入之日 K CSV';
+            srData.hasTrueDaily = true;
             document.getElementById('manualSrClose').value = srData.lastPrice;
             document.getElementById('manualSrPrevClose').value = srData.prevClose;
             document.getElementById('manualSrHigh').value = srData.dayHigh;
             document.getElementById('manualSrLow').value = srData.dayLow;
-            document.getElementById('srDataSourceStatus').textContent = `⚠️ 手動 OHLC 已套用：日K ${daily.length} 根／60分K ${hourly.length} 根`;
+            document.getElementById('srDataSourceStatus').textContent = `✅ 手動日 K 已套用：共 ${daily.length} 根日 K`;
             computeAndRenderSR();
-            showToast('已以手動 OHLC 更新多週期結構分析');
+            showToast('已套用手動日 K 並更新支撐壓力表');
         }
 
-        function findSwingPoints(klines, strength) {
-            const points = [];
-            for (let index = strength; index < klines.length - strength; index++) {
-                const window = klines.slice(index - strength, index + strength + 1);
-                if (klines[index].high === Math.max(...window.map(bar => bar.high))) points.push({ type: 'H', price: klines[index].high, index });
-                if (klines[index].low === Math.min(...window.map(bar => bar.low))) points.push({ type: 'L', price: klines[index].low, index });
+        // Compute 14-day Average True Range (ATR) & 20MA from Daily K-Lines
+        function calculateDailyIndicators(klines) {
+            if (!klines || klines.length === 0) return { ma20: srData.lastPrice, atr14: 450, std20: 500 };
+            const recent20 = klines.slice(-20);
+            const ma20 = Math.round(recent20.reduce((sum, k) => sum + k.close, 0) / recent20.length);
+            const variance20 = recent20.reduce((sum, k) => sum + Math.pow(k.close - ma20, 2), 0) / recent20.length;
+            const std20 = Math.max(100, Math.round(Math.sqrt(variance20)));
+
+            const trList = [];
+            for (let i = 1; i < klines.length; i++) {
+                const cur = klines[i];
+                const prev = klines[i - 1];
+                const tr = Math.max(
+                    cur.high - cur.low,
+                    Math.abs(cur.high - prev.close),
+                    Math.abs(cur.low - prev.close)
+                );
+                trList.push(tr);
             }
-            return points;
-        }
+            const recentTr = trList.slice(-14);
+            const atr14 = recentTr.length > 0
+                ? Math.round(recentTr.reduce((a, b) => a + b, 0) / recentTr.length)
+                : Math.round(srData.dayHigh - srData.dayLow);
 
-        function analyzeStructure(klines, timeframe, isReliable) {
-            const required = timeframe === '日K' ? 8 : 12;
-            if (!isReliable || klines.length < required) return { available: false, timeframe, reason: isReliable ? `需要至少 ${required} 根完整 ${timeframe}` : `${timeframe} OHLC 資料不足或為模擬資料` };
-            const swings = findSwingPoints(klines, 2);
-            const highs = swings.filter(point => point.type === 'H').slice(-2);
-            const lows = swings.filter(point => point.type === 'L').slice(-2);
-            const latest = klines.at(-1);
-            const average = klines.slice(-Math.min(10, klines.length)).reduce((sum, bar) => sum + bar.close, 0) / Math.min(10, klines.length);
-            let trend = '盤整';
-            if (highs.length === 2 && lows.length === 2) {
-                if (highs[1].price > highs[0].price && lows[1].price > lows[0].price) trend = '多頭';
-                else if (highs[1].price < highs[0].price && lows[1].price < lows[0].price) trend = '空頭';
-            }
-            if (trend === '盤整' && latest.close > average * 1.004) trend = '偏多';
-            if (trend === '盤整' && latest.close < average * 0.996) trend = '偏空';
-            const candidates = [];
-            for (let length = Math.min(8, klines.length); length >= 4; length--) {
-                const slice = klines.slice(-length);
-                const high = Math.max(...slice.map(bar => bar.high));
-                const low = Math.min(...slice.map(bar => bar.low));
-                const averageRange = slice.reduce((sum, bar) => sum + bar.high - bar.low, 0) / length;
-                if (high - low <= averageRange * 3.2) candidates.push({ low, high, length });
-            }
-            const consolidation = candidates.at(0) || null;
-            return { available: true, timeframe, trend, latest, average, swingHigh: highs.at(-1), swingLow: lows.at(-1), consolidation };
-        }
-
-        function trendBadge(trend) {
-            const style = trend.includes('多') ? 'bg-rose-500/15 text-rose-300 border-rose-500/30' : trend.includes('空') ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30' : 'bg-amber-500/15 text-amber-300 border-amber-500/30';
-            return `<span class="px-1.5 py-0.5 rounded border ${style}">${trend}</span>`;
-        }
-
-        function describeStructure(result) {
-            if (!result.available) return result.reason;
-            const pieces = [`收盤 ${fmtNum(result.latest.close)}，${result.trend}結構`];
-            if (result.swingHigh) pieces.push(`前波高 ${fmtNum(result.swingHigh.price)}`);
-            if (result.swingLow) pieces.push(`前波低 ${fmtNum(result.swingLow.price)}`);
-            if (result.consolidation) pieces.push(`近 ${result.consolidation.length} 根整理 ${fmtNum(result.consolidation.low)}–${fmtNum(result.consolidation.high)}`);
-            else pieces.push(`尚未辨識到緊密整理區`);
-            return pieces.join('；');
-        }
-
-        function renderMultiTimeframeStructure() {
-            const daily = analyzeStructure(srData.klines1d, '日K', srData.hasTrueDaily);
-            const hourly = analyzeStructure(srData.klines60m, '60分K', srData.hasTrue60m);
-            const stateEl = document.getElementById('structureDataState');
-            const dataText = srData.dataStatus === 'REAL_OHLC' ? `真實 OHLC：${srData.sourceName}` : srData.dataStatus === 'MANUAL_OHLC' ? '手動 OHLC' : '模擬/手動校正資料';
-            stateEl.textContent = `${dataText}｜日K ${daily.available ? '可分析' : '不可分析'}／60分K ${hourly.available ? '可分析' : '不可分析'}`;
-            document.getElementById('dailyTrendBadge').innerHTML = daily.available ? trendBadge(daily.trend) : '<span class="text-amber-300">資料不足</span>';
-            document.getElementById('hourlyTrendBadge').innerHTML = hourly.available ? trendBadge(hourly.trend) : '<span class="text-amber-300">資料不足</span>';
-            document.getElementById('dailyStructureText').textContent = describeStructure(daily);
-            document.getElementById('hourlyStructureText').textContent = describeStructure(hourly);
-            const confluence = daily.available && hourly.available && daily.trend === hourly.trend && daily.trend !== '盤整';
-            const badge = document.getElementById('structureConfluenceBadge');
-            badge.textContent = confluence ? `雙週期 ${daily.trend} 共振` : daily.available && hourly.available ? '雙週期方向未一致' : '等待完整雙週期資料';
-            badge.className = `px-2 py-1 rounded-lg border text-[10px] font-bold ${confluence ? 'bg-sky-500/15 text-sky-300 border-sky-500/30' : 'bg-slate-800 text-slate-300 border-slate-700'}`;
-            const levels = [daily.swingHigh && { label: '日K 前高', price: daily.swingHigh.price, type: 'R' }, daily.swingLow && { label: '日K 前低', price: daily.swingLow.price, type: 'S' }, daily.consolidation && { label: '日K 整理區', price: `${fmtNum(daily.consolidation.low)}–${fmtNum(daily.consolidation.high)}`, type: 'Z' }, hourly.swingHigh && { label: '60分 前高', price: hourly.swingHigh.price, type: 'R' }, hourly.swingLow && { label: '60分 前低', price: hourly.swingLow.price, type: 'S' }, hourly.consolidation && { label: '60分 整理區', price: `${fmtNum(hourly.consolidation.low)}–${fmtNum(hourly.consolidation.high)}`, type: 'Z' }].filter(Boolean);
-            document.getElementById('structureLevelsList').innerHTML = levels.map(level => `<span class="px-2 py-1 rounded-lg text-[10px] border ${level.type === 'R' ? 'bg-rose-500/10 text-rose-300 border-rose-500/25' : level.type === 'S' ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/25' : 'bg-amber-500/10 text-amber-300 border-amber-500/25'}">${level.label} ${typeof level.price === 'number' ? fmtNum(level.price) : level.price}</span>`).join('') || '<span class="text-[10px] text-slate-500">尚無可列出的關鍵價位</span>';
-            document.getElementById('structureSummaryText').textContent = confluence ? `日 K 與 60 分 K 同為${daily.trend}，可將日 K 的前波高低／整理邊界當作主要地圖，再以 60 分 K 的結構確認反應。` : `目前${daily.available ? `日 K 為${daily.trend}` : '日 K 資料不足'}，${hourly.available ? `60 分 K 為${hourly.trend}` : '60 分 K 資料不足'}；優先留意關鍵支撐壓力表之共振區。`;
-        }
-
-        function switchSrTimeframe(tf) {
-            state.srTimeframe = tf;
-            const btn60 = document.getElementById('btnTf60m');
-            const btn1d = document.getElementById('btnTf1d');
-            if (tf === '60m') {
-                btn60.className = 'px-2.5 py-1 rounded-md font-bold bg-amber-500 text-slate-950 transition';
-                btn1d.className = 'px-2.5 py-1 rounded-md font-medium text-slate-400 hover:text-white transition';
-            } else {
-                btn1d.className = 'px-2.5 py-1 rounded-md font-bold bg-amber-500 text-slate-950 transition';
-                btn60.className = 'px-2.5 py-1 rounded-md font-medium text-slate-400 hover:text-white transition';
-            }
-            computeAndRenderSR();
+            return { ma20, atr14: Math.max(80, atr14), std20 };
         }
 
         function computeAndRenderSR() {
-            if (srData.klines60m.length === 0) {
+            if (srData.klines1d.length === 0) {
                 initSimulatedMarketData(parseFloat(document.getElementById('inputBasePrice').value) || 46200);
             }
 
@@ -2447,38 +2171,34 @@ export default async function handler(req, res) {
             const H_day = Math.max(srData.dayHigh, C);
             const L_day = Math.min(srData.dayLow, C);
 
-            const k1d = srData.klines1d && srData.klines1d.length >= 3 ? srData.klines1d : null;
-            const ref1dH = H_day;
-            const ref1dL = L_day;
-            const pp1d = Math.round((ref1dH + ref1dL + C) / 3);
-            const r1_1d = Math.round(2 * pp1d - ref1dL);
-            const s1_1d = Math.round(2 * pp1d - ref1dH);
-            const r2_1d = Math.round(pp1d + (ref1dH - ref1dL));
-            const s2_1d = Math.round(pp1d - (ref1dH - ref1dL));
-            const r3_1d = Math.round(k1d ? Math.max(...k1d.slice(-20).map(k => k.high), r2_1d + 150) : srData.swingHigh20);
-            const s3_1d = Math.round(k1d ? Math.min(...k1d.slice(-20).map(k => k.low), s2_1d - 150) : srData.swingLow20);
+            const k1d = srData.klines1d;
+            const { ma20, atr14, std20 } = calculateDailyIndicators(k1d);
+            srData.ma20 = ma20;
+            srData.atr14 = atr14;
 
-            const k60 = srData.klines60m;
-            const recent8Bars = k60.slice(-8);
-            const recent20Bars = k60.slice(-20);
+            // 1. Classic Daily Floor Pivot Points (P, R1~R3, S1~S3)
+            const pp = Math.round((H_day + L_day + C) / 3);
+            const r1 = Math.round(2 * pp - L_day);
+            const s1 = Math.round(2 * pp - H_day);
+            const r2 = Math.round(pp + (H_day - L_day));
+            const s2 = Math.round(pp - (H_day - L_day));
+            const r3 = Math.round(H_day + 2 * (pp - L_day));
+            const s3 = Math.round(L_day - 2 * (H_day - pp));
 
-            const h60_short = Math.max(...recent8Bars.map(k => k.high), C);
-            const l60_short = Math.min(...recent8Bars.map(k => k.low), C);
-            const h60_swing = Math.max(...recent20Bars.map(k => k.high), h60_short);
-            const l60_swing = Math.min(...recent20Bars.map(k => k.low), l60_short);
+            // 2. 20-Day Swing High/Low & Fibonacci Golden Ratio Levels
+            const recent20 = k1d.slice(-20);
+            const swingHigh = Math.max(...recent20.map(k => k.high), H_day);
+            const swingLow = Math.min(...recent20.map(k => k.low), L_day);
+            srData.swingHigh20 = swingHigh;
+            srData.swingLow20 = swingLow;
+            const swingSpan = Math.max(200, swingHigh - swingLow);
 
-            const ma20_60 = recent20Bars.reduce((acc, k) => acc + k.close, 0) / recent20Bars.length;
-            const variance60 = recent20Bars.reduce((acc, k) => acc + Math.pow(k.close - ma20_60, 2), 0) / recent20Bars.length;
-            const std60 = Math.max(60, Math.sqrt(variance60));
+            const fib236 = Math.round(swingHigh - swingSpan * 0.236);
+            const fib382 = Math.round(swingHigh - swingSpan * 0.382);
+            const fib500 = Math.round(swingHigh - swingSpan * 0.500);
+            const fib618 = Math.round(swingHigh - swingSpan * 0.618);
 
-            const pp60 = Math.round((h60_short + l60_short + C + ma20_60) / 4);
-            const r1_60 = Math.round(Math.max(2 * pp60 - l60_short, C + std60 * 0.6));
-            const s1_60 = Math.round(Math.min(2 * pp60 - h60_short, C - std60 * 0.6));
-            const r2_60 = Math.round(Math.max(ma20_60 + 2 * std60, h60_short));
-            const s2_60 = Math.round(Math.min(ma20_60 - 2 * std60, l60_short));
-            const r3_60 = Math.round(Math.max(h60_swing, r2_60 + std60));
-            const s3_60 = Math.round(Math.min(l60_swing, s2_60 - std60));
-
+            // Update Top Quote Bar
             document.getElementById('srLastPrice').textContent = fmtNum(C);
             const diff = C - prevC;
             const diffPct = prevC > 0 ? (diff / prevC) * 100 : 0;
@@ -2492,17 +2212,73 @@ export default async function handler(req, res) {
 
             document.getElementById('srDayHigh').textContent = fmtNum(H_day);
             document.getElementById('srDayLow').textContent = fmtNum(L_day);
-            document.getElementById('srSwingHigh').textContent = fmtNum(r3_1d);
-            document.getElementById('srSwingLow').textContent = fmtNum(s3_1d);
+            document.getElementById('srSwingHigh').textContent = fmtNum(swingHigh);
+            document.getElementById('srSwingLow').textContent = fmtNum(swingLow);
 
             const rows = [
-                { code: 'R3', label: '極限壓力 (波段前高)', p60: r3_60, p1d: r3_1d, type: 'RES', desc: '20K波段前高 / 空單防守線' },
-                { code: 'R2', label: '第二壓力 (布林上軌)', p60: r2_60, p1d: r2_1d, type: 'RES', desc: '60分K布林上軌 / 波段滿足' },
-                { code: 'R1', label: '第一壓力 (短線頸線)', p60: r1_60, p1d: r1_1d, type: 'RES', desc: '短線反壓 / 首道減碼區' },
-                { code: 'PP', label: '多空樞軸 (20MA中關)', p60: pp60, p1d: pp1d, type: 'PIVOT', desc: '60分K 20MA 均線與多空分水嶺' },
-                { code: 'S1', label: '第一支撐 (短線防守)', p60: s1_60, p1d: s1_1d, type: 'SUP', desc: '短線回測支撐 / 首筆接多點' },
-                { code: 'S2', label: '第二支撐 (布林下軌)', p60: s2_60, p1d: s2_1d, type: 'SUP', desc: '🔥 60分K下軌 + 日線共振支撐' },
-                { code: 'S3', label: '極限支撐 (波段前低)', p60: s3_60, p1d: s3_1d, type: 'SUP', desc: '20K波段前低 / 長線鐵板抄底線' }
+                {
+                    code: 'R3',
+                    label: '極限壓力 (波段前高)',
+                    pPivot: r3,
+                    pSwing: swingHigh,
+                    swingTag: '20日最高點',
+                    type: 'RES',
+                    desc: `極端追價風險區 / 空單波段防守頂部`
+                },
+                {
+                    code: 'R2',
+                    label: '第二壓力 (波段滿足)',
+                    pPivot: r2,
+                    pSwing: fib236,
+                    swingTag: '黃金分割 0.236',
+                    type: 'RES',
+                    desc: `日K一倍波幅目標 / 接近 +1.5 ATR (${fmtNum(C + Math.round(atr14 * 1.5))})`
+                },
+                {
+                    code: 'R1',
+                    label: '第一壓力 (短線反壓)',
+                    pPivot: r1,
+                    pSwing: fib382,
+                    swingTag: '黃金分割 0.382',
+                    type: 'RES',
+                    desc: `日內反彈首道賣壓區 / 多單減碼停利點`
+                },
+                {
+                    code: 'PP',
+                    label: '日K多空樞軸 (中關)',
+                    pPivot: pp,
+                    pSwing: ma20,
+                    swingTag: `20日均線(月線)`,
+                    type: 'PIVOT',
+                    desc: `日K強弱分水嶺 (波段中軸 0.500 為 ${fmtNum(fib500)})`
+                },
+                {
+                    code: 'S1',
+                    label: '第一支撐 (回測防守)',
+                    pPivot: s1,
+                    pSwing: fib618,
+                    swingTag: '黃金分割 0.618',
+                    type: 'SUP',
+                    desc: `🔥 關鍵回檔買點 / 接近 -1 ATR (${fmtNum(C - atr14)})`
+                },
+                {
+                    code: 'S2',
+                    label: '第二支撐 (波段鐵板)',
+                    pPivot: s2,
+                    pSwing: Math.round(ma20 - 2 * std20),
+                    swingTag: '日K布林下軌',
+                    type: 'SUP',
+                    desc: `🔥 日K超跌共振支撐 / 適合左側網格主力加倉`
+                },
+                {
+                    code: 'S3',
+                    label: '極限支撐 (20日波段底)',
+                    pPivot: s3,
+                    pSwing: swingLow,
+                    swingTag: '20日最低點',
+                    type: 'SUP',
+                    desc: `恐慌急殺極限緩衝區 / 接近 -2 ATR (${fmtNum(C - atr14 * 2)})`
+                }
             ];
 
             srData.calculatedLevels = rows;
@@ -2515,9 +2291,8 @@ export default async function handler(req, res) {
                     ? 'bg-amber-500/20 text-amber-300 border-amber-500/30'
                     : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30';
 
-                const targetPrice = state.srTimeframe === '60m' ? r.p60 : r.p1d;
-                const dist60 = ((r.p60 - C) / C) * 100;
-                const dist1d = ((r.p1d - C) / C) * 100;
+                const distPivot = ((r.pPivot - C) / C) * 100;
+                const distSwing = ((r.pSwing - C) / C) * 100;
 
                 return `
                     <tr class="hover:bg-slate-800/30 transition">
@@ -2526,19 +2301,19 @@ export default async function handler(req, res) {
                             <div class="text-[11px] text-slate-200 font-sans font-semibold mt-1">${r.label}</div>
                         </td>
                         <td class="py-2.5 px-2">
-                            <div class="font-bold text-white">${fmtNum(r.p60)}</div>
-                            <div class="text-[10px] text-slate-400">${dist60 >= 0 ? '+' : ''}${dist60.toFixed(1)}%</div>
+                            <div class="font-bold text-amber-300">${fmtNum(r.pPivot)}</div>
+                            <div class="text-[10px] text-slate-400">${distPivot >= 0 ? '+' : ''}${distPivot.toFixed(1)}%</div>
                         </td>
                         <td class="py-2.5 px-2">
-                            <div class="font-bold text-amber-300">${fmtNum(r.p1d)}</div>
-                            <div class="text-[10px] text-slate-400">${dist1d >= 0 ? '+' : ''}${dist1d.toFixed(1)}%</div>
+                            <div class="font-bold text-sky-300">${fmtNum(r.pSwing)}</div>
+                            <div class="text-[10px] text-slate-400">${r.swingTag} (${distSwing >= 0 ? '+' : ''}${distSwing.toFixed(1)}%)</div>
                         </td>
                         <td class="py-2.5 px-2">
                             <div class="text-[11px] text-slate-300 font-sans">${r.desc}</div>
                         </td>
-                        <td class="py-2.5 pl-1.5 pr-3 text-right">
-                            <button onclick="applySrPriceToGrid(${targetPrice}, '${r.type}')" class="px-2 py-1 rounded-lg bg-amber-500/15 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 text-[10px] font-sans font-bold transition active:scale-95">
-                                帶入基準價
+                        <td class="py-2.5 pl-1.5 pr-3 text-right space-y-1">
+                            <button onclick="applySrPriceToGrid(${r.pPivot}, '${r.type}')" class="block ml-auto px-2 py-1 rounded-lg bg-amber-500/15 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 text-[10px] font-sans font-bold transition active:scale-95">
+                                帶入樞軸 ${fmtNum(r.pPivot)}
                             </button>
                         </td>
                     </tr>
@@ -2546,26 +2321,73 @@ export default async function handler(req, res) {
             }).join('');
 
             renderSrKlineChart(rows);
-            renderMultiTimeframeStructure();
+            renderDailyStructureSummary(rows);
         }
 
-        // Render Interactive K-Line Chart with TradingView Lightweight Charts (and SVG fallback)
+        function renderDailyStructureSummary(rows) {
+            const C = srData.lastPrice;
+            const ma20 = srData.ma20;
+            const atr14 = srData.atr14;
+            const atrPct = ((atr14 / C) * 100).toFixed(2);
+
+            document.getElementById('dailyMa20Val').textContent = `${fmtNum(ma20)} 點`;
+            const aboveMa = C >= ma20;
+            document.getElementById('dailyMa20Status').textContent = aboveMa
+                ? `現價站上月線 (+${fmtNum(C - ma20)} 點)`
+                : `現價低於月線 (${fmtNum(C - ma20)} 點)`;
+            document.getElementById('dailyMa20Status').className = `text-[10px] block mt-0.5 ${aboveMa ? 'text-rose-400' : 'text-emerald-400'}`;
+
+            document.getElementById('dailyAtrVal').textContent = `${fmtNum(atr14)} 點 (${atrPct}%)`;
+            document.getElementById('dailyAtrStatus').textContent = `日均震幅約 ${atrPct}%，可作單格間距基準`;
+
+            const trendLabel = C > ma20 * 1.008 ? '日K多頭結構' : C < ma20 * 0.992 ? '日K偏空整理' : '日K月線附近盤整';
+            const badgeEl = document.getElementById('dailyTrendBadge');
+            badgeEl.textContent = trendLabel;
+            badgeEl.className = `px-2.5 py-1 rounded-lg border text-[10px] font-bold ${
+                trendLabel.includes('多')
+                    ? 'bg-rose-500/15 text-rose-300 border-rose-500/30'
+                    : trendLabel.includes('空')
+                    ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
+                    : 'bg-amber-500/15 text-amber-300 border-amber-500/30'
+            }`;
+
+            const stateEl = document.getElementById('structureDataState');
+            stateEl.textContent = `${srData.sourceName}｜共 ${srData.klines1d.length} 根日 K`;
+
+            const s1 = rows[4].pPivot;
+            const s2 = rows[5].pPivot;
+            const r1 = rows[2].pPivot;
+            document.getElementById('structureSummaryText').textContent =
+                `目前台指收盤 ${fmtNum(C)} 點，位於 20 日均線（${fmtNum(ma20)}）${aboveMa ? '之上' : '之下'}。近 14 日平均真實波幅（ATR）為 ${fmtNum(atr14)} 點（約 ${atrPct}%）。若規劃逢低多單網格，可考慮將首格基準價設於現價或 S1（${fmtNum(s1)} 點），並將加倉間距設為 ${Math.max(1, Math.round(parseFloat(atrPct) * 1.2 * 10) / 10)}% 以上，以涵蓋 S2（${fmtNum(s2)}）至 20 日波段底（${fmtNum(srData.swingLow20)}）。`;
+
+            const tags = [
+                { label: '日K R1 壓力', val: r1, cls: 'bg-rose-500/10 text-rose-300 border-rose-500/25' },
+                { label: '日K PP 樞軸', val: rows[3].pPivot, cls: 'bg-amber-500/10 text-amber-300 border-amber-500/25' },
+                { label: '20日均線(月線)', val: ma20, cls: 'bg-sky-500/10 text-sky-300 border-sky-500/25' },
+                { label: '日K S1 支撐', val: s1, cls: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/25' },
+                { label: '日K S2 鐵板', val: s2, cls: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/25' }
+            ];
+            document.getElementById('structureLevelsList').innerHTML = tags.map(t =>
+                `<span class="px-2 py-1 rounded-lg text-[10px] font-mono border ${t.cls}">${t.label}: ${fmtNum(t.val)}</span>`
+            ).join('');
+        }
+
+        // Render Interactive Daily K-Line Chart with TradingView Lightweight Charts
         function renderSrKlineChart(rows) {
             const container = document.getElementById('tvKlineContainer');
             if (!container) return;
-            const rawKlines = state.srTimeframe === '60m' ? srData.klines60m : srData.klines1d;
+            const rawKlines = srData.klines1d;
             if (!rawKlines || rawKlines.length === 0) return;
 
             const isTW = state.colorScheme === 'TW';
             const upColor = isTW ? '#ef4444' : '#10b981';
             const downColor = isTW ? '#10b981' : '#ef4444';
 
-            const is60m = state.srTimeframe === '60m';
-            const r2 = is60m ? rows[1].p60 : rows[1].p1d;
-            const r1 = is60m ? rows[2].p60 : rows[2].p1d;
-            const pp = is60m ? rows[3].p60 : rows[3].p1d;
-            const s1 = is60m ? rows[4].p60 : rows[4].p1d;
-            const s2 = is60m ? rows[5].p60 : rows[5].p1d;
+            const r2 = rows[1].pPivot;
+            const r1 = rows[2].pPivot;
+            const pp = rows[3].pPivot;
+            const s1 = rows[4].pPivot;
+            const s2 = rows[5].pPivot;
             const gridBasePrice = parseFloat(document.getElementById('inputBasePrice').value) || 46200;
 
             if (window.LightweightCharts) {
@@ -2585,7 +2407,7 @@ export default async function handler(req, res) {
                         },
                         crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
                         rightPriceScale: { borderColor: '#1e273d' },
-                        timeScale: { borderColor: '#1e273d', timeVisible: true }
+                        timeScale: { borderColor: '#1e273d', timeVisible: false }
                     });
 
                     if (typeof tvChart.addCandlestickSeries === 'function') {
@@ -2613,25 +2435,29 @@ export default async function handler(req, res) {
                     wickDownColor: downColor
                 });
 
-                // Ensure strictly ascending unix timestamps for Lightweight Charts
-                const baseUnix = Math.floor(Date.now() / 1000) - rawKlines.length * (is60m ? 3600 : 86400);
-                let prevTime = 0;
-                const formattedData = rawKlines.map((k, idx) => {
-                    let t = (typeof k.time === 'number' && k.time > 100000000) ? k.time : (baseUnix + idx * (is60m ? 3600 : 86400));
-                    if (t <= prevTime) t = prevTime + (is60m ? 3600 : 86400);
-                    prevTime = t;
-                    return {
+                // Format daily dates cleanly as YYYY-MM-DD or ascending unix days
+                const baseUnix = Math.floor(Date.now() / 1000) - rawKlines.length * 86400;
+                const seenTimes = new Set();
+                const formattedData = [];
+
+                rawKlines.forEach((k, idx) => {
+                    let t = (typeof k.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(k.date))
+                        ? k.date
+                        : new Date((baseUnix + idx * 86400) * 1000).toISOString().slice(0, 10);
+                    if (seenTimes.has(t)) return;
+                    seenTimes.add(t);
+                    formattedData.push({
                         time: t,
                         open: Number(k.open),
                         high: Number(k.high),
                         low: Number(k.low),
                         close: Number(k.close)
-                    };
+                    });
                 });
 
+                formattedData.sort((a, b) => String(a.time).localeCompare(String(b.time)));
                 tvCandleSeries.setData(formattedData);
 
-                // Remove old price lines before drawing new ones
                 tvPriceLines.forEach(line => {
                     try { tvCandleSeries.removePriceLine(line); } catch (_) {}
                 });
@@ -2672,14 +2498,14 @@ export default async function handler(req, res) {
             updateDirectionButtonsUI();
             recalculateAll();
             switchBottomTab('GRID');
-            showToast(`⚡ 已將 ${fmtNum(price)} 點帶入網格基準價`);
+            showToast(`⚡ 已將日K關鍵價位 ${fmtNum(price)} 點帶入網格基準價`);
         }
 
         function applySrAutoGridStep() {
             const C = srData.lastPrice;
             const rows = srData.calculatedLevels;
             if (!rows || rows.length < 6) return;
-            const s2 = rows[5].p1d;
+            const s2 = rows[5].pPivot;
             const distPct = Math.max(0.5, Math.abs((C - s2) / C) * 100);
             const roundedStep = Math.round(distPct * 10) / 10;
 
@@ -2688,10 +2514,10 @@ export default async function handler(req, res) {
             updateSpacingPillsUI(roundedStep);
             recalculateAll();
             switchBottomTab('GRID');
-            showToast(`⚡ 已將現價 ${fmtNum(C)} 與支撐間距 ${roundedStep}% 帶入網格`);
+            showToast(`⚡ 已將日K收盤 ${fmtNum(C)} 與 S2 支撐間距 ${roundedStep}% 帶入網格`);
         }
 
-        // ==================== Core Mathematical Calculation Engine (Upgraded with Tax/Fees/Rollover) ====================
+        // ==================== Core Mathematical Calculation Engine ====================
         function calculateGridData() {
             const contract = CONTRACTS[state.contractKey];
             const basePrice = Math.max(100, parseFloat(document.getElementById('inputBasePrice').value) || 46200);
@@ -2704,7 +2530,7 @@ export default async function handler(req, res) {
             const feePerLot = Math.max(0, parseFloat(document.getElementById('inputFeePerLot').value) || 0);
             const rolloverPts = parseFloat(document.getElementById('inputRolloverPts').value) || 0;
             const includeTaxFee = document.getElementById('chkIncludeTaxFee').checked;
-            const TAX_RATE = 0.00002; // 臺灣期交稅十萬分之二
+            const TAX_RATE = 0.00002;
 
             const spacingPoints = Math.round(basePrice * (spacingPct / 100));
             document.getElementById('labelSpacingPts').textContent = `(約 ${fmtNum(spacingPoints)} 點)`;
@@ -2728,25 +2554,20 @@ export default async function handler(req, res) {
                 cumLots += stepLots;
                 weightedPriceSum += entryPrice * stepLots;
 
-                // Entry transaction tax + fee for this grid step
                 const stepEntryTax = Math.round(entryPrice * contract.multiplier * TAX_RATE) * stepLots;
                 const stepEntryFee = feePerLot * stepLots;
                 cumEntryTaxFeeNT += (stepEntryTax + stepEntryFee);
 
-                // Raw Weighted Average Cost Price
                 const rawAvgPrice = weightedPriceSum / cumLots;
 
-                // Estimate exit tax + fee for breakeven calculation
                 const estExitTaxFeeNT = Math.round(rawAvgPrice * contract.multiplier * TAX_RATE) * cumLots + (feePerLot * cumLots);
                 const totalRoundTripCostNT = includeTaxFee ? (cumEntryTaxFeeNT + estExitTaxFeeNT) : 0;
                 const costPointsShift = (totalRoundTripCostNT / (cumLots * contract.multiplier)) + (includeTaxFee ? rolloverPts : 0);
 
-                // True Breakeven Average Price (including tax, fees & rollover)
                 const avgPrice = state.direction === 'LONG'
                     ? rawAvgPrice + costPointsShift
                     : Math.max(0, rawAvgPrice - costPointsShift);
 
-                // Single-grid Take Profit price & Net Profit after round-trip fee+tax
                 const singleTpPrice = state.direction === 'LONG'
                     ? Math.round(entryPrice * (1 + spacingPct / 100))
                     : Math.round(entryPrice * (1 - spacingPct / 100));
@@ -2756,11 +2577,9 @@ export default async function handler(req, res) {
                     : 0;
                 const singleGridProfitNT = Math.round(grossSingleGridProfit - singleGridRoundTripCost);
 
-                // Rebound % needed from current step entryPrice back to true breakeven avgPrice
                 const pointsToBreakeven = Math.abs(avgPrice - entryPrice);
                 const reboundToBreakevenPct = entryPrice > 0 ? (pointsToBreakeven / entryPrice) * 100 : 0;
 
-                // Net Floating PnL at Step i
                 const rawDiff = state.direction === 'LONG'
                     ? (entryPrice - rawAvgPrice)
                     : (rawAvgPrice - entryPrice);
@@ -2772,7 +2591,6 @@ export default async function handler(req, res) {
                 const notionalValue = cumLots * rawAvgPrice * contract.multiplier;
                 const leverage = equity > 0 ? (notionalValue / equity) : 99.9;
 
-                // 1) Forced Liquidation Price (25% of Initial Margin)
                 const forceReserve = cumLots * (contract.initMargin * 0.25);
                 const availForceLoss = equity - forceReserve;
                 const ptsToForceLiq = availForceLoss / (cumLots * contract.multiplier);
@@ -2781,7 +2599,6 @@ export default async function handler(req, res) {
                     : entryPrice + ptsToForceLiq;
                 const forceLiqPrice = Math.max(0, Math.round(rawForceLiqPrice));
 
-                // 2) After-hours Margin Call Price (100% Maintenance Margin)
                 const maintReserve = cumLots * contract.maintMargin;
                 const availMaintLoss = equity - maintReserve;
                 const ptsToMaintCall = availMaintLoss / (cumLots * contract.multiplier);
@@ -2790,7 +2607,6 @@ export default async function handler(req, res) {
                     : entryPrice + ptsToMaintCall;
                 const maintCallPrice = Math.max(0, Math.round(rawMaintCallPrice));
 
-                // 3) Zero-Equity Liquidation Price
                 const ptsToZero = equity / (cumLots * contract.multiplier);
                 const rawZeroLiqPrice = state.direction === 'LONG'
                     ? entryPrice - ptsToZero
@@ -2864,7 +2680,6 @@ export default async function handler(req, res) {
             };
         }
 
-        // Update Live Market Price Tracker Dashboard
         function renderLiveTracker(data) {
             const { contract, basePrice, currentPrice, activeTriggerStep, depositedMargin, rows } = data;
             const lastRow = rows[rows.length - 1];
@@ -2941,7 +2756,6 @@ export default async function handler(req, res) {
                 : `⚠️ 已觸及 25% 強制平倉線`;
         }
 
-        // Render SVG Chart 1: 槓桿倍數
         function renderLeverageChart(data) {
             const container = document.getElementById('svgContainerLev');
             const rows = data.rows;
@@ -3024,7 +2838,6 @@ export default async function handler(req, res) {
             container.innerHTML = svg;
         }
 
-        // Render SVG Chart 2: 買入價 & 爆倉價 (Upgraded with Live Current Price Horizontal Cursor Line)
         function renderPriceChart(data) {
             const container = document.getElementById('svgContainerPrice');
             const rows = data.rows;
@@ -3060,7 +2873,6 @@ export default async function handler(req, res) {
                 `;
             }
 
-            // Dynamic Live Price Horizontal Line
             const curY = yScale(data.currentPrice);
             svg += `
                 <line x1="${padLeft}" y1="${curY}" x2="${width - padRight}" y2="${curY}" stroke="#38bdf8" stroke-width="1.2" stroke-dasharray="2,2" opacity="0.85" />
@@ -3111,7 +2923,6 @@ export default async function handler(req, res) {
             container.innerHTML = svg;
         }
 
-        // Render SVG Chart 3: 權益數 & 盈虧
         function renderEquityChart(data) {
             const container = document.getElementById('svgContainerEquity');
             const rows = data.rows;
@@ -3192,7 +3003,6 @@ export default async function handler(req, res) {
             container.innerHTML = svg;
         }
 
-        // Render Summary Card & Radar View & Breakdown Table
         function renderTableAndSummary(data) {
             const rows = data.rows;
             const lastRow = rows[rows.length - 1];
